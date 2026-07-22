@@ -127,12 +127,12 @@ There are 2 ways to install them:
 #### OpenCV
 
 * **Android**:
-You can download Opencv 4.8.0 for android [here](https://github.com/nihui/opencv-mobile/releases/latest/download/opencv-mobile-4.8.1-android.zip).
+You can download Opencv 4.12.0 for android [here](https://github.com/nihui/opencv-mobile/releases/download/v35/opencv-mobile-4.13.0-android.zip).
 Then place the necessary libs/includes in the `opencv/android` at the root of this repo like shown here:
 ![opencv directory structure](images/opencv_structure.png)
 
 * **iOS** :
-You can download Opencv 4.8.0 for iOS [here](https://github.com/opencv/opencv/releases/download/4.8.0/opencv-4.8.0-ios-framework.zip).
+You can download Opencv 4.12.0 for iOS [here](https://github.com/opencv/opencv/releases/download/4.13.0/opencv-4.13.0-ios-framework.zip).
 Then place the `opencv2.xcframework` in the `opencv/ios` at the root of this repo
 
 This should be enough. Android and iOS build will use it using symlinks

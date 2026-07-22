@@ -8,7 +8,7 @@
 
     const items = [
         {
-            moduleName: 'OpenCV 4.8.0',
+            moduleName: 'OpenCV 4.12.0',
             moduleUrl: 'https://github.com/opencv/opencv'
         },
         {
