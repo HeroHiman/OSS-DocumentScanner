@@ -1305,7 +1305,8 @@
                     try {
                         await securityService.enableBiometric();
                     } catch (error) {
-                        console.error('enableBiometric error', error);
+                        const errorMessage = (error.message as string).split(':').pop();
+                        showError(errorMessage, { showAsSnack: true });
                         const checkboxView = event.object as CheckBox;
                         checkboxView.checked = item.value = false;
                         // showError(error);
