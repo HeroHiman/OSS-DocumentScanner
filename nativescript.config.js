@@ -23,6 +23,7 @@ module.exports = {
         runtimePackageName: '@akylas/nativescript-ios-runtime'
     },
     android: {
+        ignoredNativeDependencies: ['@akylas/nativescript-inapp-purchase'],
         plugins: {
             'plugin-nativeprocessor': {
                 // based on the app the plugin is built with our without qrcode.
