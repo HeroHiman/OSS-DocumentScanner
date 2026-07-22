@@ -112,13 +112,9 @@ export default class SecurityService extends Observable {
     }
 
     async enableBiometric() {
-        try {
-            DEV_LOG && console.log('enableBiometric');
-            this.biometricEnabled = await this.verifyFingerprint({});
-            return this.biometricEnabled;
-        } catch (error) {
-            throw error;
-        }
+        DEV_LOG && console.log('enableBiometric');
+        this.biometricEnabled = await this.verifyFingerprint({});
+        return this.biometricEnabled;
     }
     async disableBiometric() {
         try {
