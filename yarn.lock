@@ -27,7 +27,7 @@ __metadata:
 
 "@akylas/nativescript-app-tools@file:tools::locator=root-workspace-0b6124%40workspace%3A.":
   version: 1.0.0
-  resolution: "@akylas/nativescript-app-tools@file:tools#tools::hash=ad6c92&locator=root-workspace-0b6124%40workspace%3A."
+  resolution: "@akylas/nativescript-app-tools@file:tools#tools::hash=fbf8b1&locator=root-workspace-0b6124%40workspace%3A."
   dependencies:
     "@dotenvx/dotenvx": "npm:1.51.4"
     "@nativescript-community/fontmin": "npm:0.9.11"
@@ -81,7 +81,7 @@ __metadata:
     typescript: "npm:5.9.3"
     typescript-eslint: "npm:8.53.0"
     webpack-bundle-analyzer: "npm:4.10.2"
-  checksum: 10/cc54fcfa01c7e6f568d732fa5cbbd4f4f6ae37ed5538db72fbea69d44145daa4e6f16a346516abda1fa078ee1c97ce6f4ce05bd3115556d69865b3f0c479883d
+  checksum: 10/37e77017aa861d6c44e3b6d9d56ff58bc97dd1916f55fd3a1fad562cb46febc9ece848965b59d595d17b2ac11f8c869721c0d391601943c9685ed6390cae6543
   languageName: node
   linkType: hard
 
@@ -97,10 +97,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@akylas/nativescript-inapp-purchase@npm:0.0.4":
-  version: 0.0.4
-  resolution: "@akylas/nativescript-inapp-purchase@npm:0.0.4"
-  checksum: 10/b03783e49ced38964ef802cdfb8b88c533188771552cd4ccf4fab61d0af7242ca4d70ab274763df8e69b9f968b0c84321c73c07895c952362fd4e2a04a5b71fd
+"@akylas/nativescript-inapp-purchase@npm:0.0.5":
+  version: 0.0.5
+  resolution: "@akylas/nativescript-inapp-purchase@npm:0.0.5"
+  checksum: 10/e3f3706cc516a682161665c7072022bc978f02640f10d80d2b0f8cc2c653ce9ac76c301e7c5b83d2ee64485620925e5bfef1ff5afe106885df65920d47a26a63
   languageName: node
   linkType: hard
 
@@ -10906,7 +10906,7 @@ __metadata:
     "@akylas/nativescript-android-runtime": "npm:8.9.2"
     "@akylas/nativescript-app-tools": "file:tools"
     "@akylas/nativescript-app-utils": "npm:2.2.13"
-    "@akylas/nativescript-inapp-purchase": "npm:0.0.4"
+    "@akylas/nativescript-inapp-purchase": "npm:0.0.5"
     "@akylas/nativescript-inappbrowser": "npm:3.1.8"
     "@akylas/nativescript-ios-runtime": "npm:8.9.6"
     "@akylas/nativescript-webpack": "npm:5.0.24"
