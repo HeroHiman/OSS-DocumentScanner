@@ -178,7 +178,7 @@ export async function getSVGFromQRCode(text: string, format: string, hintSize: n
         (r) => (r?.length ? r : undefined)
     );
 }
-export  function getSVGFromQRCodeSync(text: string, format: string, hintSize: number, options?: Partial<GenerateQRCodeOptions>) {
+export function getSVGFromQRCodeSync(text: string, format: string, hintSize: number, options?: Partial<GenerateQRCodeOptions>) {
     return com.akylas.documentscanner.CustomImageAnalysisCallback.Companion.generateQRCodeSVGSync(text, format, hintSize, options ? JSON.stringify(options) : '');
 }
 

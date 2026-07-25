@@ -5,17 +5,18 @@ This directory contains [Maestro](https://maestro.mobile.dev/) flows for automat
 ## Prerequisites
 
 1. **Install Maestro CLI:**
-   ```bash
-   curl -Ls "https://get.maestro.mobile.dev" | bash
-   ```
+
+    ```bash
+    curl -Ls "https://get.maestro.mobile.dev" | bash
+    ```
 
 2. **Running Device/Emulator:**
-   - Android: Start an emulator via Android Studio or `emulator -avd <avd_name>`
-   - iOS: Start a simulator via Xcode or `xcrun simctl boot <device_name>`
+    - Android: Start an emulator via Android Studio or `emulator -avd <avd_name>`
+    - iOS: Start a simulator via Xcode or `xcrun simctl boot <device_name>`
 
 3. **App Installed:**
-   - Build and install OSS Document Scanner on the device/emulator
-   - App ID: `com.akylas.documentscanner`
+    - Build and install OSS Document Scanner on the device/emulator
+    - App ID: `com.akylas.documentscanner`
 
 ## Quick Start
 
@@ -30,6 +31,7 @@ Generate all screenshots with one command:
 ```
 
 The script will automatically:
+
 1. Push a test document image to the device/emulator
 2. Run all screenshot flows
 3. Save screenshots to `docs-site/static/img/`
@@ -43,16 +45,17 @@ Some screenshots (edit, export) require a document to exist in the app. The Maes
 1. **Test Image**: The script includes `test-document.png` which is pushed to the device before running flows
 2. **Document Setup Flow**: The `flows/setup-test-document.yaml` flow checks if documents exist and imports one if needed
 3. **Automatic Import**: If no documents exist, the flow:
-   - Taps the import button
-   - Selects the test image from gallery
-   - Confirms the crop dialog
-   - Saves the document
+    - Taps the import button
+    - Selects the test image from gallery
+    - Confirms the crop dialog
+    - Saves the document
 
 ### Manual Image Setup
 
 If the automatic setup fails, you can manually prepare:
 
 **Android:**
+
 ```bash
 # Push test image to device
 adb push docs-site/maestro/test-document.png /sdcard/DCIM/test-document.png
@@ -63,6 +66,7 @@ adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE \
 ```
 
 **iOS:**
+
 ```bash
 # Add image to simulator Photos
 xcrun simctl addmedia booted docs-site/maestro/test-document.png
@@ -118,13 +122,13 @@ maestro/
 
 Screenshots are saved directly to `docs-site/static/img/` with these filenames:
 
-| Filename | Description |
-|----------|-------------|
-| `capture-1.png` | Main capture/document list screen |
-| `settings-1.png` | Settings screen |
-| `sync-1.png` | Sync/backup settings |
-| `export-1.png` | Export options |
-| `edit-1.png` | Edit/crop screen |
+| Filename         | Description                       |
+| ---------------- | --------------------------------- |
+| `capture-1.png`  | Main capture/document list screen |
+| `settings-1.png` | Settings screen                   |
+| `sync-1.png`     | Sync/backup settings              |
+| `export-1.png`   | Export options                    |
+| `edit-1.png`     | Edit/crop screen                  |
 
 ## Customizing Flows
 
@@ -137,15 +141,14 @@ Screenshots are saved directly to `docs-site/static/img/` with these filenames:
 appId: com.akylas.documentscanner
 
 ---
-
 - launchApp:
-    clearState: false
+      clearState: false
 
 - waitForAnimationToEnd:
-    timeout: 5000
+      timeout: 5000
 
 # Navigation steps...
-- tapOn: "Some Button"
+- tapOn: 'Some Button'
 - waitForAnimationToEnd
 
 # Take screenshot - path relative to yaml file location
@@ -170,18 +173,18 @@ Maestro flows use conditional execution for UI variations:
 ```yaml
 # Try multiple ways to find an element
 - runFlow:
-    when:
-      visible: "Settings"
-    commands:
-      - tapOn: "Settings"
+      when:
+          visible: 'Settings'
+      commands:
+          - tapOn: 'Settings'
 
 - runFlow:
-    when:
-      visible:
-        id: ".*settings.*"
-    commands:
-      - tapOn:
-          id: ".*settings.*"
+      when:
+          visible:
+              id: '.*settings.*'
+      commands:
+          - tapOn:
+                id: '.*settings.*'
 ```
 
 ## Troubleshooting
@@ -195,9 +198,10 @@ Maestro flows use conditional execution for UI variations:
 ### Flow fails to find elements
 
 1. Run Maestro Studio to inspect the app:
-   ```bash
-   maestro studio
-   ```
+
+    ```bash
+    maestro studio
+    ```
 
 2. Use Maestro's hierarchy view to find correct element identifiers
 
@@ -215,10 +219,10 @@ The flows include handlers for common permission dialogs. If new dialogs appear:
 
 ```yaml
 - runFlow:
-    when:
-      visible: "Your Permission Text"
-    commands:
-      - tapOn: "Allow"  # or appropriate button
+      when:
+          visible: 'Your Permission Text'
+      commands:
+          - tapOn: 'Allow' # or appropriate button
 ```
 
 ## CI Integration
@@ -230,33 +234,33 @@ To run screenshot generation in CI:
 name: Generate Screenshots
 
 on:
-  workflow_dispatch:
+    workflow_dispatch:
 
 jobs:
-  screenshots:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Install Maestro
-        run: curl -Ls "https://get.maestro.mobile.dev" | bash
-        
-      - name: Setup Android Emulator
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 30
-          script: |
-            # Build and install app first
-            # ...
-            
-            # Generate screenshots
-            ./docs-site/maestro/generate-screenshots.sh android
-            
-      - name: Upload Screenshots
-        uses: actions/upload-artifact@v4
-        with:
-          name: screenshots
-          path: docs-site/static/img/*.png
+    screenshots:
+        runs-on: macos-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Install Maestro
+              run: curl -Ls "https://get.maestro.mobile.dev" | bash
+
+            - name: Setup Android Emulator
+              uses: reactivecircus/android-emulator-runner@v2
+              with:
+                  api-level: 30
+                  script: |
+                      # Build and install app first
+                      # ...
+
+                      # Generate screenshots
+                      ./docs-site/maestro/generate-screenshots.sh android
+
+            - name: Upload Screenshots
+              uses: actions/upload-artifact@v4
+              with:
+                  name: screenshots
+                  path: docs-site/static/img/*.png
 ```
 
 ## Resources

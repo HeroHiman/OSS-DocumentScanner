@@ -51,14 +51,14 @@ CardWallet supporte de nombreux formats de codes-barres :
 
 ## Fonctionnalités Clés
 
-| Fonctionnalité | Description |
-|----------------|-------------|
-| Scan de Codes-Barres | Scanner des codes-barres avec votre appareil photo |
-| Saisie Manuelle | Entrer les numéros de codes-barres manuellement |
-| Organisation des Cartes | Grouper les cartes par catégorie |
-| Accès Rapide | Widgets et boost de luminosité |
-| Synchronisation Cloud | Synchroniser via WebDAV vers votre serveur |
-| Priorité à la Vie Privée | Toutes les données restent sur votre appareil |
+| Fonctionnalité           | Description                                        |
+| ------------------------ | -------------------------------------------------- |
+| Scan de Codes-Barres     | Scanner des codes-barres avec votre appareil photo |
+| Saisie Manuelle          | Entrer les numéros de codes-barres manuellement    |
+| Organisation des Cartes  | Grouper les cartes par catégorie                   |
+| Accès Rapide             | Widgets et boost de luminosité                     |
+| Synchronisation Cloud    | Synchroniser via WebDAV vers votre serveur         |
+| Priorité à la Vie Privée | Toutes les données restent sur votre appareil      |
 
 ## Permissions Requises
 

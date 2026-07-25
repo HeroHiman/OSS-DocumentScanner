@@ -35,7 +35,8 @@
                     returnKeyType="next"
                     text={filename}
                     variant="outline"
-                    on:textChange={(e) => (filename = e['value'])} />
+                    on:textChange={(e) => (filename = e['value'])}
+                />
             {/if}
             <SettingsSlider margin="5 10 5 10" max={100} min={0} onChange={(value) => (jpegQuality = value)} step={1} title={lc('jpeg_quality')} value={jpegQuality} />
             <textfield
@@ -49,7 +50,8 @@
                 secure={true}
                 text={password}
                 variant="outline"
-                on:textChange={(e) => (password = e['value'].length ? e['value'] : null)} />
+                on:textChange={(e) => (password = e['value'].length ? e['value'] : null)}
+            />
         </stacklayout>
     </scrollview>
 </gesturerootview>

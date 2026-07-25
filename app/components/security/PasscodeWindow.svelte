@@ -255,7 +255,8 @@
                         text={currentArray[i - 1] !== undefined ? '•' : ' '}
                         textAlignment="center"
                         verticalAlignment="center"
-                        verticalTextAlignment="center" />
+                        verticalTextAlignment="center"
+                    />
                 {/each}
 
                 <label colSpan={4} color="white" fontSize={18} fontWeight="bold" paddingTop={30} text={title} textAlignment="center" verticalAlignment="top" />
@@ -274,7 +275,8 @@
                     text={j - 1}
                     variant="flat"
                     width={60}
-                    on:tap={() => onButtonTap(j - 1 + '')} />
+                    on:tap={() => onButtonTap(j - 1 + '')}
+                />
             {/each}
             <mdbutton class="mdi" backgroundColor="transparent" borderRadius={30} col={2} fontSize={30} height={60} row={4} text="mdi-close" variant="flat" width="60" on:tap={() => clear()} />
         </gridlayout>
@@ -290,7 +292,8 @@
                 loop={true}
                 marginBottom={70}
                 src="~/assets/lottie/fingerprint.lottie"
-                width="60%" />
+                width="60%"
+            />
         </gridlayout>
     {/if}
 </page>

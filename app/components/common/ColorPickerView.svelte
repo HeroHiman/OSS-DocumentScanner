@@ -29,7 +29,8 @@
                 borderWidth={color === defaultColor ? 2 : 0}
                 height={BUTTON_WIDTH}
                 margin={BUTTON_MARGIN}
-                width={BUTTON_WIDTH}>
+                width={BUTTON_WIDTH}
+            >
                 <label
                     color={colorOutline}
                     fontFamily={$fonts.mdi}
@@ -37,7 +38,8 @@
                     text={color === defaultColor ? 'mdi-check' : null}
                     textAlignment="center"
                     verticalTextAlignment="center"
-                    on:tap={() => selectColor(color)} />
+                    on:tap={() => selectColor(color)}
+                />
             </gridlayout>
         {/each}
     </wraplayout>

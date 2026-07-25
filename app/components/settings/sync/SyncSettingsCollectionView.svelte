@@ -230,7 +230,8 @@
                 text={item.icon}
                 variant="text"
                 verticalAlignment="middle"
-                visibility={item.icon ? 'visible' : 'hidden'} />
+                visibility={item.icon ? 'visible' : 'hidden'}
+            />
         </gridlayout>
     </Template>
     <Template key="switch" let:item>

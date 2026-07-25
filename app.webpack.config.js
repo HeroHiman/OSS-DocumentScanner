@@ -372,7 +372,7 @@ module.exports = (env, params = {}) => {
                     replace: (match, p1, offset, str) => appIcons[p1] || match,
                     flags: 'g'
                 }
-            },
+            }
         ]
     });
     // we remove default rules

@@ -728,7 +728,8 @@
             row={1}
             rowHeight={itemHeight}
             on:itemReordered={onItemReordered}
-            on:itemReorderStarting={onItemReorderStarting}>
+            on:itemReorderStarting={onItemReorderStarting}
+        >
             <Template let:index let:item>
                 <!-- <gridlayout
                     backgroundColor={colorSurfaceContainer}
@@ -769,7 +770,8 @@
                     on:tap={(e) => onItemTap(item, e)}
                     on:touch={(e) => onTouch(item, e)}
                     on:pan={(e) => onPan(item, e)}
-                    on:longPress={(e) => onItemLongPress(item, e)}>
+                    on:longPress={(e) => onItemLongPress(item, e)}
+                >
                     <RotableImageView
                         id="imageView"
                         borderRadius={12}
@@ -778,14 +780,16 @@
                         item={item.page}
                         sharedTransitionTag={`document_${document.id}_${item.page.id}`}
                         stretch="aspectFit"
-                        verticalAlignment="center" />
+                        verticalAlignment="center"
+                    />
                     <canvaslabel color={colorOnSurfaceVariant} fontSize={14 * $fontScale} padding="10 0 0 0" row={1}>
                         <cspan fontFamily={$fonts.mdi} fontSize={24} text="mdi-reorder-horizontal" visibility={inEditMode ? 'visible' : 'hidden'} />
                         <cspan
                             paddingLeft={inEditMode ? 30 : 0}
                             text={`${item.page.width} x ${item.page.height}\n${filesize(item.page.size, { output: 'string' })}`}
                             textAlignment="left"
-                            verticalAlignment="bottom" />
+                            verticalAlignment="bottom"
+                        />
                         <!-- <cspan color={colorOnSurfaceVariant} fontSize={12} paddingTop={36} text={dayjs(item.doc.createdDate).format('L LT')} /> -->
                         <!-- <cspan color={colorOnSurfaceVariant} fontSize={12} paddingTop={50} text={lc('nb_pages', item.doc.pages.length)} /> -->
                     </canvaslabel>
@@ -801,7 +805,8 @@
                     class="small-fab"
                     text="mdi-image-plus-outline"
                     verticalAlignment="center"
-                    on:tap={throttle(() => importAndScanImage({ document, importPDFs: false, canGoToView: false, forceGalleryPick: true }), 500)} />
+                    on:tap={throttle(() => importAndScanImage({ document, importPDFs: false, canGoToView: false, forceGalleryPick: true }), 500)}
+                />
             {/if}
             <mdbutton class={$hasCamera ? 'small-fab' : 'fab'} text="mdi-file-document-plus-outline" verticalAlignment="center" on:tap={throttle(() => onAddButton(), 500)} />
             {#if $hasCamera}
@@ -813,7 +818,8 @@
             onGoBack={nbSelected ? unselectAll : inEditMode ? switchEditMode : null}
             onTitleTap={() => (editingTitle = true)}
             title={inEditMode ? lc('reorder_pages') : nbSelected ? lc('selected', nbSelected) : document.name}
-            titleProps={{ padding: 0 }}>
+            titleProps={{ padding: 0 }}
+        >
             {#if !nbSelected}
                 <mdbutton class="actionBarButton" text="mdi-file-pdf-box" variant="text" on:tap={showPDFPopover} />
                 <mdbutton class="actionBarButton" text="mdi-dots-vertical" variant="text" on:tap={showOptions} />

@@ -140,8 +140,8 @@ Pour une sauvegarde automatique, voir [Synchronisation et Sauvegarde](/sync-and-
 1. Ouvrez la carte
 2. Appuyez sur le bouton **Partager**
 3. Choisissez comment partager :
-   - Comme image
-   - Comme texte (numéro du code-barres)
+    - Comme image
+    - Comme texte (numéro du code-barres)
 
 ### Importer des Cartes Partagées
 
@@ -170,6 +170,7 @@ Pour les cartes contenant des informations sensibles :
 ### Organiser par Couleur
 
 Utilisez des couleurs cohérentes pour les types de cartes :
+
 - 🔵 Bleu pour l'épicerie
 - 🟢 Vert pour les cafés
 - 🔴 Rouge pour les restaurants

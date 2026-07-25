@@ -100,7 +100,8 @@
                             paddingLeft={dataType === quality ? 8 : 12}
                             paddingRight={12}
                             rippleColor={colorPrimary}
-                            on:tap={() => setDataType(quality)}>
+                            on:tap={() => setDataType(quality)}
+                        >
                             <label
                                 color={dataType === quality ? colorOnPrimary : colorOnSurface}
                                 fontFamily={$fonts.mdi}
@@ -108,14 +109,16 @@
                                 marginRight={4}
                                 text="mdi-check"
                                 verticalAlignment="middle"
-                                visibility={dataType === quality ? 'visible' : 'collapse'} />
+                                visibility={dataType === quality ? 'visible' : 'collapse'}
+                            />
                             <label
                                 col={1}
                                 color={dataType === quality ? colorOnPrimary : colorOnSurface}
                                 fontSize={14}
                                 fontWeight={dataType === quality ? 'bold' : 'normal'}
                                 text={lc(quality)}
-                                verticalAlignment="middle" />
+                                verticalAlignment="middle"
+                            />
                         </gridlayout>
                     {/each}
                 </stacklayout>
@@ -135,7 +138,8 @@
                         paddingLeft={dataType === quality ? 8 : 12}
                         paddingRight={12}
                         rippleColor={colorPrimary}
-                        on:tap={() => setDataType(quality)}>
+                        on:tap={() => setDataType(quality)}
+                    >
                         <label
                             color={dataType === quality ? colorOnPrimary : colorOnSurface}
                             fontFamily={$fonts.mdi}
@@ -143,14 +147,16 @@
                             marginRight={4}
                             text="mdi-check"
                             verticalAlignment="middle"
-                            visibility={dataType === quality ? 'visible' : 'collapse'} />
+                            visibility={dataType === quality ? 'visible' : 'collapse'}
+                        />
                         <label
                             col={1}
                             color={dataType === quality ? colorOnPrimary : colorOnSurface}
                             fontSize={14}
                             fontWeight={dataType === quality ? 'bold' : 'normal'}
                             text={lc(quality)}
-                            verticalAlignment="middle" />
+                            verticalAlignment="middle"
+                        />
                     </gridlayout>
                 {/each}
             </stacklayout>

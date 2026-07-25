@@ -73,7 +73,8 @@
         on:textChange={(e) => {
             $store.serverUrl = e['value'];
             testConnectionSuccess = 0;
-        }} />
+        }}
+    />
 
     <label fontSize={12} margin="2 0 6 2" opacity={0.7} text={lc('paperless_token_hint')} textWrap={true} />
 
@@ -89,7 +90,8 @@
         on:textChange={(e) => {
             $store.token = e['value'];
             testConnectionSuccess = 0;
-        }} />
+        }}
+    />
 
     <label fontSize={12} margin="6 0 2 2" opacity={0.7} text={lc('or')} />
 
@@ -105,7 +107,8 @@
         on:textChange={(e) => {
             $store.username = e['value'];
             testConnectionSuccess = 0;
-        }} />
+        }}
+    />
     <textfield
         autocapitalizationType="none"
         autocorrect={false}
@@ -120,7 +123,8 @@
         on:textChange={(e) => {
             $store.password = e['value'];
             testConnectionSuccess = 0;
-        }} />
+        }}
+    />
 
     <gridlayout columns="*,*" margin="5 0 0 0" rows="auto">
         <gridlayout col={1} columns="auto" horizontalAlignment="right" rows="auto" verticalAlignment="middle">
@@ -130,7 +134,8 @@
                 text={testConnectionSuccess < 0 ? lc('failed') : testConnectionSuccess > 0 ? lc('successful') : lc('test')}
                 verticalAlignment="middle"
                 visibility={testing ? 'hidden' : 'visible'}
-                on:tap={testConnection} />
+                on:tap={testConnection}
+            />
             <activityindicator busy={testing} height={20} horizontalAlignment="center" verticalAlignment="middle" visibility={testing ? 'visible' : 'hidden'} />
         </gridlayout>
     </gridlayout>
