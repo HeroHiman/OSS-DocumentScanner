@@ -6,15 +6,8 @@
         "emitDecoratorMetadata": true,
         "importHelpers": false,
         "sourceMap": true,
-        "types": [
-            "node",
-            "mocha",
-            "chai"
-        ],
-        "lib": [
-            "es2015",
-            "dom"
-        ],
+        "types": ["node", "mocha", "chai"],
+        "lib": ["es2015", "dom"],
         "baseUrl": "."
     }
 }

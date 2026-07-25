@@ -32,7 +32,10 @@ test('filterNonTrashedDocuments excludes trashed documents', () => {
 });
 
 test('filterNonTrashedDocuments returns empty array when all documents are trashed', () => {
-    const docs = [{ id: 'a', trashedDate: 1000000 }, { id: 'b', trashedDate: 2000000 }];
+    const docs = [
+        { id: 'a', trashedDate: 1000000 },
+        { id: 'b', trashedDate: 2000000 }
+    ];
     expect(filterNonTrashedDocuments(docs)).toEqual([]);
 });
 

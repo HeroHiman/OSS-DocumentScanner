@@ -9,4 +9,5 @@
     horizontalAlignment="right"
     verticalAlignment="top"
     visibility={favorite ? 'visible' : 'hidden'}
-    width={40}></absolutelayout>
+    width={40}
+></absolutelayout>

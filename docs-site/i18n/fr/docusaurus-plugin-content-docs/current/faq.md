@@ -18,6 +18,7 @@ Oui ! OSS Document Scanner et OSS CardWallet sont entièrement gratuits et open 
 ### Mes données sont-elles privées ?
 
 Absolument. Les deux applications :
+
 - Traitent toutes les données sur votre appareil
 - Ne téléchargent jamais de données vers aucun serveur (sauf si vous configurez la synchronisation)
 - N'incluent pas d'analytics ou de suivi
@@ -25,12 +26,12 @@ Absolument. Les deux applications :
 
 ### Quelle est la différence entre les deux applications ?
 
-| OSS Document Scanner | OSS CardWallet |
-|---------------------|----------------|
-| Numériser des documents papier | Stocker des cartes de fidélité/membres |
-| Détection automatique des bords | Scan de codes-barres |
-| Export PDF avec OCR | Plusieurs formats de codes-barres |
-| Organisation des documents | Organisation des cartes |
+| OSS Document Scanner            | OSS CardWallet                         |
+| ------------------------------- | -------------------------------------- |
+| Numériser des documents papier  | Stocker des cartes de fidélité/membres |
+| Détection automatique des bords | Scan de codes-barres                   |
+| Export PDF avec OCR             | Plusieurs formats de codes-barres      |
+| Organisation des documents      | Organisation des cartes                |
 
 Les deux applications partagent des fonctionnalités communes comme la synchronisation cloud, la sauvegarde et un design respectueux de la vie privée.
 
@@ -72,12 +73,12 @@ Oui ! Utilisez le mode de numérisation par lots :
 
 ### Quelle résolution dois-je utiliser ?
 
-| Cas d'Utilisation | Résolution Recommandée |
-|-------------------|------------------------|
-| Référence rapide | Standard |
-| Documents généraux | Élevée |
-| Documents importants | Maximum |
-| Traitement OCR | Élevée ou Maximum |
+| Cas d'Utilisation    | Résolution Recommandée |
+| -------------------- | ---------------------- |
+| Référence rapide     | Standard               |
+| Documents généraux   | Élevée                 |
+| Documents importants | Maximum                |
+| Traitement OCR       | Élevée ou Maximum      |
 
 ### Puis-je numériser en faible luminosité ?
 
@@ -164,6 +165,7 @@ Oui :
 ### Quels services cloud sont supportés ?
 
 Synchronisation directe via WebDAV :
+
 - Nextcloud
 - ownCloud
 - NAS Synology
@@ -178,6 +180,7 @@ Voir notre guide détaillé [Synchronisation et Sauvegarde](/sync-and-backup).
 ### Que se passe-t-il si je modifie sur plusieurs appareils ?
 
 La modification la plus récente l'emporte généralement. L'application va :
+
 1. Détecter le conflit
 2. Comparer les horodatages
 3. Garder la version la plus récente
@@ -186,6 +189,7 @@ La modification la plus récente l'emporte généralement. L'application va :
 ### Les sauvegardes sont-elles chiffrées ?
 
 Les sauvegardes sont des fichiers ZIP qui ne sont pas chiffrés par défaut. Pour les documents sensibles :
+
 - Activez le chiffrement des documents dans les paramètres de l'app
 - Stockez les sauvegardes dans un stockage chiffré
 - Utilisez un stockage cloud chiffré
@@ -242,6 +246,7 @@ Essayez ces étapes :
 ### Comment l'application est-elle construite ?
 
 OSS Document Scanner est construit avec :
+
 - **NativeScript** : Framework cross-platform
 - **Svelte** : Composants UI
 - **OpenCV** : Traitement d'images
@@ -251,14 +256,14 @@ OSS Document Scanner est construit avec :
 
 Répertoires clés dans le [dépôt GitHub](https://github.com/ossappscollective/OSS-DocumentScanner) :
 
-| Répertoire | Contenu |
-|------------|---------|
-| `app/` | Code principal de l'application |
-| `app/components/` | Composants UI |
-| `app/services/` | Logique métier |
-| `opencv/` | Intégration OpenCV |
-| `plugin-nativeprocessor/` | Plugin de traitement natif |
-| `cpp/` | Code natif C++ |
+| Répertoire                | Contenu                         |
+| ------------------------- | ------------------------------- |
+| `app/`                    | Code principal de l'application |
+| `app/components/`         | Composants UI                   |
+| `app/services/`           | Logique métier                  |
+| `opencv/`                 | Intégration OpenCV              |
+| `plugin-nativeprocessor/` | Plugin de traitement natif      |
+| `cpp/`                    | Code natif C++                  |
 
 ### Comment puis-je compiler depuis les sources ?
 

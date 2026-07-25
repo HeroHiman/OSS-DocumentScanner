@@ -1,7 +1,3 @@
 {
-    "recommendations": [
-        "ms-vscode.cpptools",
-        "ms-vscode.cmake-tools",
-        "simpletoolsdev.opencv-image"
-    ]
+    "recommendations": ["ms-vscode.cpptools", "ms-vscode.cmake-tools", "simpletoolsdev.opencv-image"]
 }

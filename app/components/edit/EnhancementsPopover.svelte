@@ -58,7 +58,8 @@
                         decodeWidth={120}
                         {imageRotation}
                         src={imagePath}
-                        stretch="aspectFill" />
+                        stretch="aspectFill"
+                    />
                     <label
                         backgroundImage="linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 90%, rgba(0,0,0,0) 100%)"
                         ios:selectable={true}
@@ -68,7 +69,8 @@
                         fontWeight="500"
                         text={item.text}
                         textAlignment="center"
-                        verticalAlignment="bottom" />
+                        verticalAlignment="bottom"
+                    />
                 </gridlayout>
             </Template>
         </collectionview>

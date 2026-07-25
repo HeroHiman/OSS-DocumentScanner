@@ -310,7 +310,8 @@
                             text={item.options[$cameraOptionsStore[item.id] || item.default]?.name || $cameraOptionsStore[item.id]}
                             variant="outline"
                             width={textFieldWidth}
-                            on:tap={(e) => selectOption(item, e)} />
+                            on:tap={(e) => selectOption(item, e)}
+                        />
                     {/each}
                 </wraplayout>
             {/if}
@@ -324,7 +325,8 @@
                             col={2}
                             ios:marginRight={10}
                             verticalAlignment="center"
-                            on:checkedChange={(e) => onCheckedChanged(item, e)} />
+                            on:checkedChange={(e) => onCheckedChanged(item, e)}
+                        />
                     </ListItem>
                 {/each}
                 <ListItemAutoSize item={{ title: lc('brightness'), rightValue: brightness.toFixed(2) }} on:tap={editBrightnessContrast} />
@@ -339,7 +341,8 @@
                             borderRadius={4}
                             borderWidth={isCurrentColorType(item) ? 3 : 0}
                             colorMatrix={getColorMatrix(item.colorType)}
-                            src="~/assets/images/filter_color.png" />
+                            src="~/assets/images/filter_color.png"
+                        />
                         <label
                             backgroundImage="linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 90%, rgba(0,0,0,0) 100%)"
                             ios:selectable={true}
@@ -349,7 +352,8 @@
                             fontWeight="500"
                             text={item.text}
                             textAlignment="center"
-                            verticalAlignment="bottom" />
+                            verticalAlignment="bottom"
+                        />
                     </gridlayout>
                 </Template>
             </collectionview>

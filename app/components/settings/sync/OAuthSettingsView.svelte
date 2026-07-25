@@ -91,7 +91,8 @@
             text={isAuthenticated ? lc('re_authenticate') : lc('authenticate')}
             variant={isAuthenticated ? 'outline' : 'contained'}
             verticalAlignment="center"
-            on:tap={authenticate} />
+            on:tap={authenticate}
+        />
     </gridlayout>
 
     <gridlayout columns="auto,auto,*" margin="10 16" visibility={isAuthenticated ? 'visible' : 'collapsed'}>
@@ -103,7 +104,8 @@
             fontSize={24}
             text={testConnectionSuccess > 0 ? 'mdi-check-circle' : 'mdi-alert-circle'}
             verticalAlignment="center"
-            visibility={testConnectionSuccess !== 0 ? 'visible' : 'collapse'} />
+            visibility={testConnectionSuccess !== 0 ? 'visible' : 'collapse'}
+        />
         <mdbutton col={2} horizontalAlignment="right" text={lc('test_connection')} variant="outline" on:tap={testConnectionAction} />
     </gridlayout>
     <RemoteFolderTextField hint={lc('remote_folder')} margin="20 4 10 4" text={$store.remoteFolder} {variant} on:textChange={(e) => ($store.remoteFolder = e['value'])} />

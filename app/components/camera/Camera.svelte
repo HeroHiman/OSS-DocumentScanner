@@ -731,7 +731,8 @@
                 {zoom}
                 on:cameraOpen={onCameraOpen}
                 on:zoom={onZoom}
-                on:tap={focusCamera} />
+                on:tap={focusCamera}
+            />
             <cropview bind:this={cropView} colors={[colorPrimary]} fillAlpha={120} height="100%" isUserInteractionEnabled={false} {stretch} strokeWidth={3} width="100%" />
             <absoluteLayout bind:this={focusRing} borderColor="white" borderRadius={35} borderWidth={1.5} height={70} opacity={0} width={70} />
         </absolutelayout>
@@ -756,7 +757,8 @@
             row={1}
             verticalAlignment="bottom"
             visibility={(maxZoom !== 1 || minZoom !== 1) && maxZoom !== minZoom ? 'visible' : 'collapsed'}
-            width="70%">
+            width="70%"
+        >
             <slider
                 bind:this={zoomSlider}
                 backgroundColor={colorBackground}
@@ -765,7 +767,8 @@
                 thumbColor="transparent"
                 value={zoom}
                 on:valueChange={onZoomValue}
-                on:layoutChanged={(e) => updateFloatZoom(zoom)} />
+                on:layoutChanged={(e) => updateFloatZoom(zoom)}
+            />
             <label
                 backgroundColor={colorBackground}
                 borderColor={colorOutlineVariant}
@@ -780,7 +783,8 @@
                 text={Math.round(floatZoom * 10) / 10 + 'x'}
                 textAlignment="center"
                 verticalTextAlignment="center"
-                width={40} />
+                width={40}
+            />
         </gridlayout>
 
         <gridlayout columns="60,*,auto,*,60" ios:paddingBottom={30} android:marginBottom={30 + $windowInset.bottom} paddingTop={10} row={3} visibility={QRCodeOnly ? 'collapsed' : 'visible'}>
@@ -798,7 +802,8 @@
                     text={batchMode ? 'mdi-image-multiple' : 'mdi-image'}
                     tooltip={lc('batch_mode')}
                     verticalAlignment="center"
-                    on:tap={() => (batchMode = !batchMode)} />
+                    on:tap={() => (batchMode = !batchMode)}
+                />
             {/if}
 
             <image
@@ -812,7 +817,8 @@
                 src={smallImage}
                 stretch="aspectFit"
                 verticalAlignment="center"
-                width={60} />
+                width={60}
+            />
             <gridlayout col={2} height={70} horizontalAlignment="center" opacity={takingPicture ? 0.6 : 1} verticalAlignment="center" width={70}>
                 <canvasView bind:this={takPictureBtnCanvas} class:infinite-rotate={autoScan} on:draw={drawTakePictureBtnBorder}> </canvasView>
                 <gridlayout
@@ -823,7 +829,8 @@
                     rippleColor="white"
                     width={54}
                     on:tap={() => takePicture()}
-                    on:longPress={() => toggleAutoScan()} />
+                    on:longPress={() => toggleAutoScan()}
+                />
                 <label color="white" fontSize={20} isUserInteractionEnabled={false} text={nbPages + ''} textAlignment="center" verticalAlignment="middle" visibility={nbPages ? 'visible' : 'hidden'} />
             </gridlayout>
 
@@ -836,7 +843,8 @@
                 tooltip={lc('finish')}
                 verticalAlignment="center"
                 visibility={canSaveDoc ? 'visible' : 'hidden'}
-                on:tap={() => saveCurrentDocument()} />
+                on:tap={() => saveCurrentDocument()}
+            />
         </gridlayout>
 
         <!-- <image

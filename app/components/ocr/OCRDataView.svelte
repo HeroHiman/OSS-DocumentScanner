@@ -326,7 +326,8 @@
             row={1}
             src={`~/assets/webpdfviewer/index.html?textColor=${textColor}`}
             webConsoleEnabled={!PRODUCTION}
-            on:loadFinished={onWebViewLoadFinished} />
+            on:loadFinished={onWebViewLoadFinished}
+        />
 
         <textview
             backgroundColor={new Color(visualState).setAlpha(200).hex}
@@ -336,7 +337,8 @@
             {text}
             variant="none"
             visibility={showTextView ? 'visible' : 'hidden'}
-            on:textChange={(e) => (text = e.value)} />
+            on:textChange={(e) => (text = e.value)}
+        />
         <CActionBar backgroundColor="transparent" buttonsDefaultVisualState={visualState} modalWindow={true} title={null}>
             <mdbutton class="actionBarButton" color={textColor} text="mdi-content-save" variant="text" visibility={showTextView ? 'visible' : 'hidden'} on:tap={saveEdit} />
             <mdbutton class="actionBarButton" color={textColor} text="mdi-content-copy" variant="text" on:tap={copyText} />

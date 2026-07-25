@@ -194,7 +194,8 @@
                     onChange={(value) => (brightness = value / 100)}
                     step={1}
                     title={lc('brightness')}
-                    value={Math.round(Math.max(-1, Math.min(brightness ?? DEFAULT_BRIGHTNESS, 5)) * 100)} />
+                    value={Math.round(Math.max(-1, Math.min(brightness ?? DEFAULT_BRIGHTNESS, 5)) * 100)}
+                />
 
                 <SettingsSlider
                     formatter={(v) => (v / 100).toFixed(2)}
@@ -203,7 +204,8 @@
                     onChange={(value) => (contrast = value / 100)}
                     step={1}
                     title={lc('contrast')}
-                    value={Math.round(Math.max(-1, Math.min(contrast ?? DEFAULT_CONTRAST, 4)) * 100)} />
+                    value={Math.round(Math.max(-1, Math.min(contrast ?? DEFAULT_CONTRAST, 4)) * 100)}
+                />
             </stacklayout>
             <label class="sectionBigHeader" text={lc('filters')} />
             <collectionview bind:this={collectionView} colWidth={FILTER_COL_WIDTH} height={FILTER_ROW_HEIGHT} items={filters} orientation="horizontal">
@@ -214,7 +216,8 @@
                             borderRadius={4}
                             borderWidth={isCurrentColorType(item) ? 3 : 0}
                             colorMatrix={getColorMatrix(item.colorType)}
-                            src="~/assets/images/filter_color.png" />
+                            src="~/assets/images/filter_color.png"
+                        />
                         <label
                             backgroundImage="linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 90%, rgba(0,0,0,0) 100%)"
                             ios:selectable={true}
@@ -224,7 +227,8 @@
                             fontWeight="500"
                             text={item.text}
                             textAlignment="center"
-                            verticalAlignment="bottom" />
+                            verticalAlignment="bottom"
+                        />
                     </gridlayout>
                 </Template>
             </collectionview>

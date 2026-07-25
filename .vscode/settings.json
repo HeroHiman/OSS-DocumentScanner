@@ -45,7 +45,7 @@
         "**/.hg/store/**": true,
         "platforms": true
     },
-   "explorer.fileNesting.patterns": {
+    "explorer.fileNesting.patterns": {
         ".agent": ".agent, .claude, .cline, .codebuddy, .codex, .commandcode, .continue, .crush, .cursor, .factory, .gemini, .goose, .junie, .kilocode, .kiro, .kode, .mcpjam, .mux, .neovate, .opencode, .openhands, .pi, .pochi, .qoder, .qwen, .roo, .trae, .windsurf, .zencoder",
         ".clang-tidy": ".clang-format, .clangd, compile_commands.json",
         ".env": "*.env, .env.*, .envrc, env.d.ts",

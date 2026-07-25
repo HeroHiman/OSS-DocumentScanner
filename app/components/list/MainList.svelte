@@ -1426,7 +1426,8 @@
             paddingBottom={Math.max($windowInset.bottom, BOTTOM_BUTTON_OFFSET)}
             row={2}
             spanSize={itemTemplateSpanSize}
-            {...collectionViewOptions}>
+            {...collectionViewOptions}
+        >
             <Template key="folder" let:item>
                 <ListItemAutoSize
                     class="card"
@@ -1440,7 +1441,8 @@
                     subtitleFontSize={12}
                     useExtraPadding={false}
                     on:longPress={(e) => onItemLongPress(item, e)}
-                    on:tap={() => onItemTap(item)}>
+                    on:tap={() => onItemTap(item)}
+                >
                     <label
                         col={0}
                         color={!$folderBackgroundColor && item.folder.color ? item.folder.color : colorOutline}
@@ -1448,7 +1450,8 @@
                         fontSize={24}
                         padding="0 10 0 0"
                         text="mdi-folder "
-                        verticalAlignment="center" />
+                        verticalAlignment="center"
+                    />
                     <SelectedIndicator col={0} horizontalAlignment="left" margin="10 0 10 0" selected={item.selected} verticalAlignment="top" />
                 </ListItemAutoSize>
             </Template>
@@ -1460,7 +1463,8 @@
                     items={folderItems}
                     orientation="horizontal"
                     row={1}
-                    visibility={folders?.length ? 'visible' : 'collapsed'}>
+                    visibility={folders?.length ? 'visible' : 'collapsed'}
+                >
                     <Template let:item>
                         <canvasview
                             backgroundColor={($folderBackgroundColor && item.folder.color) || isEInk ? 'transparent' : colorSurfaceContainerLow}
@@ -1471,7 +1475,8 @@
                             rippleColor={colorSurface}
                             on:tap={() => onItemTap(item)}
                             on:longPress={(e) => onItemLongPress(item, e)}
-                            on:draw={(e) => onFolderCanvasDraw(item, e)}>
+                            on:draw={(e) => onFolderCanvasDraw(item, e)}
+                        >
                             <SelectedIndicator horizontalAlignment="right" margin={10} selected={item.selected} verticalAlignment="top" />
                             <!-- <SyncIndicator synced={item.doc._synced} visible={syncEnabled} /> -->
                             <!-- <PageIndicator horizontalAlignment="right" margin={10} text={item.doc.pages.length} /> -->
@@ -1492,7 +1497,8 @@
                 row={2}
                 verticalAlignment="center"
                 width="80%"
-                transition:fade={{ duration: 200 }}>
+                transition:fade={{ duration: 200 }}
+            >
                 <lottie
                     async={true}
                     autoPlay={PRODUCTION}
@@ -1505,14 +1511,16 @@
                     }}
                     loop={true}
                     src="~/assets/lottie/scanning.lottie"
-                    visibility={isTrash ? 'collapsed' : 'visible'} />
+                    visibility={isTrash ? 'collapsed' : 'visible'}
+                />
                 <label
                     color={colorOnSurfaceVariant}
                     flexShrink={0}
                     fontSize={19}
                     text={lastRefreshFilter && showSearch ? lc('no_document_found') : isTrash ? lc('no_trashed_document') : lc('no_document_yet')}
                     textAlignment="center"
-                    textWrap={true} />
+                    textWrap={true}
+                />
             </flexlayout>
         {/if}
         {#if showActionButton}
@@ -1532,7 +1540,8 @@
                         variant="text"
                         visibility={!folder && syncEnabled ? 'visible' : 'collapse'}
                         on:tap={syncDocuments}
-                        on:longPress={openSyncSettings} />
+                        on:longPress={openSyncSettings}
+                    />
                 {/if}
                 <mdbutton class="actionBarButton" text="mdi-magnify" variant="text" on:tap={() => search.showSearch()} />
                 {#if !onlyForImport}
