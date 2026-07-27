@@ -44,6 +44,7 @@ import { basename } from '~/utils/path';
 import { SyncNotificationManager } from '~/workers/SyncNotificationManager';
 import { doInBatch } from '@shared/utils/batch';
 import { mergeDeletedDocumentTombstones } from '~/services/sync/deletedDocuments';
+import { filterBySyncFolders, filterPagedBySyncFolders } from '~/services/sync/folderFilter';
 import { networkService } from '~/services/api';
 
 const context: Worker = self as any;
@@ -286,21 +287,11 @@ export default class SyncWorker extends BaseWorker {
     }
 
     private filterDocumentsBySyncFolders(service: BaseSyncService, documents: OCRDocument[]): OCRDocument[] {
-        if (!service.syncFolders?.length) {
-            return documents;
-        }
-        const folderSet = new Set(service.syncFolders);
-        // Documents not assigned to any folder are intentionally excluded when a folder filter is active.
-        return documents.filter((doc) => doc.folders?.some((folderId) => folderSet.has(folderId)));
+        return filterBySyncFolders(service.syncFolders, documents);
     }
 
     private filterPagedDocumentsBySyncFolders<T extends { document: OCRDocument }>(service: BaseSyncService, documents: T[]): T[] {
-        if (!service.syncFolders?.length) {
-            return documents;
-        }
-        const folderSet = new Set(service.syncFolders);
-        // Documents not assigned to any folder are intentionally excluded when a folder filter is active.
-        return documents.filter((item) => item.document.folders?.some((folderId) => folderSet.has(folderId)));
+        return filterPagedBySyncFolders(service.syncFolders, documents);
     }
 
     async syncDataDocuments({ bothWays = false, event, force = false, withFolders = false }: { withFolders?; force; bothWays; event: DocumentEvents }) {
