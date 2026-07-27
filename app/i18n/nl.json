@@ -246,6 +246,7 @@
     "ok": "oké",
     "on": "aan",
     "open": "openen",
+    "open_trash": "prullenbak openen",
     "orientation": "oriëntatie",
     "page": "pagina",
     "page_layout": "pagina­indeling",
@@ -352,6 +353,5 @@
     "webdav_sync_desc": "schakel WebDAV in om uw documenten te synchroniseren (back-uppen)",
     "whitepaper": "witboek",
     "whitepaper_desc": "verbetering voor documenten van het type whitepaper",
-    "wrong_passcode": "incorrect wacht­woord",
-    "open_trash": "prullenbak openen"
+    "wrong_passcode": "incorrect wacht­woord"
 }
