@@ -309,6 +309,7 @@
     "ok": "OK",
     "on": "ON",
     "open": "ouvrir",
+    "open_trash": "ouvrir la poubelle",
     "operations": "opérations",
     "operations_settings_desc": "paramètres relatifs aux opérations appliquées aux images",
     "optional_pdf_password": "Mot de passe du PDF (facultatif)",
@@ -447,6 +448,5 @@
     "webdav_sync_desc": "permet à webdav de synchroniser vos documents (backup)",
     "whitepaper": "papier blanc",
     "whitepaper_desc": "amélioration pour les documents de type feuille blanche",
-    "wrong_passcode": "mot de passe erroné",
-    "open_trash": "ouvrir la poubelle"
+    "wrong_passcode": "mot de passe erroné"
 }
