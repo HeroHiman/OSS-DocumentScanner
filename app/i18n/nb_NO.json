@@ -294,6 +294,7 @@
     "ok": "OK",
     "on": "på",
     "open": "åpne",
+    "open_trash": "åpne søppel",
     "operations": "operasjoner",
     "operations_settings_desc": "innstillinger for bildeoperasjoner",
     "optional_pdf_password": "PDF passord (valgfri)",
@@ -428,6 +429,5 @@
     "webdav_sync_desc": "slå på WebDAV for å synkronisere dokumenter (sikkerhetskopi)",
     "whitepaper": "hvitbok",
     "whitepaper_desc": "forbedring for hvitbok-dokumenter",
-    "wrong_passcode": "feil passord",
-    "open_trash": "åpne søppel"
+    "wrong_passcode": "feil passord"
 }
