@@ -310,6 +310,7 @@
     "ok": "OK",
     "on": "An",
     "open": "Öffnen",
+    "open_trash": "Öffne den Papierkorb",
     "operations": "Operationen",
     "operations_settings_desc": "Einstellungen von Operationen auf Bilder",
     "optional_pdf_password": "Passwort für PDF (optional)",
@@ -455,6 +456,5 @@
     "webdav_sync_desc": "Aktiviere WebDAV, um Dokumente abzugleichen (Sicherung)",
     "whitepaper": "Weißes Papier",
     "whitepaper_desc": "Verbesserung für Dokumente auf weißem Papier",
-    "wrong_passcode": "Falsches Passwort",
-    "open_trash": "Öffne den Papierkorb"
+    "wrong_passcode": "Falsches Passwort"
 }
