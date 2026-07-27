@@ -332,6 +332,7 @@
     "ok": "ठीक है",
     "on": "पर",
     "open": "खोलें",
+    "open_trash": "खुला कचरा",
     "operations": "कार्य",
     "operations_settings_desc": "छवियों पर लागू संचालन से संबंधित सेटिंग",
     "optional_pdf_password": "पासवर्ड (वैकल्पिक)",
@@ -494,6 +495,5 @@
     "webdav_sync_desc": "अपने दस्तावेज़ों को समन्वयित करने के लिए WebDAV सक्षम करें (बैकअप)",
     "whitepaper": "श्वेतपत्र",
     "whitepaper_desc": "श्वेतपत्र प्रकार के दस्तावेज़ों के लिए सुधार",
-    "wrong_passcode": "गलत पासवर्ड",
-    "open_trash": "खुला कचरा"
+    "wrong_passcode": "गलत पासवर्ड"
 }
