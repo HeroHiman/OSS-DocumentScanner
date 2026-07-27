@@ -303,6 +303,7 @@
     "ok": "tamam",
     "on": "açık",
     "open": "aç",
+    "open_trash": "çöp kutusunu aç",
     "operations": "işlemler",
     "operations_settings_desc": "görüntüler üzerinde uygulanan işlemlerle ilgili ayarlar",
     "optional_pdf_password": "PDF şifresi (isteğe bağlı)",
@@ -443,6 +444,5 @@
     "webdav_sync_desc": "belgelerinizi senkronize etmesi için webdav'ı etkinleştirin (yedekleme)",
     "whitepaper": "beyaz sayfa",
     "whitepaper_desc": "beyaz sayfadan oluşan belgeler için iyileştirme",
-    "wrong_passcode": "yanlış parola",
-    "open_trash": "çöp kutusunu aç"
+    "wrong_passcode": "yanlış parola"
 }
