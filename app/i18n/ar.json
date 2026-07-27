@@ -345,6 +345,7 @@
     "ok": "حسنَا",
     "on": "تشغيل",
     "open": "فتح",
+    "open_trash": "فتح سلة المهملات",
     "operations": "العمليات",
     "operations_settings_desc": "الإعدادات المتعلقة بالعمليات تنطبق على الصور",
     "optional_pdf_password": "كلمة سر PDF (اختياري)",
@@ -513,6 +514,5 @@
     "webdav_sync_desc": "فعّل webdav لمزامنة مستنداتك (نسخة احتياطية)",
     "whitepaper": "ورقة بيضاء",
     "whitepaper_desc": "تحسينات لمستندات نوع الورقة البيضاء",
-    "wrong_passcode": "كلمة سر خاطئة",
-    "open_trash": "فتح سلة المهملات"
+    "wrong_passcode": "كلمة سر خاطئة"
 }
