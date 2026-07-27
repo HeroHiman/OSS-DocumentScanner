@@ -32,6 +32,7 @@
     "always": "Ĉiam",
     "always_prompt_crop_edit": "Ĉiam demandi ĉu vi volas redakti dokument-areon",
     "always_prompt_crop_edit_desc": "Kiam vi fotas sen la ariĝada reĝimo, tiu ĉi agordo determinas ĉu vi estos demandata redakti dokument-areon antaŭ krei la dokumenton",
+    "always_show_card_name": "Ĉiam montri la nomon de cardoj",
     "app": {
         "name": "Liberfontkoda Dokumento-skanilo"
     },
@@ -43,7 +44,9 @@
     "aspect_fill": "Proporcie skali plenante ujon",
     "aspect_fit": "Proporcie skali, plene videblas",
     "aspect_ratio": "Proporcio inter bildaj dimensioj",
+    "authenticate": "Aŭtentigi",
     "authenticate_security": "Aŭtentigu por atingi la apon",
+    "authenticated": "Aŭtentigita",
     "authentication": "Aŭtentigado",
     "auto": "Aŭtomata",
     "auto_black": "Aŭtomata malluma etoso iĝas nigra etoso",
@@ -301,6 +304,6 @@
     "ocr": "OCR",
     "ocr_computing": "Trovado de teksto (%1$s%%)...",
     "ocr_computing_document": "Trovado de teksto en dokumento(j) (%1$s%%)",
-    "toggle_favorite": "Baskuli ĉu favorata",
-    "open_trash": "malferma rubujo"
+    "open_trash": "malferma rubujo",
+    "toggle_favorite": "Baskuli ĉu favorata"
 }
