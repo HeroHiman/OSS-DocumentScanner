@@ -309,6 +309,7 @@
     "ok": "Aceptar",
     "on": "Encender",
     "open": "abrir",
+    "open_trash": "abrir la basura",
     "operations": "operaciones",
     "operations_settings_desc": "Ajustes para operaciones relacionadas con imágenes",
     "optional_pdf_password": "contraseña de PDF (opcional)",
@@ -447,6 +448,5 @@
     "webdav_sync_desc": "active webdav para sincronizar sus documentos (respaldos)",
     "whitepaper": "libro blanco",
     "whitepaper_desc": "mejora para los documentos tipo libro blanco",
-    "wrong_passcode": "contraseña incorrecta",
-    "open_trash": "abrir la basura"
+    "wrong_passcode": "contraseña incorrecta"
 }
