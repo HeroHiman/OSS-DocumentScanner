@@ -107,7 +107,8 @@
     marginBottom={forImageRendering ? 0 : $windowInset.bottom + 16}
     rows={`auto,auto,${forImageRendering ? 'auto' : '*'},auto`}
     {...$$restProps}
-    use:conditionalEvent={{ condition: forImageRendering, event: 'layoutChanged', callback: onLayoutChanged }}>
+    use:conditionalEvent={{ condition: forImageRendering, event: 'layoutChanged', callback: onLayoutChanged }}
+>
     {#if backgroundImage && passStyle === PKPassStyle.EventTicket}
         <image height="100%" opacity="0.3" rowSpan={4} src={backgroundImage} stretch="aspectFill" />
     {/if}
@@ -141,7 +142,8 @@
                     selectable={true}
                     text={orgName}
                     verticalAlignment="center"
-                    width={120} />
+                    width={120}
+                />
             {/if}
 
             <!-- Header fields -->
@@ -156,7 +158,8 @@
                                 lineHeight={FIELD_LINE_HEIGHT}
                                 text={renderFieldLabel(field)}
                                 verticalTextAlignment="top"
-                                visibility={field.label ? 'visible' : 'hidden'} />
+                                visibility={field.label ? 'visible' : 'hidden'}
+                            />
                             <cspan color={foregroundColor} fontSize={17 * $fontScale} fontWeight="500" text={renderFieldValue(field)} />
                         </label>
                     {/each}
@@ -171,7 +174,8 @@
             selectable={true}
             text={passData.organizationName}
             textAlignment="center"
-            visibility={passData.logoText !== passData.organizationName ? 'visible' : 'collapsed'} />
+            visibility={passData.logoText !== passData.organizationName ? 'visible' : 'collapsed'}
+        />
     </stacklayout>
 
     <!-- Main content -->
@@ -202,7 +206,8 @@
                             marginRight={16}
                             text={transitIcon}
                             textAlignment="center"
-                            verticalAlignment="center" />
+                            verticalAlignment="center"
+                        />
 
                         <!-- Right primary field (arrival) -->
                         <label col={2} selectable={true} textAlignment="right">
@@ -272,7 +277,8 @@
                     marginTop={24}
                     padding={8}
                     on:tap={onQRCodeTap}
-                    use:conditionalEvent={{ condition: forImageRendering, event: 'layoutChanged', callback: onLoadingStep }}>
+                    use:conditionalEvent={{ condition: forImageRendering, event: 'layoutChanged', callback: onLoadingStep }}
+                >
                     <svgview src={barcodeSvg} stretch="aspectFit" width="50%" />
                     {#if primaryBarcode?.altText}
                         <label color={foregroundColor} fontSize="12" marginTop="8" selectable={true} text={primaryBarcode.altText} textAlignment="center" />
@@ -311,7 +317,8 @@
                     marginTop={16}
                     padding={12}
                     text={pkpass.isExpired() ? lc('pkpass_expired') : lc('pkpass_expires_at', new Date(passData.expirationDate).toLocaleDateString())}
-                    textAlignment="center" />
+                    textAlignment="center"
+                />
             {/if}
 
             {#if pkpass.isVoided()}
@@ -324,7 +331,8 @@
                     marginTop={8}
                     padding={12}
                     text={lc('pkpass_voided')}
-                    textAlignment="center" />
+                    textAlignment="center"
+                />
             {/if}
         </stacklayout>
     </scrollview>

@@ -1386,7 +1386,8 @@
                 visibility={document.pages.length === 1 && !document.pages[0].imagePath ? 'collapsed' : 'visible'}
                 width={$isLandscape ? colWidth : undefined}
                 on:itemReordered={onItemReordered}
-                on:itemReorderStarting={onItemReorderStarting}>
+                on:itemReorderStarting={onItemReorderStarting}
+            >
                 <Template let:index let:item>
                     <gridlayout
                         class="cardItemTemplate"
@@ -1405,7 +1406,8 @@
                         on:tap={() => onItemTap(item)}
                         on:touch={(e) => onTouch(item, e)}
                         on:longPress={(e) => onItemLongPress(item, e)}
-                        on:pan={(e) => onPan(item, e)}>
+                        on:pan={(e) => onPan(item, e)}
+                    >
                         <RotableImageView
                             id="imageView"
                             borderRadius={12}
@@ -1413,7 +1415,8 @@
                             item={item.page}
                             sharedTransitionTag={`document_${document.id}_${item.page.id}`}
                             stretch="aspectFit"
-                            width="100%" />
+                            width="100%"
+                        />
                         <label
                             autoFontSize={true}
                             color={getItemLabelColor(item)}
@@ -1426,7 +1429,8 @@
                             textAlignment="center"
                             textWrap={true}
                             verticalTextAlignment="center"
-                            visibility={item.page.imagePath ? 'hidden' : 'visible'} />
+                            visibility={item.page.imagePath ? 'hidden' : 'visible'}
+                        />
                         <SelectedIndicator rowSpan={2} selected={item.selected} />
                         <label fontFamily={$fonts.mdi} fontSize={24} padding={10} text="mdi-reorder-horizontal" verticalAlignment="bottom" visibility={inEditMode ? 'visible' : 'hidden'} />
                         <PageIndicator horizontalAlignment="right" margin={2} rowSpan={2} scale={$fontScale} text={index + 1} />
@@ -1457,7 +1461,8 @@
                                             sharedTransitionTag={'qrcode' + index}
                                             src={item.svg}
                                             stretch="aspectFit"
-                                            verticalAlignment="top" />
+                                            verticalAlignment="top"
+                                        />
                                         <gridlayout columns="*,auto" row={1} rows="auto,auto">
                                             <label
                                                 fontSize={30}
@@ -1469,7 +1474,8 @@
                                                 sharedTransitionTag={'qrcodelabel' + index}
                                                 text={item?.text}
                                                 textAlignment="center"
-                                                visibility={editing ? 'collapsed' : 'visible'} />
+                                                visibility={editing ? 'collapsed' : 'visible'}
+                                            />
                                             <textfield
                                                 id="textField"
                                                 error={item.error}
@@ -1479,7 +1485,8 @@
                                                 variant="outline"
                                                 verticalAlignment="center"
                                                 visibility={editing ? 'visible' : 'collapsed'}
-                                                on:textChange={(event) => setQRCodeText(item, event)} />
+                                                on:textChange={(event) => setQRCodeText(item, event)}
+                                            />
                                             <IconButton
                                                 col={1}
                                                 marginTop={5}
@@ -1487,7 +1494,8 @@
                                                 text="mdi-delete"
                                                 verticalAlignment="center"
                                                 visibility={editing ? 'visible' : 'collapsed'}
-                                                on:tap={(event) => deleteCurrentQRCode(item, event)} />
+                                                on:tap={(event) => deleteCurrentQRCode(item, event)}
+                                            />
 
                                             <gridlayout colSpan={2} columns="auto,*,auto" padding={4} rows="auto" visibility={editing ? 'visible' : 'collapsed'} width="100%">
                                                 <label col={0} marginTop={4} text={lc('scale')} verticalAlignment="center" />
@@ -1507,7 +1515,8 @@
                                 row={1}
                                 selectedColor={colorOnSurfaceVariant}
                                 type="worm"
-                                verticalAlignment="bottom" />
+                                verticalAlignment="bottom"
+                            />
                         </gridlayout>
                     </Template>
                     <Template key="color" let:item>
@@ -1524,7 +1533,8 @@
                                 text="mdi-delete"
                                 verticalAlignment="center"
                                 visibility={editing ? 'visible' : 'collapsed'}
-                                on:tap={(event) => deleteExtraField(item, event)} />
+                                on:tap={(event) => deleteExtraField(item, event)}
+                            />
                         </gridlayout>
                         <ListItemAutoSize columns="*,auto,auto" item={{ rightValue: formatItemValue(item), title: item.name }}></ListItemAutoSize>
                     </Template>
@@ -1550,7 +1560,8 @@
                 text={lc('add_extra_field')}
                 verticalAlignment="bottom"
                 visibility={editing ? 'visible' : 'collapsed'}
-                on:tap={(event) => addOrEditExtraField()} />
+                on:tap={(event) => addOrEditExtraField()}
+            />
         {/if}
         <stacklayout
             bind:this={fabHolder}
@@ -1559,14 +1570,16 @@
             marginBottom={Math.min(60, $windowInset.bottom)}
             orientation="horizontal"
             row={2}
-            visibility={editing ? 'collapsed' : 'visible'}>
+            visibility={editing ? 'collapsed' : 'visible'}
+        >
             <mdbutton class="small-fab" text="mdi-pencil" verticalAlignment="center" visibility={isPKPassDocument ? 'collapsed' : 'visible'} on:tap={startEdit} />
             <mdbutton
                 class="small-fab"
                 text="mdi-fullscreen"
                 verticalAlignment="center"
                 visibility={isPKPassDocument || !hasImages ? 'collapsed' : 'visible'}
-                on:tap={throttle(() => showFullscreen(), 500)} />
+                on:tap={throttle(() => showFullscreen(), 500)}
+            />
 
             <mdbutton
                 bind:this={fabHolder}
@@ -1574,7 +1587,8 @@
                 class="fab"
                 text={editing ? 'mdi-check' : 'mdi-plus'}
                 visibility={isPKPassDocument ? 'collapsed' : 'visible'}
-                on:tap={throttle(() => onAddButton(), 500)} />
+                on:tap={throttle(() => onAddButton(), 500)}
+            />
         </stacklayout>
         <CActionBar
             backgroundColor={topBackgroundColor}
@@ -1585,7 +1599,8 @@
             onGoBack={nbSelected ? unselectAll : inEditMode ? switchEditMode : null}
             onTitleTap={() => (editingTitle = true)}
             title={inEditMode ? lc('reorder_pages') : nbSelected ? lc('selected', nbSelected) : document.name}
-            titleProps={{ padding: 0, color: statusBarStyle === 'dark' ? 'white' : 'black' }}>
+            titleProps={{ padding: 0, color: statusBarStyle === 'dark' ? 'white' : 'black' }}
+        >
             <!-- {#if editing}
                 <mdbutton class="actionBarButton" defaultVisualState={statusBarStyle} text="mdi-close" variant="text" on:tap={cancelEdit} />
                 <mdbutton class="actionBarButton" defaultVisualState={statusBarStyle} text="mdi-content-save" variant="text" on:tap={saveEdit} />
@@ -1596,7 +1611,8 @@
                 text="mdi-file-pdf-box"
                 variant="text"
                 visibility={canBeExportedToPDF ? 'visible' : 'collapse'}
-                on:tap={showPDFPopover} />
+                on:tap={showPDFPopover}
+            />
             <mdbutton class="actionBarButton" defaultVisualState={statusBarStyle} text="mdi-dots-vertical" variant="text" on:tap={showOptions} />
             <!-- {/if} -->
         </CActionBar>
@@ -1610,8 +1626,8 @@
                 labelsDefaultVisualState={statusBarStyle}
                 onGoBack={onEditActionBarGoBack}
                 onSave={onEditActionBarSave}
-                bind:editingTitle>
-            </EditNameActionBar>
+                bind:editingTitle
+            ></EditNameActionBar>
         {/if}
     </gridlayout>
 </page>

@@ -112,7 +112,8 @@
             selectedIndex={startPageIndex}
             transformers="zoomOut"
             on:selectedIndexChange={onSelectedIndex}
-            android:marginTop={$windowInset.top}>
+            android:marginTop={$windowInset.top}
+        >
             <Template let:item>
                 <gridlayout rows="*,auto" width="100%">
                     <RotableImageView id="imageView" {imageFunctionArg} {item} margin={item.margin} sharedTransitionTag={item.sharedTransitionTag} zoomable={true} />
@@ -129,7 +130,8 @@
                         text={item.subtitle}
                         textAlignment="center"
                         verticalAlignment="bottom"
-                        visibility={item.subtitle ? 'visible' : 'hidden'} />
+                        visibility={item.subtitle ? 'visible' : 'hidden'}
+                    />
                 </gridlayout>
             </Template>
             <Template key="svg" let:item>
@@ -140,7 +142,8 @@
                         scaleY={item.scale ?? 1}
                         sharedTransitionTag={item.sharedTransitionTag}
                         src={item.svg}
-                        stretch={item.stretch ?? 'aspectFit'} />
+                        stretch={item.stretch ?? 'aspectFit'}
+                    />
                     <label
                         color={labelColor}
                         fontSize={30}
@@ -153,7 +156,8 @@
                         text={item.subtitle}
                         textAlignment="center"
                         verticalAlignment="bottom"
-                        visibility={item.subtitle ? 'visible' : 'hidden'} />
+                        visibility={item.subtitle ? 'visible' : 'hidden'}
+                    />
                 </gridlayout>
             </Template>
         </pager>

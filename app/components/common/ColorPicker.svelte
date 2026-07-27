@@ -785,7 +785,8 @@
                                 visibility={item[index] ? 'visible' : 'collapse'}
                                 width={SAVED_THUMB_RADIUS * 2}
                                 on:draw={(e) => drawSavedColor(e, item[index])}
-                                on:tap={(e) => onDrawSavedColorTapped(e, item[index])} />
+                                on:tap={(e) => onDrawSavedColorTapped(e, item[index])}
+                            />
                         {/each}
                     </wraplayout>
                 </Template>
@@ -809,7 +810,8 @@
                     variant="outline"
                     on:returnPress={(e) => {
                         selectColor('#' + e.object.text);
-                    }} />
+                    }}
+                />
 
                 <mdbutton col={1} text={lc('select')} verticalAlignment="center" on:tap={(e) => closeBottomSheet(currentColor)} />
             </gridlayout>

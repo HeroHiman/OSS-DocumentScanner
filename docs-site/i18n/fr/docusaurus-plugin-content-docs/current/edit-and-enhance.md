@@ -94,8 +94,8 @@ Affinez l'apparence de l'image :
 
 1. Appuyez sur **Ajuster** dans la barre d'outils d'édition
 2. Utilisez les curseurs pour ajuster :
-   - **Luminosité** : Éclaircir ou assombrir l'image
-   - **Contraste** : Augmenter ou diminuer la gamme tonale
+    - **Luminosité** : Éclaircir ou assombrir l'image
+    - **Contraste** : Augmenter ou diminuer la gamme tonale
 3. Prévisualisez les modifications en temps réel
 4. Appuyez sur **Appliquer** pour enregistrer
 

@@ -73,6 +73,7 @@
         SETTINGS_SYNC_ON_START,
         SETTINGS_TRANSFORM_BATCH_SIZE,
         SETTINGS_TRASH_ENABLED,
+        SETTINGS_TRASH_REMEMBERED_DELETE_MODE,
         TRANSFORM_BATCH_SIZE,
         USE_SYSTEM_CAMERA
     } from '~/utils/constants';
@@ -485,7 +486,7 @@
                         description: lc('image_processing_settings_desc')
                     }
                 ];
-            case 'documents':
+            case 'trash':
                 return [
                     {
                         type: 'switch',
@@ -493,6 +494,13 @@
                         title: lc('trash_enabled'),
                         description: lc('trash_enabled_desc'),
                         value: ApplicationSettings.getBoolean(SETTINGS_TRASH_ENABLED, DEFAULT_TRASH_ENABLED)
+                    },
+                    {
+                        id: 'reset_trash_remember',
+                        rightBtnIcon: 'mdi-restore',
+                        title: lc('reset_deletion_preference'),
+                        description: lc('reset_deletion_preference_desc'),
+                        onTap: () => ApplicationSettings.remove(SETTINGS_TRASH_REMEMBERED_DELETE_MODE)
                     }
                 ];
             case 'folders':
@@ -903,8 +911,8 @@
                         id: 'sub_settings',
                         icon: 'mdi-trash-can-outline',
                         title: lc('trash'),
-                        description: lc('documents_settings'),
-                        options: () => getSubSettings('documents')
+                        description: lc('trash_settings'),
+                        options: () => getSubSettings('trash')
                     },
                     {
                         id: 'sub_settings',
@@ -1297,7 +1305,8 @@
                     try {
                         await securityService.enableBiometric();
                     } catch (error) {
-                        console.error('enableBiometric error', error);
+                        const errorMessage = (error.message as string).split(':').pop();
+                        showError(errorMessage, { showAsSnack: true });
                         const checkboxView = event.object as CheckBox;
                         checkboxView.checked = item.value = false;
                         // showError(error);
@@ -1362,7 +1371,8 @@
     {searchItemsProvider}
     title={title || $slc('settings.title')}
     bind:getStoreSetting
-    bind:refresh>
+    bind:refresh
+>
     <svelte:fragment slot="actionBarButtons">
         {#each actionBarButtons as button (button.id)}
             <mdbutton class="actionBarButton" text={button.icon} variant="text" on:tap={(event) => onTap({ id: button.id }, event)} />
@@ -1381,7 +1391,8 @@
                     padding={10}
                     rippleColor="white"
                     verticalAlignment="center"
-                    on:tap={(event) => onTap({ id: 'sponsor' }, event)}>
+                    on:tap={(event) => onTap({ id: 'sponsor' }, event)}
+                >
                     <label color="white" fontFamily={$fonts.mdi} fontSize={26} marginRight={10} text="mdi-heart" verticalAlignment="center" />
                     <label color="white" fontSize={12 * $fontScale} text={item.title} textWrap={true} verticalAlignment="center" />
                 </stacklayout>
@@ -1394,7 +1405,8 @@
                         rippleColor="white"
                         src="~/assets/images/librepay.png"
                         verticalAlignment="center"
-                        on:tap={(event) => onTap({ id: 'sponsor', type: 'librepay' }, event)} />
+                        on:tap={(event) => onTap({ id: 'sponsor', type: 'librepay' }, event)}
+                    />
                     <image
                         borderRadius={6}
                         col={2}
@@ -1402,7 +1414,8 @@
                         rippleColor="#f96754"
                         src="~/assets/images/patreon.png"
                         verticalAlignment="center"
-                        on:tap={(event) => onTap({ id: 'sponsor', type: 'patreon' }, event)} />
+                        on:tap={(event) => onTap({ id: 'sponsor', type: 'patreon' }, event)}
+                    />
                 {/if}
             </gridlayout>
 

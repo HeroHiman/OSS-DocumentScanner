@@ -70,7 +70,8 @@
         variant="text"
         verticalAlignment="center"
         visibility={availableFolders.length > 0 ? 'visible' : 'hidden'}
-        on:tap={addFolder} />
+        on:tap={addFolder}
+    />
     <wraplayout row={1}>
         {#each selectedFolders as folder (folder.id)}
             <Chip text={folder.name} on:tap={() => removeFolder(folder.id)} />

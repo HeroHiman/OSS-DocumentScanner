@@ -10,6 +10,7 @@ module.exports = {
     id: id || 'com.akylas.documentscanner',
     appResourcesPath: process.env['APP_RESOURCES'] || 'App_Resources/documentscanner',
     buildPath: process.env['APP_BUILD_PATH'] || 'build/documentscanner',
+    corePackageName: '@akylas/nativescript',
     webpackPackageName: '@akylas/nativescript-webpack',
     webpackConfigPath: 'app.webpack.config.js',
     projectName: process.env['PROJECT_NAME'],
@@ -23,6 +24,7 @@ module.exports = {
         runtimePackageName: '@akylas/nativescript-ios-runtime'
     },
     android: {
+        ignoredNativeDependencies: ['@akylas/nativescript-inapp-purchase'],
         plugins: {
             'plugin-nativeprocessor': {
                 // based on the app the plugin is built with our without qrcode.

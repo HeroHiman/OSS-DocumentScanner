@@ -33,13 +33,13 @@ Le format le plus polyvalent pour le partage de documents :
 
 Configurez les options d'exportation PDF :
 
-| Paramètre | Description |
-|-----------|-------------|
+| Paramètre      | Description                                  |
+| -------------- | -------------------------------------------- |
 | Taille de Page | A4, Letter, Taille originale ou personnalisé |
-| Orientation | Portrait, Paysage ou Auto |
-| Marges | Aucune, Petite, Moyenne, Grande |
-| Qualité | Basse, Moyenne, Élevée, Maximum |
-| Compression | JPEG, PNG ou mixte |
+| Orientation    | Portrait, Paysage ou Auto                    |
+| Marges         | Aucune, Petite, Moyenne, Grande              |
+| Qualité        | Basse, Moyenne, Élevée, Maximum              |
+| Compression    | JPEG, PNG ou mixte                           |
 
 ### Exportation d'Images
 
@@ -61,10 +61,10 @@ Exportez comme fichiers images individuels :
 
 #### Paramètres d'Image
 
-| Paramètre | Description |
-|-----------|-------------|
-| Qualité | 1-100% (JPEG uniquement) |
-| Résolution | Originale, 150 DPI, 300 DPI, 600 DPI |
+| Paramètre             | Description                             |
+| --------------------- | --------------------------------------- |
+| Qualité               | 1-100% (JPEG uniquement)                |
+| Résolution            | Originale, 150 DPI, 300 DPI, 600 DPI    |
 | Espace Colorimétrique | Couleur, Niveaux de gris, Noir et Blanc |
 
 ### Autres Formats
@@ -88,6 +88,7 @@ Utilisez la feuille de partage système pour envoyer des documents :
 4. Choisissez l'application de destination
 
 Compatible avec :
+
 - Applications email
 - Applications de messagerie
 - Applications de stockage cloud
@@ -183,6 +184,7 @@ Personnalisez le modèle de nommage dans les paramètres :
 ### Nommage par Lots
 
 Pour les exports par lots :
+
 - La numérotation séquentielle est ajoutée automatiquement
 - Un préfixe personnalisé peut être spécifié
 

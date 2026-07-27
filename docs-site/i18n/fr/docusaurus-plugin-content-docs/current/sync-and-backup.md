@@ -30,21 +30,21 @@ Connectez-vous à n'importe quel serveur compatible WebDAV :
 1. Allez dans **Paramètres** > **Synchronisation**
 2. Sélectionnez **WebDAV**
 3. Entrez les détails de votre serveur :
-   - **URL du Serveur** : Votre point d'accès WebDAV
-   - **Nom d'utilisateur** : Votre nom d'utilisateur de compte
-   - **Mot de passe** : Votre mot de passe de compte
+    - **URL du Serveur** : Votre point d'accès WebDAV
+    - **Nom d'utilisateur** : Votre nom d'utilisateur de compte
+    - **Mot de passe** : Votre mot de passe de compte
 4. Appuyez sur **Tester la Connexion**
 5. Sélectionnez le dossier de synchronisation
 6. Activez la synchronisation
 
 #### Configuration WebDAV
 
-| Paramètre | Description |
-|-----------|-------------|
-| URL du Serveur | URL WebDAV complète (ex: `https://cloud.example.com/remote.php/webdav/`) |
-| Nom d'utilisateur | Nom d'utilisateur du compte |
-| Mot de passe | Mot de passe du compte ou token d'application |
-| Dossier de Sync | Dossier distant pour les documents |
+| Paramètre         | Description                                                              |
+| ----------------- | ------------------------------------------------------------------------ |
+| URL du Serveur    | URL WebDAV complète (ex: `https://cloud.example.com/remote.php/webdav/`) |
+| Nom d'utilisateur | Nom d'utilisateur du compte                                              |
+| Mot de passe      | Mot de passe du compte ou token d'application                            |
+| Dossier de Sync   | Dossier distant pour les documents                                       |
 
 ### Sauvegarde Locale
 
@@ -84,11 +84,11 @@ Déclenchez la synchronisation manuellement :
 
 Configurez le comportement de la synchronisation :
 
-| Mode | Description |
-|------|-------------|
-| Bidirectionnel | Les modifications se synchronisent dans les deux sens |
-| Envoi uniquement | Envoi uniquement des modifications vers le serveur |
-| Réception uniquement | Réception uniquement des modifications du serveur |
+| Mode                 | Description                                           |
+| -------------------- | ----------------------------------------------------- |
+| Bidirectionnel       | Les modifications se synchronisent dans les deux sens |
+| Envoi uniquement     | Envoi uniquement des modifications vers le serveur    |
+| Réception uniquement | Réception uniquement des modifications du serveur     |
 
 ## Gestion des Conflits
 
@@ -109,9 +109,9 @@ Pour les conflits complexes :
 1. Une notification apparaît concernant le conflit
 2. Visualisez les deux versions
 3. Choisissez laquelle garder :
-   - **Garder Local** : Utiliser la version de votre appareil
-   - **Garder Distant** : Utiliser la version du serveur
-   - **Garder les Deux** : Créer une copie de chaque
+    - **Garder Local** : Utiliser la version de votre appareil
+    - **Garder Distant** : Utiliser la version du serveur
+    - **Garder les Deux** : Créer une copie de chaque
 
 ### Prévention des Conflits
 
@@ -127,16 +127,16 @@ Pour les conflits complexes :
 2. Allez dans **Paramètres** > **Sécurité** > **Appareils et sessions**
 3. Créez un mot de passe d'application pour OSS Document Scanner
 4. Dans l'application, entrez :
-   - URL : `https://votre-nextcloud.com/remote.php/webdav/`
-   - Utilisez le mot de passe d'application au lieu du mot de passe principal
+    - URL : `https://votre-nextcloud.com/remote.php/webdav/`
+    - Utilisez le mot de passe d'application au lieu du mot de passe principal
 
 ### NAS Synology
 
 1. Activez le paquet Serveur WebDAV sur votre NAS
 2. Configurez HTTPS (recommandé)
 3. Dans l'application, entrez :
-   - URL : `https://ip-de-votre-nas:5006/` (ou port personnalisé)
-   - Utilisez vos identifiants de compte Synology
+    - URL : `https://ip-de-votre-nas:5006/` (ou port personnalisé)
+    - Utilisez vos identifiants de compte Synology
 
 ### WebDAV Générique
 

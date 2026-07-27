@@ -20,6 +20,7 @@
         {text}
         {variant}
         on:returnPress
-        on:textChange />
+        on:textChange
+    />
     <mdbutton class="icon-btn" color={colorOnSurfaceVariant} horizontalAlignment="right" text="mdi-folder-open" variant="text" verticalAlignment="middle" />
 </gridlayout>
