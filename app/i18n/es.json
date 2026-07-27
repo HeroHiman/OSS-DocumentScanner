@@ -299,7 +299,6 @@
     "ocr_enabled_desc": "El OCR se activará en cada cambio de documento que utilice los idiomas que seleccione aquí",
     "ocr_missing_languages_download": "No se encontraron modelos OCR, estos se descargarán: %1$s",
     "ocr_settings": "Configuración de OCR",
-    "off": "Apagar",
     "ok": "Aceptar",
     "on": "Encender",
     "open": "abrir",

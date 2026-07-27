@@ -349,7 +349,6 @@
     "ocr_missing_languages": "Липсват OCR модели, можете да ги изтеглите от настройките",
     "ocr_missing_languages_download": "OCR моделите липсват, те ще бъдат изтеглени: %1$s",
     "ocr_settings": "OCR настройки",
-    "off": "изключено",
     "ok": "OK",
     "on": "включено",
     "opacity": "непрозрачност",

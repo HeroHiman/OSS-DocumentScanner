@@ -274,7 +274,6 @@
     "ocr_enabled_desc": "OCR-tekstintunnistus käynnistyy jokaisen asiakirjan muutoksen yhteydessä tässä valitsemillasi kielillä",
     "ocr_missing_languages_download": "OCR-mallit puuttuvat, ladataan: %1$s",
     "ocr_settings": "OCR-tekstintunnistusasetukset",
-    "off": "pois päältä",
     "ok": "OK",
     "on": "päällä",
     "open": "avaa",

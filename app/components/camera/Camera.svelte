@@ -787,7 +787,7 @@
             />
         </gridlayout>
 
-        <gridlayout columns="60,*,auto,*,60" ios:paddingBottom={30} android:marginBottom={30 + $windowInset.bottom} paddingTop={10} row={3} visibility={QRCodeOnly ? 'collapsed' : 'visible'}>
+        <gridlayout columns="*,*,auto,*,*" ios:paddingBottom={30} android:marginBottom={30 + $windowInset.bottom} paddingTop={10} row={3} visibility={QRCodeOnly ? 'collapsed' : 'visible'}>
             {#if !onlyForOCR}
                 <IconButton
                     colSpan={2}
@@ -817,7 +817,6 @@
                 src={smallImage}
                 stretch="aspectFit"
                 verticalAlignment="center"
-                width={60}
             />
             <gridlayout col={2} height={70} horizontalAlignment="center" opacity={takingPicture ? 0.6 : 1} verticalAlignment="center" width={70}>
                 <canvasView bind:this={takPictureBtnCanvas} class:infinite-rotate={autoScan} on:draw={drawTakePictureBtnBorder}> </canvasView>
@@ -834,13 +833,15 @@
                 <label color="white" fontSize={20} isUserInteractionEnabled={false} text={nbPages + ''} textAlignment="center" verticalAlignment="middle" visibility={nbPages ? 'visible' : 'hidden'} />
             </gridlayout>
 
-            <IconButton
+            <mdbutton
+                class="fab"
+                accessibilityLabel={lc('finish')}
                 col={4}
-                color="white"
-                horizontalAlignment="right"
-                marginRight={16}
+                elevation={0}
+                horizontalAlignment="center"
+                margin={0}
                 text="mdi-check"
-                tooltip={lc('finish')}
+                variant="text"
                 verticalAlignment="center"
                 visibility={canSaveDoc ? 'visible' : 'hidden'}
                 on:tap={() => saveCurrentDocument()}

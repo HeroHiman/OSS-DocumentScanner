@@ -343,7 +343,6 @@
     "ocr_missing_languages": "OCR models are missing, you can download them from the settings",
     "ocr_missing_languages_download": "OCR models are missing, they will be downloaded: %1$s",
     "ocr_settings": "OCR settings",
-    "off": "off",
     "ok": "OK",
     "on": "on",
     "opacity": "opacity",

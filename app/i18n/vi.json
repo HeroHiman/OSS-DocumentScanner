@@ -311,7 +311,6 @@
     "ocr_missing_languages": "Thiếu mô hình OCR, bạn có thể tải xuống từ thiết đặt",
     "ocr_missing_languages_download": "Thiếu mô hình OCR, sẽ tải mô hình xuống: %1$s",
     "ocr_settings": "thiết đặt OCR",
-    "off": "tắt",
     "ok": "OK",
     "on": "bật",
     "open": "mở",

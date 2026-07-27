@@ -345,7 +345,6 @@
     "ocr_missing_languages": "model OCR tidak tersedia; Anda dapat mengunduhnya dari menu pengaturan",
     "ocr_missing_languages_download": "Model OCR tidak ditemukan. Model akan diunduh: %1$",
     "ocr_settings": "pengaturan OCR",
-    "off": "mati",
     "ok": "OK",
     "on": "nyala",
     "opacity": "opasitas",

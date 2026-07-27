@@ -72,6 +72,7 @@ module.exports = (env, params = {}) => {
     }
 
     nsWebpack.chainWebpack((config, env) => {
+        config.externals(env.externals);
         config.module
             .rule('svelte')
             .use('svelte-loader')
@@ -168,7 +169,6 @@ module.exports = (env, params = {}) => {
         .filter((s) => s.endsWith('.json'))
         .map((s) => s.replace('.json', ''));
     console.log('supportedLocales', supportedLocales);
-    config.externals.push('~/licenses.json');
     config.externals.push(function ({ context, request }, cb) {
         if (/i18n$/i.test(context)) {
             return cb(null, join('~/i18n/', request));
@@ -257,7 +257,7 @@ module.exports = (env, params = {}) => {
         SPONSOR_URL: '"https://github.com/sponsors/farfromrefug"',
         DEV_LOG: !!devlog
     };
-    Object.assign(config.plugins.find((p) => p.constructor.name === 'DefinePlugin').definitions, defines);
+    Object.assign(config.plugins.find((p) => p.constructor.name === 'CompatDefinePlugin').definitions, defines);
 
     const symbolsParser = require('scss-symbols-parser');
     const mdiSymbols = symbolsParser.parseSymbols(readFileSync(resolve(projectRoot, 'node_modules/@mdi/font/scss/_variables.scss')).toString());

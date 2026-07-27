@@ -339,7 +339,6 @@
     "ocr_missing_languages": "Модели OCR отсутствуют, вы можете скачать их в настройках",
     "ocr_missing_languages_download": "Модели OCR отсутствуют, они будут загружены: %1$s",
     "ocr_settings": "настройки OCR",
-    "off": "выключено",
     "ok": "OK",
     "on": "на",
     "opacity": "непрозрачность",

@@ -350,7 +350,6 @@
     "ocr_missing_languages": "Brakuje modeli OCR, można je pobrać z ustawień",
     "ocr_missing_languages_download": "Brakuje modeli OCR. Zostaną pobrane: %1$s",
     "ocr_settings": "ustawienia OCR",
-    "off": "wył.",
     "ok": "OK",
     "on": "wł.",
     "opacity": "nieprzezroczystość",

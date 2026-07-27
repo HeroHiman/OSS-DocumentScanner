@@ -300,7 +300,6 @@
     "ocr_missing_languages": "Mancano i modelli OCR, puoi scaricarli dalle impostazioni",
     "ocr_missing_languages_download": "i modelli OCR sono mancanti, verranno scaricati: %1$s",
     "ocr_settings": "impostazioni OCR",
-    "off": "disattiva",
     "ok": "OK",
     "on": "attiva",
     "open": "apri",
