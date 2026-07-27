@@ -1,38 +1,36 @@
 ﻿@import './animations';
 
-
 .ns-root {
-
     --windowInsetLeft: 0;
     --windowInsetRight: 0;
     --fontScale: 1;
-    --colorPrimary: #006E25;
+    --colorPrimary: #006e25;
     --colorOnPrimary: #ffffff;
-    --colorPrimaryContainer: #98F89C;
+    --colorPrimaryContainer: #98f89c;
     --colorOnPrimaryContainer: #002106;
     --colorSecondary: #526350;
-    --colorOnSecondary: #FFFFFF;
-    --colorSecondaryContainer: #D5E8D0;
-    --colorOnSecondaryContainer: #101F10;
-    --colorTertiary: #39656B;
-    --colorOnTertiary: #FFFFFF;
-    --colorTertiaryContainer: #BCEBF2;
-    --colorOnTertiaryContainer: #001F23;
-    --colorBackground: #FCFDF7;
-    --colorOnBackground: #1A1C19;
-    --colorError: #BA1A1A;
-    --colorOnError: #FFFFFF;
-    --colorErrorContainer: #FFDAD6;
-    --colorOutline: #72796F;
-    --colorOutlineVariant: #C2C9BD;
+    --colorOnSecondary: #ffffff;
+    --colorSecondaryContainer: #d5e8d0;
+    --colorOnSecondaryContainer: #101f10;
+    --colorTertiary: #39656b;
+    --colorOnTertiary: #ffffff;
+    --colorTertiaryContainer: #bcebf2;
+    --colorOnTertiaryContainer: #001f23;
+    --colorBackground: #fcfdf7;
+    --colorOnBackground: #1a1c19;
+    --colorError: #ba1a1a;
+    --colorOnError: #ffffff;
+    --colorErrorContainer: #ffdad6;
+    --colorOutline: #72796f;
+    --colorOutlineVariant: #c2c9bd;
     --colorOnSurfaceDisabled: #00000055;
-    --colorSurfaceVariant: #DEE5D9;
+    --colorSurfaceVariant: #dee5d9;
     --colorOnSurfaceVariant: #424940;
-    --colorSurface: #F9FAF4;
-    --colorOnSurface: #1A1C19;
+    --colorSurface: #f9faf4;
+    --colorOnSurface: #1a1c19;
     --colorOnSurfaceInverse: #000000;
-    --colorSurfaceContainer: #C2C9BD;
-    --popupMenuBackground: #C2C9BD;
+    --colorSurfaceContainer: #c2c9bd;
+    --popupMenuBackground: #c2c9bd;
 
     --mdiFontFamily: #{$mdiFontFamily};
     --appFontFamily: #{$appFontFamily};
@@ -53,7 +51,6 @@
     font-family: $mdiFontFamily;
 }
 
-
 mdtextfield,
 mdtextview {
     stroke-color: var(--colorOutline);
@@ -67,10 +64,8 @@ checkbox {
     fill-color: var(--colorPrimary);
 }
 
-
-
-mdbutton[variant=flat],
-mdbutton[variant=contained] {
+mdbutton[variant='flat'],
+mdbutton[variant='contained'] {
     background-color: var(--colorPrimary);
     color: var(--colorOnPrimary);
 }
@@ -89,7 +84,6 @@ htmllabel {
     // }
 
     // white-space: normal;
-
 }
 
 // mdtextfield {
@@ -104,7 +98,6 @@ htmllabel {
 //     }
 // }
 
-
 page {
     status-bar-color: transparent;
     status-bar-style: light;
@@ -113,11 +106,10 @@ page {
     .ns-black & {
         status-bar-style: dark;
     }
-
 }
 .pageContent {
-    padding-left:var(--windowInsetLeft);
-    padding-right:var(--windowInsetRight);
+    padding-left: var(--windowInsetLeft);
+    padding-right: var(--windowInsetRight);
 }
 
 frame {
@@ -137,15 +129,12 @@ frame {
     padding: 15 15 5 16;
 }
 
-
-
 .sectionBigHeader {
     font-size: 20;
     font-weight: 500;
     color: var(--colorPrimary);
     padding: 4 0 10 0;
 }
-
 
 .actionBarTitle {
     font-size: 22;
@@ -160,14 +149,12 @@ frame {
     color: var(--colorOnBackground);
 }
 
-
 label,
 canvaslabel,
 htmllabel,
 mdtextfield,
 .actionBarTitle,
 .actionBarSubtitle {
-
     &:black,
     &:dark {
         color: white;
@@ -178,7 +165,6 @@ mdtextfield,
         color: black;
     }
 }
-
 
 .icon-btn,
 .actionBarButton {
@@ -192,9 +178,7 @@ mdtextfield,
     color: var(--colorOnBackground);
     ripple-color: var(--colorOnBackground);
 
-
-
-    &:onTertiary {
+    &:ontertiary {
         color: var(--colorOnTertiary);
         ripple-color: var(--colorOnTertiary);
     }
@@ -208,8 +192,6 @@ mdtextfield,
     &:dark {
         color: white;
         ripple-color: white;
-
-
     }
 
     &:white,
@@ -247,7 +229,6 @@ mdtextfield,
     }
 }
 
-
 .small-fab {
     @extend .mdi;
     shape: small;
@@ -269,7 +250,7 @@ mdtextfield,
         border-color: var(--colorOutlineVariant);
         border-width: 1;
     }
-}   
+}
 
 .selectionToolbar {
     elevation: 2;
@@ -278,7 +259,7 @@ mdtextfield,
     horizontal-align: stretch;
     vertical-align: bottom;
     .ns-eink & {
-        elevation:0;
+        elevation: 0;
     }
 }
 
@@ -303,7 +284,6 @@ mdtextfield,
     font-size: 24;
 }
 
-
 .card {
     margin: 8;
     background-color: var(--colorSurfaceContainerHigh);
@@ -323,14 +303,17 @@ mdtextfield,
 }
 .cardItemTemplate {
     border-radius: 12;
-    ripple-color:var(--colorSurface);
+    ripple-color: var(--colorSurface);
 }
 
 .cardViewHolder {
     background-color: var(--colorBackground);
     border-radius: 10 10 0 0;
 }
-.cardViewHolder, .pageIndicator, .card, .cardItemTemplate {
+.cardViewHolder,
+.pageIndicator,
+.card,
+.cardItemTemplate {
     .ns-eink & {
         border-color: var(--colorOutlineVariant);
         background-color: white;

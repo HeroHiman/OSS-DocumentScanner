@@ -74,7 +74,8 @@
             text={(document || folder).name}
             verticalTextAlignment="center"
             on:returnPress={saveDocumentTitle}
-            on:layoutChanged={onTextFieldFocus} />
+            on:layoutChanged={onTextFieldFocus}
+        />
         <mdbutton class="actionBarButton" col={1} defaultVisualState={buttonsDefaultVisualState} text="mdi-content-save" variant="text" on:tap={saveDocumentTitle} />
     </gridlayout>
     <slot />

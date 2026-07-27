@@ -310,7 +310,8 @@
     bind:getSyncColors
     bind:documents
     bind:folderItems
-    bind:collectionView>
+    bind:collectionView
+>
     <Template key="cardholder" let:item>
         <absolutelayout height={itemRowHeight}>
             <CardListCell
@@ -325,7 +326,8 @@
                 syncColors={getSyncColors(item)}
                 {syncEnabled}
                 on:tap={() => onItemTap(item)}
-                on:longPress={(e) => onItemLongPress(item, e)} />
+                on:longPress={(e) => onItemLongPress(item, e)}
+            />
             <absolutelayout boxShadow="0 0 8 rgba(1, 0, 0, 1)" height={3} top={itemRowHeight} width="100%" />
         </absolutelayout>
     </Template>
@@ -343,7 +345,8 @@
             syncColors={getSyncColors(item)}
             {syncEnabled}
             on:tap={() => onItemTap(item)}
-            on:longPress={(e) => onItemLongPress(item, e)} />
+            on:longPress={(e) => onItemLongPress(item, e)}
+        />
     </Template>
     <Template key="list" let:item>
         <CardListCell
@@ -359,7 +362,8 @@
             syncColors={getSyncColors(item)}
             {syncEnabled}
             on:tap={() => onItemTap(item)}
-            on:longPress={(e) => onItemLongPress(item, e)} />
+            on:longPress={(e) => onItemLongPress(item, e)}
+        />
     </Template>
     <Template key="columns" let:item>
         <CardListCell
@@ -375,7 +379,8 @@
             syncColors={getSyncColors(item)}
             {syncEnabled}
             on:tap={() => onItemTap(item)}
-            on:longPress={(e) => onItemLongPress(item, e)} />
+            on:longPress={(e) => onItemLongPress(item, e)}
+        />
     </Template>
     <Template key="pkpass_cardholder" let:item>
         <absolutelayout height={itemRowHeight}>
@@ -393,7 +398,8 @@
                 syncColors={getSyncColors(item)}
                 {syncEnabled}
                 on:tap={() => onItemTap(item)}
-                on:longPress={(e) => onItemLongPress(item, e)} />
+                on:longPress={(e) => onItemLongPress(item, e)}
+            />
             <absolutelayout boxShadow="0 0 8 rgba(1, 0, 0, 1)" height={3} top={itemRowHeight} width="100%" />
         </absolutelayout>
     </Template>
@@ -412,7 +418,8 @@
             syncColors={getSyncColors(item)}
             {syncEnabled}
             on:tap={() => onItemTap(item)}
-            on:longPress={(e) => onItemLongPress(item, e)} />
+            on:longPress={(e) => onItemLongPress(item, e)}
+        />
     </Template>
     <Template key="pkpass_list" let:item>
         <CardListCell
@@ -429,7 +436,8 @@
             syncColors={getSyncColors(item)}
             {syncEnabled}
             on:tap={() => onItemTap(item)}
-            on:longPress={(e) => onItemLongPress(item, e)} />
+            on:longPress={(e) => onItemLongPress(item, e)}
+        />
     </Template>
     <Template key="pkpass_columns" let:item>
         <CardListCell
@@ -446,7 +454,8 @@
             syncColors={getSyncColors(item)}
             {syncEnabled}
             on:tap={() => onItemTap(item)}
-            on:longPress={(e) => onItemLongPress(item, e)} />
+            on:longPress={(e) => onItemLongPress(item, e)}
+        />
     </Template>
 
     <stacklayout bind:this={fabHolder} slot="fab" class="fabHolder" marginBottom={Math.min(60, $windowInset.bottom)} orientation="horizontal" row={2}>

@@ -113,7 +113,8 @@
                     stretch="aspectFit"
                     verticalAlignment="center"
                     visibility={logoImage || iconImage ? 'visible' : 'collapse'}
-                    width={(logoImage ? 80 : 20) * scaleFactor} />
+                    width={(logoImage ? 80 : 20) * scaleFactor}
+                />
                 <label
                     color={foregroundColor}
                     fontSize={14 * scaleFactor}
@@ -122,7 +123,8 @@
                     text={orgName}
                     verticalAlignment="center"
                     visibility={!logoImage ? 'visible' : 'collapse'}
-                    width={120 * scaleFactor} />
+                    width={120 * scaleFactor}
+                />
             </stacklayout>
 
             <!-- Right: Important data (header fields like gate, seat, date) -->
@@ -136,7 +138,8 @@
                             fontWeight="500"
                             lineHeight={FIELD_LINE_HEIGHT * scaleFactor}
                             text={getFieldLabel(field)}
-                            visibility={field?.label ? 'visible' : 'hidden'} />
+                            visibility={field?.label ? 'visible' : 'hidden'}
+                        />
                         <span color={foregroundColor} fontSize={13 * scaleFactor} fontWeight="500" text={getFieldValue(field)} />
                     </label>
                 {/each}
@@ -162,7 +165,8 @@
                 marginRight={16 * scaleFactor}
                 text={transitIcon}
                 verticalAlignment="center"
-                visibility={withTransitionIcon ? 'visible' : 'collapsed'} />
+                visibility={withTransitionIcon ? 'visible' : 'collapsed'}
+            />
 
             <!-- Arrival -->
             <label col={2} horizontalAlignment="right" maxLines={2} textAlignment="right" verticalAlignment="center" visibility={withTransitionIcon ? 'visible' : 'collapsed'}>
@@ -180,7 +184,8 @@
                             fontWeight="500"
                             lineHeight={FIELD_LINE_HEIGHT * scaleFactor}
                             text={getFieldLabel(field)}
-                            visibility={field?.label ? 'visible' : 'hidden'} />
+                            visibility={field?.label ? 'visible' : 'hidden'}
+                        />
                         <cspan color={foregroundColor} fontSize={24 * scaleFactor} fontWeight="bold" text={getFieldValue(field)} />
                     </label>
                 {/each}

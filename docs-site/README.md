@@ -100,11 +100,11 @@ The `npm run build` and `npm run start` commands automatically run `copy-assets.
 
 ```json
 {
-  "scripts": {
-    "copy-assets": "bash scripts/copy-assets.sh",
-    "start": "npm run copy-assets && docusaurus start",
-    "build": "npm run copy-assets && docusaurus build"
-  }
+    "scripts": {
+        "copy-assets": "bash scripts/copy-assets.sh",
+        "start": "npm run copy-assets && docusaurus start",
+        "build": "npm run copy-assets && docusaurus build"
+    }
 }
 ```
 
@@ -151,13 +151,13 @@ maestro test screenshots/edit-screenshot.yaml
 
 Screenshots are saved directly to `static/img/` with these names:
 
-| Filename | Screen |
-|----------|--------|
-| `capture-1.png` | Main capture/camera screen |
-| `edit-1.png` | Edit/crop screen |
-| `export-1.png` | Export options screen |
-| `sync-1.png` | Sync settings screen |
-| `settings-1.png` | Settings screen |
+| Filename         | Screen                     |
+| ---------------- | -------------------------- |
+| `capture-1.png`  | Main capture/camera screen |
+| `edit-1.png`     | Edit/crop screen           |
+| `export-1.png`   | Export options screen      |
+| `sync-1.png`     | Sync settings screen       |
+| `settings-1.png` | Settings screen            |
 
 See [maestro/README.md](maestro/README.md) for detailed documentation on customizing flows and CI integration.
 
@@ -174,41 +174,41 @@ The site is configured for multiple languages:
 
 1. **Generate translation files:**
 
-   ```bash
-   npm run write-translations -- --locale fr
-   ```
+    ```bash
+    npm run write-translations -- --locale fr
+    ```
 
-   This creates JSON files in `i18n/fr/` with all translatable strings.
+    This creates JSON files in `i18n/fr/` with all translatable strings.
 
 2. **Translate documentation:**
 
-   Copy docs to `i18n/fr/docusaurus-plugin-content-docs/current/`:
+    Copy docs to `i18n/fr/docusaurus-plugin-content-docs/current/`:
 
-   ```bash
-   mkdir -p i18n/fr/docusaurus-plugin-content-docs/current
-   cp -r docs/* i18n/fr/docusaurus-plugin-content-docs/current/
-   ```
+    ```bash
+    mkdir -p i18n/fr/docusaurus-plugin-content-docs/current
+    cp -r docs/* i18n/fr/docusaurus-plugin-content-docs/current/
+    ```
 
-   Then translate the copied markdown files.
+    Then translate the copied markdown files.
 
 3. **Translate theme strings:**
 
-   Edit the generated JSON files in `i18n/fr/`:
-   - `code.json` - Theme UI strings
-   - `docusaurus-theme-classic/navbar.json` - Navbar items
-   - `docusaurus-theme-classic/footer.json` - Footer items
+    Edit the generated JSON files in `i18n/fr/`:
+    - `code.json` - Theme UI strings
+    - `docusaurus-theme-classic/navbar.json` - Navbar items
+    - `docusaurus-theme-classic/footer.json` - Footer items
 
 4. **Build for a specific locale:**
 
-   ```bash
-   npm run build -- --locale fr
-   ```
+    ```bash
+    npm run build -- --locale fr
+    ```
 
 5. **Start dev server with a specific locale:**
 
-   ```bash
-   npm run start -- --locale fr
-   ```
+    ```bash
+    npm run start -- --locale fr
+    ```
 
 ### Translation File Structure
 
@@ -236,8 +236,8 @@ Edit `src/css/custom.css` to modify the color scheme:
 
 ```css
 :root {
-  --ifm-color-primary: #2e8555;
-  /* ... */
+    --ifm-color-primary: #2e8555;
+    /* ... */
 }
 ```
 

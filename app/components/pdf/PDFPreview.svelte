@@ -330,7 +330,8 @@
                     preserveIndexOnItemsChange={true}
                     row={1}
                     selectedIndex={currentPagerIndex}
-                    on:selectedIndexChange={onPageIndexChanged}>
+                    on:selectedIndexChange={onPageIndexChanged}
+                >
                     {#each { length: 6 } as _, i (i)}
                         <Template key={`${i + 1}`} let:index let:item>
                             <gridlayout padding={PAGER_PAGE_PADDING - 10}>
@@ -341,7 +342,8 @@
                                             {...getPageImageOptions(i + 1, item, j, index)}
                                             horizontalAlignment="center"
                                             stretch="aspectFit"
-                                            verticalAlignment="middle" />
+                                            verticalAlignment="middle"
+                                        />
                                     {/each}
                                 </gridlayout>
                             </gridlayout>
@@ -370,7 +372,8 @@
                     text={PDF_OPTIONS['orientation'][orientation].name}
                     variant="outline"
                     width={tWidth}
-                    on:tap={(e) => selectOption('orientation', e)} />
+                    on:tap={(e) => selectOption('orientation', e)}
+                />
                 <textfield
                     editable={false}
                     height={tHeight}
@@ -380,7 +383,8 @@
                     text={PDF_OPTIONS['paper_size'][paper_size].name}
                     variant="outline"
                     width={tWidth}
-                    on:tap={(e) => selectOption('paper_size', e)} />
+                    on:tap={(e) => selectOption('paper_size', e)}
+                />
 
                 <textfield
                     editable={false}
@@ -391,7 +395,8 @@
                     text={PDF_OPTIONS['color'][color].name}
                     variant="outline"
                     width={tWidth}
-                    on:tap={(e) => selectOption('color', e)} />
+                    on:tap={(e) => selectOption('color', e)}
+                />
                 <textfield
                     editable={false}
                     height={tHeight}
@@ -401,7 +406,8 @@
                     text={PDF_OPTIONS['items_per_page'][items_per_page].name}
                     variant="outline"
                     width={tWidth}
-                    on:tap={(e) => selectOption('items_per_page', e, parseInt)} />
+                    on:tap={(e) => selectOption('items_per_page', e, parseInt)}
+                />
                 <textfield
                     editable={false}
                     height={tHeight}
@@ -411,7 +417,8 @@
                     text={page_padding}
                     variant="outline"
                     width={tWidth}
-                    on:tap={(e) => selectSilderOption('page_padding', e)} />
+                    on:tap={(e) => selectSilderOption('page_padding', e)}
+                />
                 <stacklayout orientation="horizontal" width={tWidth}>
                     <checkbox
                         id="checkbox"
@@ -420,7 +427,8 @@
                         margin={tMargin}
                         verticalAlignment="center"
                         on:checkedChange={(e) => updateOption('draw_ocr_text', e.value)}
-                        ios:margin={14} />
+                        ios:margin={14}
+                    />
                     <label fontSize={14} text={lc('draw_ocr_text')} textWrap={true} verticalAlignment="center" on:tap={tapForCheckBox} />
                 </stacklayout>
 

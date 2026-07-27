@@ -58,13 +58,13 @@ Une fois importés, vos passes affichent toutes les informations pertinentes :
 
 Chaque type de pass a un style visuel unique :
 
-| Type de Pass | Style d'affichage |
-|--------------|-------------------|
+| Type de Pass         | Style d'affichage                |
+| -------------------- | -------------------------------- |
 | Carte d'embarquement | Disposition en bande horizontale |
-| Billet d'événement | Style ticket avec perforations |
-| Carte de magasin | Disposition carte avec logo |
-| Coupon | Design style coupon |
-| Générique | Disposition carte standard |
+| Billet d'événement   | Style ticket avec perforations   |
+| Carte de magasin     | Disposition carte avec logo      |
+| Coupon               | Design style coupon              |
+| Générique            | Disposition carte standard       |
 
 ## Gérer les Passes
 
@@ -82,7 +82,7 @@ Certains passes supportent les mises à jour automatiques :
 - Horaires d'embarquement mis à jour
 - Nouvelles offres de coupons
 
-*Note : Les mises à jour automatiques nécessitent que l'émetteur du pass supporte cette fonctionnalité.*
+_Note : Les mises à jour automatiques nécessitent que l'émetteur du pass supporte cette fonctionnalité._
 
 ### Supprimer des passes
 

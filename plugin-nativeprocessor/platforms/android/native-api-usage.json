@@ -1,5 +1,5 @@
 {
-    "uses":[
+    "uses": [
         "com.akylas.documentscanner:CropView",
         "com.akylas.documentscanner:CustomImageAnalysisCallback",
         "com.akylas.documentscanner:CustomImageAnalysisCallback.OnQRCode",

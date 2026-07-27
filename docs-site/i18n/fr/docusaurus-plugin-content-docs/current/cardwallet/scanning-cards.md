@@ -41,25 +41,25 @@ Si le scan ne fonctionne pas, vous pouvez entrer les données du code-barres man
 
 ### Codes-Barres 1D (Linéaires)
 
-| Format | Utilisation Courante |
-|--------|---------------------|
-| CODE_128 | Usage général, expédition |
-| CODE_39 | Industriel, automobile |
-| EAN_13 | Produits de détail (Europe) |
-| EAN_8 | Petits produits de détail |
-| UPC_A | Produits de détail (Amérique du Nord) |
-| UPC_E | Petits emballages |
-| ITF | Expédition, logistique |
-| CODABAR | Bibliothèques, banques de sang |
+| Format   | Utilisation Courante                  |
+| -------- | ------------------------------------- |
+| CODE_128 | Usage général, expédition             |
+| CODE_39  | Industriel, automobile                |
+| EAN_13   | Produits de détail (Europe)           |
+| EAN_8    | Petits produits de détail             |
+| UPC_A    | Produits de détail (Amérique du Nord) |
+| UPC_E    | Petits emballages                     |
+| ITF      | Expédition, logistique                |
+| CODABAR  | Bibliothèques, banques de sang        |
 
 ### Codes-Barres 2D
 
-| Format | Utilisation Courante |
-|--------|---------------------|
-| QR_CODE | URLs, cartes de fidélité, billets |
-| DATA_MATRIX | Électronique, petits articles |
-| AZTEC | Billets, cartes d'embarquement |
-| PDF_417 | Cartes d'identité, permis de conduire |
+| Format      | Utilisation Courante                  |
+| ----------- | ------------------------------------- |
+| QR_CODE     | URLs, cartes de fidélité, billets     |
+| DATA_MATRIX | Électronique, petits articles         |
+| AZTEC       | Billets, cartes d'embarquement        |
+| PDF_417     | Cartes d'identité, permis de conduire |
 
 ## Scanner depuis des Images
 

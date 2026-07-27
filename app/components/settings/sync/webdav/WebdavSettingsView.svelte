@@ -89,7 +89,8 @@
         text={$store.remoteURL}
         {variant}
         on:returnPress={() => focusTextfield('username')}
-        on:textChange={(e) => ($store.remoteURL = e['value'])} />
+        on:textChange={(e) => ($store.remoteURL = e['value'])}
+    />
     <gridLayout columns="auto,*">
         <textfield
             editable={false}
@@ -99,7 +100,8 @@
             textTransform="uppercase"
             {variant}
             width={130}
-            on:tap={(e) => selectAuthentication(e)} />
+            on:tap={(e) => selectAuthentication(e)}
+        />
         <textfield
             autocapitalizationType="none"
             autocorrect={false}
@@ -112,7 +114,8 @@
             text={$store.token}
             {variant}
             on:returnPress={() => focusTextfield('username')}
-            on:textChange={(e) => ($store.token = e['value'])} />
+            on:textChange={(e) => ($store.token = e['value'])}
+        />
     </gridLayout>
     <textfield
         autocapitalizationType="none"
@@ -125,7 +128,8 @@
         text={$store.username}
         {variant}
         on:returnPress={() => focusTextfield('password')}
-        on:textChange={(e) => ($store.username = e['value'])} />
+        on:textChange={(e) => ($store.username = e['value'])}
+    />
     <textfield
         autocapitalizationType="none"
         autocorrect={false}
@@ -139,7 +143,8 @@
         text={$store.password}
         {variant}
         on:returnPress={() => focusTextfield('remote_folder')}
-        on:textChange={(e) => ($store.password = e['value'])} />
+        on:textChange={(e) => ($store.password = e['value'])}
+    />
     <RemoteFolderTextField columns="*" row={3} text={$store.remoteFolder} on:returnPress={testConnection} on:textChange={(e) => ($store.remoteFolder = e['value'])} />
     <gridlayout columns="*,*" row={4} rows="auto">
         <!-- <mdbutton text={lc('save')} verticalAlignment="middle" on:tap={save} /> -->
@@ -150,7 +155,8 @@
                 text={testConnectionSuccess < 0 ? lc('failed') : testConnectionSuccess > 0 ? lc('successful') : lc('test')}
                 verticalAlignment="middle"
                 visibility={testing ? 'hidden' : 'visible'}
-                on:tap={testConnection} />
+                on:tap={testConnection}
+            />
             <activityindicator busy={testing} height={20} horizontalAlignment="center" verticalAlignment="middle" visibility={testing ? 'visible' : 'hidden'} />
         </gridlayout>
     </gridlayout>

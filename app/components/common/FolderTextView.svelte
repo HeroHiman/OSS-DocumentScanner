@@ -39,6 +39,7 @@
         placeholder={lc('folder')}
         returnKeyType="done"
         text={getDirectoryActualName(text)}
-        {variant} />
+        {variant}
+    />
     <mdbutton class="icon-btn" color={colorOnSurfaceVariant} horizontalAlignment="right" text="mdi-folder-open" variant="text" verticalAlignment="middle" />
 </gridlayout>

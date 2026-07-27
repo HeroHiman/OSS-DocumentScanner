@@ -124,7 +124,8 @@
         variant="outline"
         on:unloaded={blurTextField}
         on:textChange={onTextChange}
-        on:loaded={focus} />
+        on:loaded={focus}
+    />
     <collectionview {items} row={1} rowHeight={56}>
         <Template let:item>
             <gridlayout columns="auto,*,auto" padding={16} rippleColor={colorPrimary} on:tap={() => close(item)}>

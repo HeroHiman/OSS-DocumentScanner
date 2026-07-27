@@ -758,7 +758,8 @@
                 row={1}
                 verticalAlignment="top"
                 width={40}
-                on:tap={(event) => changeColor(currentItem, event)} />
+                on:tap={(event) => changeColor(currentItem, event)}
+            />
         {/if}
 
         <stacklayout backgroundColor="#00000055" borderRadius={10} horizontalAlignment="right" marginRight={5} row={1} verticalAlignment="center">

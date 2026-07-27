@@ -72,7 +72,8 @@
         text={defaultFolder}
         variant="outline"
         on:textChange={onTextChange}
-        on:returnPress={onKeyboardReturn} />
+        on:returnPress={onKeyboardReturn}
+    />
     {#if foundFolders.length > 0}
         <label marginTop={15} row={2} text={lc('existing_folders')} />
         <wraplayout margin={5} row={3}>

@@ -1371,7 +1371,8 @@
     {searchItemsProvider}
     title={title || $slc('settings.title')}
     bind:getStoreSetting
-    bind:refresh>
+    bind:refresh
+>
     <svelte:fragment slot="actionBarButtons">
         {#each actionBarButtons as button (button.id)}
             <mdbutton class="actionBarButton" text={button.icon} variant="text" on:tap={(event) => onTap({ id: button.id }, event)} />
@@ -1390,7 +1391,8 @@
                     padding={10}
                     rippleColor="white"
                     verticalAlignment="center"
-                    on:tap={(event) => onTap({ id: 'sponsor' }, event)}>
+                    on:tap={(event) => onTap({ id: 'sponsor' }, event)}
+                >
                     <label color="white" fontFamily={$fonts.mdi} fontSize={26} marginRight={10} text="mdi-heart" verticalAlignment="center" />
                     <label color="white" fontSize={12 * $fontScale} text={item.title} textWrap={true} verticalAlignment="center" />
                 </stacklayout>
@@ -1403,7 +1405,8 @@
                         rippleColor="white"
                         src="~/assets/images/librepay.png"
                         verticalAlignment="center"
-                        on:tap={(event) => onTap({ id: 'sponsor', type: 'librepay' }, event)} />
+                        on:tap={(event) => onTap({ id: 'sponsor', type: 'librepay' }, event)}
+                    />
                     <image
                         borderRadius={6}
                         col={2}
@@ -1411,7 +1414,8 @@
                         rippleColor="#f96754"
                         src="~/assets/images/patreon.png"
                         verticalAlignment="center"
-                        on:tap={(event) => onTap({ id: 'sponsor', type: 'patreon' }, event)} />
+                        on:tap={(event) => onTap({ id: 'sponsor', type: 'patreon' }, event)}
+                    />
                 {/if}
             </gridlayout>
 

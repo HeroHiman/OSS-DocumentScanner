@@ -25,7 +25,8 @@
             maxLines={subtitleMaxLines}
             text={subtitle}
             verticalTextAlignment="top"
-            visibility={subtitleColor?.length > 0 ? 'visible' : 'collapse'} />
+            visibility={subtitleColor?.length > 0 ? 'visible' : 'collapse'}
+        />
     </stacklayout>
 
     <label col={2} color={colorOnSurfaceVariant} marginLeft={16} marginRight={16} text={rightValue?.()} verticalAlignment="middle" visibility={!!rightValue ? 'visible' : 'collapse'} />
@@ -39,6 +40,7 @@
         marginRight={16}
         text={rightIcon}
         visibility={!!rightIcon ? 'visible' : 'hidden'}
-        width={25} />
+        width={25}
+    />
     <!-- <absolutelayout backgroundColor={colorOutlineVariant} col={1} colSpan={3} height={1} marginLeft={20} row={2} verticalAlignment="bottom" /> -->
 </gridlayout>

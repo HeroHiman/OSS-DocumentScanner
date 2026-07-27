@@ -140,7 +140,8 @@
         text={currentType === ExtraFieldType.Date ? formatDate(currentTime, 'LL') : currentValue}
         variant="outline"
         on:textChange={(e) => (currentValue = e.value)}
-        on:tap={(e) => selectDate(e)} />
+        on:tap={(e) => selectDate(e)}
+    />
 
     <mdbutton horizontalAlignment="right" row={4} text={editing ? lc('edit') : lc('add')} variant="text" on:tap={add} />
 </gesturerootview>

@@ -98,7 +98,8 @@
         text={lc('invalid')}
         textAlignment="center"
         verticalAlignment="center"
-        visibility={code?.length && !validCode ? 'visible' : 'collapse'} />
+        visibility={code?.length && !validCode ? 'visible' : 'collapse'}
+    />
 
     <mdbutton colSpan={2} horizontalAlignment="right" isEnabled={name?.length > 0} row={5} text={lc('add')} variant="text" on:tap={add} />
 </gesturerootview>

@@ -18,30 +18,29 @@
 appId: com.akylas.documentscanner
 
 ---
-
 # Wait for app to fully load
 - launchApp:
-    clearState: true
-    
+      clearState: true
+
 - waitForAnimationToEnd
 
 # Allow time for initial load and any permission dialogs
 - extendedWaitUntil:
-    visible: ".*"
-    timeout: 10000
+      visible: '.*'
+      timeout: 10000
 
 # Handle potential permission dialogs (Camera, Storage)
 - runFlow:
-    when:
-      visible: "Allow"
-    commands:
-      - tapOn: "Allow"
-      
+      when:
+          visible: 'Allow'
+      commands:
+          - tapOn: 'Allow'
+
 - runFlow:
-    when:
-      visible: "While using the app"
-    commands:
-      - tapOn: "While using the app"
+      when:
+          visible: 'While using the app'
+      commands:
+          - tapOn: 'While using the app'
 
 - waitForAnimationToEnd
 
@@ -50,27 +49,27 @@ appId: com.akylas.documentscanner
 
 # Navigate to camera/capture screen if not already there
 - runFlow:
-    when:
-      visible:
-        id: ".*fab.*"
-    commands:
-      - tapOn:
-          id: ".*fab.*"
-      - waitForAnimationToEnd
-      - takeScreenshot: ../../static/img/capture-1
+      when:
+          visible:
+              id: '.*fab.*'
+      commands:
+          - tapOn:
+                id: '.*fab.*'
+          - waitForAnimationToEnd
+          - takeScreenshot: ../../static/img/capture-1
 
 # Go back to document list
 - runFlow:
-    when:
-      visible: ".*back.*"
-    commands:
-      - tapOn: ".*back.*"
-      - waitForAnimationToEnd
+      when:
+          visible: '.*back.*'
+      commands:
+          - tapOn: '.*back.*'
+          - waitForAnimationToEnd
 
 # Screenshot 2: Settings screen
 - runFlow:
-    file: flows/navigate-to-settings.yaml
-    
+      file: flows/navigate-to-settings.yaml
+
 - waitForAnimationToEnd
 - takeScreenshot: ../../static/img/settings-1
 
@@ -80,8 +79,8 @@ appId: com.akylas.documentscanner
 
 # Screenshot 3: Sync settings (if accessible)
 - runFlow:
-    file: flows/navigate-to-sync.yaml
-    
+      file: flows/navigate-to-sync.yaml
+
 - waitForAnimationToEnd
 - takeScreenshot: ../../static/img/sync-1
 
@@ -91,8 +90,8 @@ appId: com.akylas.documentscanner
 
 # Screenshot 4: Export options (open a document first if available)
 - runFlow:
-    file: flows/show-export.yaml
-    
+      file: flows/show-export.yaml
+
 - waitForAnimationToEnd
 - takeScreenshot: ../../static/img/export-1
 
@@ -102,8 +101,8 @@ appId: com.akylas.documentscanner
 
 # Screenshot 5: Edit screen (need a document to edit)
 - runFlow:
-    file: flows/show-edit.yaml
-    
+      file: flows/show-edit.yaml
+
 - waitForAnimationToEnd
 - takeScreenshot: ../../static/img/edit-1
 

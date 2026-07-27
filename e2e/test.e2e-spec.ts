@@ -5,7 +5,7 @@ const addContext = require('mochawesome/addContext');
 describe('main test scenario', () => {
     let driver: AppiumDriver;
 
-    before(async function() {
+    before(async function () {
         try {
             nsCapabilities.testReporter.context = this;
             driver = await createDriver();
@@ -14,12 +14,12 @@ describe('main test scenario', () => {
             console.log('before error', e);
         }
     });
-    after(async function() {
+    after(async function () {
         await driver.quit();
         console.log('Quit driver!');
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
         if (this.currentTest.state === 'failed') {
             await driver.logTestArtifacts(this.currentTest.title);
         }

@@ -277,7 +277,8 @@
                 padding={16}
                 text={item.doc.name}
                 visibility={showCardName(item) ? 'visible' : 'hidden'}
-                {...getLabelParams(layout, item, height, itemHeight)} />
+                {...getLabelParams(layout, item, height, itemHeight)}
+            />
         {/if}
         <!-- <gridlayout borderRadius={12}> -->
         <SelectedIndicator selected={item.selected} />

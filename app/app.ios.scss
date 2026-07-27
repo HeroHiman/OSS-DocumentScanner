@@ -4,7 +4,7 @@ mdbutton {
     // material3 basic design
     shape: round;
 }
-mdbutton[variant=outline] {
+mdbutton[variant='outline'] {
     ripple-color: var(--colorPrimary);
     color: var(--colorPrimary);
 }
@@ -34,7 +34,7 @@ checkbox {
 }
 
 mdswitch {
-    on-background-color: var(--colorPrimary)
+    on-background-color: var(--colorPrimary);
 }
 
 // mdbutton[variant=flat],mdbutton[variant=contained] {
@@ -58,6 +58,6 @@ mdcardview {
     // height: calc(40 * var(--fontScale));
 }
 
-mdtextfield[variant=none] {
-    padding:0;
+mdtextfield[variant='none'] {
+    padding: 0;
 }

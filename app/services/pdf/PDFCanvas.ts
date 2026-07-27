@@ -125,7 +125,7 @@ export default class PDFCanvas {
     //     });
     // }
     updateBitmapPaint(page: OCRPage, options: PDFExportBaseOptions) {
-            const black_white = this.options.color === 'black_white';
+        const black_white = this.options.color === 'black_white';
 
         if (black_white || page.colorType || page.colorMatrix) {
             const matrix = getPageColorMatrix(page, black_white ? 'grayscale' : undefined);

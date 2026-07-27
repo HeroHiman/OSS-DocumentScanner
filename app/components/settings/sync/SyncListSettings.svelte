@@ -461,7 +461,8 @@
                     rightSwipeDistance={0}
                     rows="*"
                     startingSide={item.startingSide}
-                    translationFunction={drawerTranslationFunction}>
+                    translationFunction={drawerTranslationFunction}
+                >
                     <ListItemAutoSize
                         borderLeftColor={getSyncColor(item)}
                         borderLeftWidth={5}
@@ -470,7 +471,8 @@
                         mainCol={1}
                         prop:mainContent
                         showBottomLine={false}
-                        on:tap={(event) => onItemTap(item, event)}>
+                        on:tap={(event) => onItemTap(item, event)}
+                    >
                         <label
                             col={0}
                             color={item.iconColor || colorOnSurface}
@@ -479,7 +481,8 @@
                             paddingLeft="8"
                             text={item.icon}
                             verticalAlignment="center"
-                            width={(item.iconFontSize || 24) * 2} />
+                            width={(item.iconFontSize || 24) * 2}
+                        />
                     </ListItemAutoSize>
                     <label
                         class="mdi"
@@ -492,7 +495,8 @@
                         textAlignment="center"
                         verticalTextAlignment="middle"
                         width={80}
-                        on:tap={(e) => deleteService(item)} />
+                        on:tap={(e) => deleteService(item)}
+                    />
                 </swipemenu>
             </Template>
         </collectionview>
