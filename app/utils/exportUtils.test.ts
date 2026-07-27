@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { deduplicateFilenames } from './exportUtils';
+import { buildExportImageNames, deduplicateFilenames } from './exportUtils';
+import { cleanFilename, getFileNameForDocument, getFormatedDateForFilename } from './utils.common';
 
 describe('deduplicateFilenames', () => {
     it('returns the list unchanged when all names are unique', () => {
@@ -44,50 +45,84 @@ describe('deduplicateFilenames', () => {
     });
 });
 
-// ─── cleanFilename regex (document export rename) ────────────────────────────
+// ─── buildExportImageNames ────────────────────────────────────────────────────
 //
-// This suite pins the exact behaviour of the regex used to sanitise export
-// filenames so that any future change to the pattern is caught immediately.
+// End-to-end regression coverage for the "rename documents on export" feature:
+// creation dates -> user filename format -> forbidden-character sanitising ->
+// collision suffixes. A change to any link in that chain must break a test here.
 
-describe('cleanFilename regex for export', () => {
-    // Re-declare the regex inline so the test is self-contained and serves as
-    // a specification for the exact pattern that must remain stable.
-    const FORBIDDEN_RE = /[\x00-\x1F\x7F"*/<>?\\:|]+/g;
-    const WHITESPACE_RE = /\s/g;
+describe('buildExportImageNames', () => {
+    // Two pages captured within the same second: with a second-resolution
+    // format they collide, which is exactly what the suffixing exists to solve.
+    const FIRST = new Date(2024, 2, 15, 10, 30, 0).getTime();
+    const SECOND = FIRST + 400;
 
-    function sanitize(str: string) {
-        return str.replace(FORBIDDEN_RE, '_').replace(WHITESPACE_RE, '_');
-    }
-
-    it('strips ASCII control characters (0x00–0x1F)', () => {
-        for (let c = 0; c <= 0x1f; c++) {
-            expect(sanitize(String.fromCharCode(c))).toBe('_');
-        }
+    it('formats each creation date with the given format', () => {
+        expect(buildExportImageNames([FIRST], 'YYYY-MM-DD')).toEqual(['2024-03-15']);
     });
 
-    it('strips DEL (0x7F)', () => {
-        expect(sanitize('\x7F')).toBe('_');
+    it('suffixes pages that collide after formatting', () => {
+        expect(buildExportImageNames([FIRST, SECOND], 'YYYY-MM-DD')).toEqual(['2024-03-15', '2024-03-15_001']);
     });
 
-    it('strips every forbidden filename character', () => {
-        const forbidden = ['"', '*', '/', '<', '>', '?', '\\', ':', '|'];
-        forbidden.forEach((ch) => {
-            expect(sanitize(ch), `character: ${JSON.stringify(ch)}`).toBe('_');
-        });
+    it('keeps distinct dates untouched', () => {
+        const nextDay = FIRST + 24 * 3600 * 1000;
+        expect(buildExportImageNames([FIRST, nextDay], 'YYYY-MM-DD')).toEqual(['2024-03-15', '2024-03-16']);
     });
 
-    it('collapses adjacent forbidden characters into one underscore', () => {
-        expect(sanitize('a::b')).toBe('a_b');
-        expect(sanitize('a<>b')).toBe('a_b');
+    it('sanitises characters the format would otherwise put in a filename', () => {
+        // A format containing ':' and ' ' must never reach the filesystem raw.
+        const [name] = buildExportImageNames([FIRST], 'YYYY-MM-DD HH:mm');
+        expect(name).not.toMatch(/[:\s]/);
+        expect(name).toBe('2024-03-15_10_30');
     });
 
-    it('replaces spaces and tabs with underscores', () => {
-        expect(sanitize('a b')).toBe('a_b');
-        expect(sanitize('a\tb')).toBe('a_b');
+    it('never produces two identical names for a batch of same-second pages', () => {
+        const dates = [FIRST, FIRST + 1, FIRST + 2, FIRST + 3];
+        const names = buildExportImageNames(dates, 'YYYY-MM-DD_HH-mm-ss');
+        expect(new Set(names).size).toBe(dates.length);
     });
 
-    it('leaves safe characters (letters, digits, dots, dashes) unchanged', () => {
-        expect(sanitize('invoice-2024.01.pdf')).toBe('invoice-2024.01.pdf');
-        expect(sanitize('SCAN_001')).toBe('SCAN_001');
+    it('falls back to the stored "timestamp" format when none is given', () => {
+        // ApplicationSettings is mocked to return defaults, so the configured
+        // format resolves to FILENAME_DATE_FORMAT ('timestamp').
+        expect(buildExportImageNames([FIRST])).toEqual([String(FIRST)]);
+    });
+
+    it('returns an empty list for an empty export', () => {
+        expect(buildExportImageNames([])).toEqual([]);
+    });
+});
+
+// ─── export filename pipeline ─────────────────────────────────────────────────
+//
+// Guards the naming rules the export screen relies on, using the real
+// production helpers rather than a copy of their logic.
+
+describe('export filename pipeline', () => {
+    it('uses the document name (sanitised) for a single named export', () => {
+        const document: any = { name: 'Invoice: Q1/2024' };
+        expect(getFileNameForDocument(document, true)).toBe('Invoice__Q1_2024');
+    });
+
+    it('falls back to a date-based name when the document has no name', () => {
+        const timestamp = new Date(2024, 2, 15).getTime();
+        expect(getFileNameForDocument({ name: '' } as any, true, timestamp, 'YYYY-MM-DD')).toBe('2024-03-15');
+    });
+
+    it('produces names that survive a round-trip through cleanFilename', () => {
+        // Sanitising an already-sanitised name must be a no-op, otherwise
+        // filenames would drift each time they pass through the export path.
+        const once = getFileNameForDocument({ name: 'a b:c/d' } as any, true);
+        expect(cleanFilename(once)).toBe(once);
+    });
+
+    it('keeps the date format setting authoritative over the document name when disabled', () => {
+        const document: any = { name: 'Should Be Ignored' };
+        expect(getFileNameForDocument(document, false, new Date(2024, 0, 2).getTime(), 'YYYY-MM-DD')).toBe('2024-01-02');
+    });
+
+    it('leaves an already-safe name completely unchanged', () => {
+        expect(getFormatedDateForFilename(new Date(2024, 0, 2).getTime(), 'YYYY-MM-DD')).toBe('2024-01-02');
     });
 });

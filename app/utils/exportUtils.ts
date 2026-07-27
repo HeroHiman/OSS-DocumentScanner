@@ -1,7 +1,8 @@
 /**
- * Pure export-related utilities, free of NativeScript dependencies so they
+ * Pure export-related utilities, kept free of UI/device dependencies so they
  * can be covered by unit tests.
  */
+import { getFormatedDateForFilename } from './utils.common';
 
 /**
  * Given an ordered list of filenames that may contain runs of identical
@@ -35,4 +36,20 @@ export function deduplicateFilenames(names: string[]): string[] {
     }
 
     return result;
+}
+
+/**
+ * Builds the final, collision-free list of image filenames used when exporting
+ * several pages at once.
+ *
+ * Each page's creation date is turned into a filename through the user's
+ * configured filename format (`getFormatedDateForFilename`, which also strips
+ * characters forbidden in filenames), then consecutive duplicates get a
+ * numeric suffix so no export overwrites another.
+ *
+ * `createdDates` must already be in export order (pages are sorted by creation
+ * date before naming) because deduplication only looks at adjacent entries.
+ */
+export function buildExportImageNames(createdDates: number[], dateFormat?: string): string[] {
+    return deduplicateFilenames(createdDates.map((createdDate) => getFormatedDateForFilename(createdDate, dateFormat)));
 }

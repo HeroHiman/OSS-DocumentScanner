@@ -37,4 +37,3 @@ test('ignores entries with missing or empty ids', () => {
     const [result] = mergeDeletedDocumentTombstones([], [null as any, '', 'doc-c'], 100);
     expect(result).toEqual([{ id: 'doc-c', deletedDate: 100 }]);
 });
-

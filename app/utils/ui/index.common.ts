@@ -105,7 +105,7 @@ import { showToast } from '~/utils/ui';
 import { colors, fontScale, screenWidthDips } from '~/variables';
 import { MatricesTypes, Matrix } from '../color_matrix';
 import { cleanFilename, saveImage } from '../utils';
-import { deduplicateFilenames } from '../exportUtils';
+import { buildExportImageNames } from '../exportUtils';
 
 export { ColorMatricesType, ColorMatricesTypes, getColorMatrix } from '~/utils/matrix';
 
@@ -908,8 +908,7 @@ async function exportImages(pages: { page: OCRPage; document: OCRDocument }[], e
         }
         outputImageNames.push(result.text);
     } else {
-        outputImageNames = sortedPages.map((page) => getFormatedDateForFilename(page.page.createdDate));
-        outputImageNames = deduplicateFilenames(outputImageNames);
+        outputImageNames = buildExportImageNames(sortedPages.map((page) => page.page.createdDate));
     }
     DEV_LOG && console.log('exporting images', imageExportSettings.imageFormat, imageExportSettings.imageQuality, exportDirectory, sortedPages.length, outputImageNames);
     showLoading(lc('exporting'));
