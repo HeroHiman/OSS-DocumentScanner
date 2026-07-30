@@ -36,7 +36,7 @@
     import RotableImageView from '~/components/common/RotableImageView.svelte';
     import SelectedIndicator from '~/components/common/SelectedIndicator.svelte';
     import PdfEdit from '~/components/edit/DocumentEdit.svelte';
-    import { lc } from '~/helpers/locale';
+    import { lc, lcp } from '~/helpers/locale';
     import { colorTheme, isDarkTheme, isEInk, onThemeChanged } from '~/helpers/theme';
     import { Document, ExtraFieldType, OCRDocument, OCRPage } from '~/models/OCRDocument';
     import {
@@ -559,7 +559,7 @@
             try {
                 const result = await confirm({
                     title: lc('delete'),
-                    message: lc('confirm_delete_pages', nbSelected),
+                    message: lcp('confirm_delete_pages', nbSelected),
                     okButtonText: lc('delete'),
                     cancelButtonText: lc('cancel')
                 });
@@ -1598,7 +1598,7 @@
             labelsDefaultVisualState={statusBarStyle}
             onGoBack={nbSelected ? unselectAll : inEditMode ? switchEditMode : null}
             onTitleTap={() => (editingTitle = true)}
-            title={inEditMode ? lc('reorder_pages') : nbSelected ? lc('selected', nbSelected) : document.name}
+            title={inEditMode ? lc('reorder_pages') : nbSelected ? lcp('selected', nbSelected) : document.name}
             titleProps={{ padding: 0, color: statusBarStyle === 'dark' ? 'white' : 'black' }}
         >
             <!-- {#if editing}

@@ -53,7 +53,7 @@ import type ExportPDFAlertOptions__SvelteComponent_ from '~/components/common/Ex
 import type OptionSelect__SvelteComponent_ from '@shared/components/OptionSelect.svelte';
 import type BottomSnack__SvelteComponent_ from '~/components/widgets/BottomSnack.svelte';
 import BottomSnack from '~/components/widgets/BottomSnack.svelte';
-import { getFileNameForDocument, getFormatedDateForFilename, getLocaleDisplayName, l, lang, lc } from '~/helpers/locale';
+import { getFileNameForDocument, getFormatedDateForFilename, getLocaleDisplayName, l, lang, lc, lcp, pluralKey } from '~/helpers/locale';
 import { DocFolder, ImportImageData, OCRDocument, OCRPage, PageData } from '~/models/OCRDocument';
 import { PKPassType } from '~/models/PKPass';
 import { OCRLanguages, ocrService } from '~/services/ocr';
@@ -390,7 +390,7 @@ export async function importAndScanImageOrPdfFromUris({ canGoToView = true, docu
                     if (document) {
                         await document.addPages(pagesToAdd);
                         await document.save({}, true);
-                        showSnack({ message: lc('imported_nb_pages', pagesToAdd.length) });
+                        showSnack({ message: lcp('imported_nb_pages', pagesToAdd.length) });
                     } else {
                         document = await OCRDocument.createDocument(pagesToAdd, folder);
                     }
@@ -1473,8 +1473,10 @@ export async function detectOCR({ documents, pages }: { documents?: OCRDocument[
             }
             const totalPages = pages.length;
             let pagesDone = 0;
+            // the count only selects the plural form here, the printed argument is the progress
+            const ocrComputingKey = pluralKey('ocr_computing_document', documents?.length ?? 1);
             showSnackMessage({
-                text: lc('ocr_computing_document', progress),
+                text: lc(ocrComputingKey, progress),
                 progress: 0
             });
             const runnningOcr: { [k: string]: number } = {};
@@ -1489,7 +1491,7 @@ export async function detectOCR({ documents, pages }: { documents?: OCRDocument[
                             runnningOcr[pageId] = progress;
                             const totalProgress = Math.round((100 / totalPages) * pagesDone + Object.values(runnningOcr).reduce((a, b) => a + b) / totalPages);
                             updateSnackMessage({
-                                text: lc('ocr_computing_document', totalProgress),
+                                text: lc(ocrComputingKey, totalProgress),
                                 progress: totalProgress
                             });
                         }
