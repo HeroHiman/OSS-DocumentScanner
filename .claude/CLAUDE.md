@@ -39,7 +39,7 @@ Applies to EVERY task, including ad-hoc debugging.
 
 The repo config files are the source of truth — follow them, don't restate them:
 
-- [`.prettierrc.js`](../.prettierrc.js) — Prettier is enforced: `tabWidth: 4` (4 spaces), `printWidth: 200`, `singleQuote: true`, `semi: true`, `trailingComma: 'none'`, `prettier-plugin-svelte` (`svelteSortOrder: 'options-styles-scripts-markup'`). Run `npx prettier --write` on changed files.
+- [`.prettierrc.js`](../.prettierrc.js) — Prettier is enforced
 - [`eslint.config.mjs`](../eslint.config.mjs) — ESLint flat config (typescript-eslint recommendedTypeChecked + prettier + svelte). Run `npx eslint <files>`.
 
 Beyond those:
