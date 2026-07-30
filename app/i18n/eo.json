@@ -470,6 +470,15 @@
     "start_app_on_cam": "Ŝalti fotilo-reĝimon kiam la apo ruliĝas",
     "start_app_on_cam_desc": "Fotilo-reĝimo ĉiam ŝaltiĝas kiam la apo lanĉiĝas. La apo devas relanĉiĝi por apliki tiun ĉi agordon",
     "start_on_cam": "Ŝalti fotilo-reĝimon kiam la apo ruliĝas",
+    "startup_error": "Malsukcesis lanĉi la apon. Bonvolu relanĉi por reklopodi. Se daŭras malsukceso, bonvolu raporti ĝin",
+    "storage_location": "Konservejo",
+    "storage_permission_needed": "Permeso por konservi necesas",
+    "successful": "Sukcesa",
+    "sure_cancel_import": "Ĉu vi vere volas nuligi?",
+    "sure_go_back": "Ĉu vi vere volas reveni?",
+    "sync": "Sinkronigi",
+    "thank_you": "Dankon!",
+    "thank_you_subtitle": "Via donaco helpas kreski la projekton kaj donas tempon al la programistoj por krei novajn funkciojn",
     "toggle_favorite": "Baskuli ĉu favorata",
     "view_style": "Vidostilo"
 }
