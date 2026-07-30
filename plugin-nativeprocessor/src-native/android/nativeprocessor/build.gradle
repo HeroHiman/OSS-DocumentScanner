@@ -103,7 +103,7 @@ artifacts {
 
 dependencies {
     implementation "androidx.annotation:annotation:1.1.0"
-	implementation project(':ui-camera')
+	api project(':ui-camera')
 
 	def cameraxVersion =  project.hasProperty("cameraxVersion") ? project.cameraxVersion : "1.4.0-beta01"
 	implementation "androidx.camera:camera-core:${cameraxVersion}"
