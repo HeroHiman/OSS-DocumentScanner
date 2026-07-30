@@ -24,7 +24,7 @@
     import EditNameActionBar from '~/components/common/EditNameActionBar.svelte';
     import SelectedIndicator from '~/components/common/SelectedIndicator.svelte';
     import SelectionToolbar from '~/components/common/SelectionToolbar.svelte';
-    import { l, lc } from '~/helpers/locale';
+    import { l, lc, lcp, lp } from '~/helpers/locale';
     import { getRealTheme, isEInk, onThemeChanged } from '~/helpers/theme';
     import { DocFolder, OCRDocument, OCRPage } from '~/models/OCRDocument';
     import {
@@ -938,7 +938,7 @@
                         view.addChild(label);
                         result = await confirm({
                             neutralButtonText: lc('cancel'),
-                            message: lc('confirm_move_to_trash', nbSelected),
+                            message: lcp('confirm_move_to_trash', nbSelected),
                             cancelButtonText: lc('delete_permanently'),
                             okButtonText: lc('move_to_trash'),
                             title: lc('delete'),
@@ -966,7 +966,7 @@
                         // neutral button tapped: delete permanently
                         const confirmed = await confirm({
                             cancelButtonText: lc('cancel'),
-                            message: lc('confirm_delete_permanently', nbSelected),
+                            message: lcp('confirm_delete_permanently', nbSelected),
                             okButtonText: lc('delete_permanently'),
                             title: lc('delete_permanently')
                         });
@@ -980,7 +980,7 @@
                 } else {
                     const result = await confirm({
                         cancelButtonText: lc('cancel'),
-                        message: lc('confirm_delete_documents', nbSelected),
+                        message: lcp('confirm_delete_documents', nbSelected),
                         okButtonText: lc('delete'),
                         title: lc('delete')
                     });
@@ -1001,7 +1001,7 @@
             try {
                 const result = await confirm({
                     cancelButtonText: lc('cancel'),
-                    message: lc('confirm_delete_permanently', nbSelected),
+                    message: lcp('confirm_delete_permanently', nbSelected),
                     okButtonText: lc('delete_permanently'),
                     title: lc('delete_permanently')
                 });
@@ -1189,7 +1189,7 @@
                     fontSize: 14 * $fontScale,
                     color: colorOutline,
                     lineHeight: 20 * $fontScale,
-                    text: '\n' + lc('documents_count', itemFolder.count)
+                    text: '\n' + lcp('documents_count', itemFolder.count)
                 }
             ]
         });
@@ -1434,7 +1434,7 @@
                     columns="auto,*"
                     fontSize={17}
                     fontWeight="600"
-                    item={{ ...item, title: folder ? item.folder.name.replace(folder.name + '/', '') : item.folder.name, subtitle: lc('documents_count', item.folder.count) }}
+                    item={{ ...item, title: folder ? item.folder.name.replace(folder.name + '/', '') : item.folder.name, subtitle: lcp('documents_count', item.folder.count) }}
                     mainCol={1}
                     margin="4 8 4 8"
                     padding="0 10 0 10"
@@ -1557,7 +1557,7 @@
             <ActionBarSearch bind:this={search} slot="center" {refresh} bind:visible={showSearch} />
         </CActionBar>
         {#if nbSelected > 0}
-            <CActionBar forceCanGoBack={true} onGoBack={unselectAll} title={l('selected', nbSelected)} titleProps={{ autoFontSize: true, maxLines: 1 }} />
+            <CActionBar forceCanGoBack={true} onGoBack={unselectAll} title={lp('selected', nbSelected)} titleProps={{ autoFontSize: true, maxLines: 1 }} />
         {/if}
         {#if !onlyForImport && nbSelected > 0}
             <SelectionToolbar onAction={handleSelectionAction} options={getSelectionToolbarOptions()} row={2} />

@@ -1,5 +1,5 @@
 import { getISO3Language } from '@akylas/nativescript-app-utils';
-import { capitalize, l, lc, loadLocaleJSON, lt, lu, overrideNativeLocale } from '@nativescript-community/l';
+import { capitalize, l, lc, lcp, loadLocaleJSON, lp, lt, lu, overrideNativeLocale, pluralKey } from '@nativescript-community/l';
 import { Application, ApplicationSettings, Device, File, Utils } from '@nativescript/core';
 import dayjs from 'dayjs';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
@@ -53,7 +53,7 @@ $lang.subscribe((newLang: string) => {
     loadDayjsLang(lang);
     try {
         // const localeData = require(`~/i18n/${lang}.json`);
-        loadLocaleJSON(`~/i18n/${lang}.json`, `~/i18n/${FALLBACK_LOCALE}.json`);
+        loadLocaleJSON(lang, `~/i18n/${lang}.json`, `~/i18n/${FALLBACK_LOCALE}.json`);
     } catch (err) {
         console.error(lang, `~/i18n/${lang}.json`, File.exists(`~/i18n/${lang}.json`), err, err.stack);
     }
@@ -218,11 +218,13 @@ if (__ANDROID__) {
     });
 }
 
-export { l, lc, lt, lu };
+export { l, lc, lcp, lp, lt, lu, pluralKey };
 export const sl = derived([$lang], () => l);
 export const slc = derived([$lang], () => lc);
 export const slt = derived([$lang], () => lt);
 export const slu = derived([$lang], () => lu);
+export const slp = derived([$lang], () => lp);
+export const slcp = derived([$lang], () => lcp);
 // export const sconvertDuration = derived([$lang], () => convertDuration);
 export const scformatDate = derived($lang, () => formatDate);
 export const scformatTime = derived([$lang, clock_24Store], () => formatTime);

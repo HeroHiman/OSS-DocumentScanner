@@ -48,7 +48,8 @@
     "capturing": "captura",
     "cardholder": "portaire",
     "cards": "cartas",
-    "cards_count": "%1$s cartas",
+    "cards_count_one": "%1$s cartas",
+    "cards_count_other": "%1$s cartas",
     "choose": "causir",
     "color": "color",
     "color_theme": {
@@ -71,7 +72,8 @@
     "delete": "suprimir",
     "delete_page": "suprimir",
     "documents": "documents",
-    "documents_count": "%1$s documents",
+    "documents_count_one": "%1$s documents",
+    "documents_count_other": "%1$s documents",
     "download": "telecargar",
     "downloading": "telecargament (%1$s%%)…",
     "edit": "editar",
@@ -125,7 +127,8 @@
     "select_language": "seleccionar la lenga",
     "select_sync_service": "seleccionar lo servici de sincronizacion",
     "select_theme": "seleccionar un tèma",
-    "selected": "%1$s seleccionats",
+    "selected_one": "%1$s seleccionats",
+    "selected_other": "%1$s seleccionats",
     "send": "enviar",
     "settings": {
         "title": "paramètres"
