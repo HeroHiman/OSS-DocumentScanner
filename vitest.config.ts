@@ -40,7 +40,14 @@ export default defineConfig({
         alias: [
             // Mirror the tsconfig path aliases so test imports resolve correctly
             { find: /^~\/(.*)$/, replacement: path.resolve(__dirname, 'app/$1') },
-            { find: /^@shared\/(.*)$/, replacement: path.resolve(__dirname, 'tools/app/$1') }
+            { find: /^@shared\/(.*)$/, replacement: path.resolve(__dirname, 'tools/app/$1') },
+            // `@nativescript-community/l` relies on webpack to resolve its platform suffixed
+            // entries (`localize.android.js` / `localize.ios.js`, `localizenative.*.js`): there is
+            // no plain `localize.js` on disk. Map both to a concrete file so a test that unmocks
+            // the plugin exercises the real localization code. The iOS native variant is picked
+            // because it needs no `@nativescript/core` import.
+            { find: /^@nativescript-community\/l$/, replacement: path.resolve(__dirname, 'node_modules/@nativescript-community/l/localize.common.js') },
+            { find: /^\.\/localizenative$/, replacement: path.resolve(__dirname, 'node_modules/@nativescript-community/l/localizenative.ios.js') }
         ],
         // NativeScript resolves `foo` to `foo.common.ts` / `foo.android.ts` /
         // `foo.ios.ts`. Reproduce that here, preferring the shared `.common`
