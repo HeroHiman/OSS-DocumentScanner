@@ -16,7 +16,7 @@
     import SelectedIndicator from '~/components/common/SelectedIndicator.svelte';
     import SelectionToolbar from '~/components/common/SelectionToolbar.svelte';
     import PdfEdit from '~/components/edit/DocumentEdit.svelte';
-    import { l, lc } from '~/helpers/locale';
+    import { l, lc, lcp } from '~/helpers/locale';
     import { onThemeChanged } from '~/helpers/theme';
     import { OCRDocument, OCRPage } from '~/models/OCRDocument';
     import {
@@ -388,7 +388,7 @@
             try {
                 const result = await confirm({
                     title: lc('delete'),
-                    message: lc('confirm_delete_pages', nbSelected),
+                    message: lcp('confirm_delete_pages', nbSelected),
                     okButtonText: lc('delete'),
                     cancelButtonText: lc('cancel')
                 });
@@ -791,7 +791,7 @@
                             verticalAlignment="bottom"
                         />
                         <!-- <cspan color={colorOnSurfaceVariant} fontSize={12} paddingTop={36} text={dayjs(item.doc.createdDate).format('L LT')} /> -->
-                        <!-- <cspan color={colorOnSurfaceVariant} fontSize={12} paddingTop={50} text={lc('nb_pages', item.doc.pages.length)} /> -->
+                        <!-- <cspan color={colorOnSurfaceVariant} fontSize={12} paddingTop={50} text={lcp('nb_pages', item.doc.pages.length)} /> -->
                     </canvaslabel>
                     <SelectedIndicator rowSpan={2} selected={item.selected} />
                     <PageIndicator rowSpan={2} scale={$fontScale} text={index + 1} on:longPress={(event) => startDragging(item, event)} />
@@ -817,7 +817,7 @@
             forceCanGoBack={inEditMode || nbSelected > 0}
             onGoBack={nbSelected ? unselectAll : inEditMode ? switchEditMode : null}
             onTitleTap={() => (editingTitle = true)}
-            title={inEditMode ? lc('reorder_pages') : nbSelected ? lc('selected', nbSelected) : document.name}
+            title={inEditMode ? lc('reorder_pages') : nbSelected ? lcp('selected', nbSelected) : document.name}
             titleProps={{ padding: 0 }}
         >
             {#if !nbSelected}
