@@ -309,6 +309,7 @@
     "ok": "تأیید",
     "on": "روشن",
     "open": "باز کردن",
+    "open_trash": "باز کردن سطل زباله",
     "operations": "عملیات",
     "operations_settings_desc": "تنظیمات مربوط به عملیات اعمال‌شده روی تصاویر",
     "optional_pdf_password": "گذرواژه PDF (اختیاری)",
@@ -448,6 +449,5 @@
     "webdav_sync_desc": "WebDAV را برای همگام‌سازی اسناد (پشتیبان‌گیری) فعال کنید",
     "whitepaper": "کاغذ سفید",
     "whitepaper_desc": "بهبود برای اسناد نوع کاغذ سفید",
-    "wrong_passcode": "رمز کوتاه اشتباه",
-    "open_trash": "باز کردن سطل زباله"
+    "wrong_passcode": "رمز کوتاه اشتباه"
 }

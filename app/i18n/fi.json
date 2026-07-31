@@ -284,6 +284,7 @@
     "ok": "OK",
     "on": "päällä",
     "open": "avaa",
+    "open_trash": "avaa roskakori",
     "operations": "toiminnot",
     "operations_settings_desc": "kuviin sovellettaviin toimintoihin liittyvät asetukset",
     "orientation": "suunta",
@@ -408,6 +409,5 @@
     "webdav_sync_desc": "ota webdav käyttöön synkronoidaksesi dokumentit (varmuuskopio)",
     "whitepaper": "valkopaperi",
     "whitepaper_desc": "ehostaa valkopaperityyppisiä dokumentteja",
-    "wrong_passcode": "virheellinen salasana",
-    "open_trash": "avaa roskakori"
+    "wrong_passcode": "virheellinen salasana"
 }

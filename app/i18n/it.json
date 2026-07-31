@@ -310,6 +310,7 @@
     "ok": "OK",
     "on": "attiva",
     "open": "apri",
+    "open_trash": "aprire il cestino",
     "operations": "operazioni",
     "operations_settings_desc": "impostazioni relative alle operazioni applicate alle immagini",
     "optional_pdf_password": "password PDF (opzionale)",
@@ -450,6 +451,5 @@
     "webdav_sync_desc": "abilita webdav per sincronizzare i documenti (backup)",
     "whitepaper": "white paper",
     "whitepaper_desc": "migliora i documenti di tipo whitepaper",
-    "wrong_passcode": "password errata",
-    "open_trash": "aprire il cestino"
+    "wrong_passcode": "password errata"
 }

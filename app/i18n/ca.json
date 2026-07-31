@@ -294,6 +294,7 @@
     "ok": "OK",
     "on": "activa",
     "open": "obre",
+    "open_trash": "obrir les escombraries",
     "operations": "operacions",
     "operations_settings_desc": "paràmetres referits a les operacions aplicades a les imatges",
     "optional_pdf_password": "contrasenya del PDF (opcional)",
@@ -428,6 +429,5 @@
     "webdav_sync_desc": "habilita WebDAV per sincronitzar els documents (còpia de seguretat)",
     "whitepaper": "paper blanc",
     "whitepaper_desc": "millora per als documents del tipus paper blanc",
-    "wrong_passcode": "contrasenya incorrecta",
-    "open_trash": "obrir les escombraries"
+    "wrong_passcode": "contrasenya incorrecta"
 }

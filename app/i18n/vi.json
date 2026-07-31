@@ -321,6 +321,7 @@
     "ok": "OK",
     "on": "bật",
     "open": "mở",
+    "open_trash": "mở thùng rác",
     "operations": "thao tác",
     "operations_settings_desc": "thiết đặt liên quan đến các thao tác được áp dụng trên hình ảnh",
     "optional_pdf_password": "mật khẩu PDF (tuỳ chọn)",
@@ -466,6 +467,5 @@
     "webdav_sync_desc": "bật webdav để đồng bộ hoá tài liệu (sao lưu) của bạn",
     "whitepaper": "giấy trắng",
     "whitepaper_desc": "cải thiện các loại tài liệu giấy trắng",
-    "wrong_passcode": "sai mật khẩu",
-    "open_trash": "mở thùng rác"
+    "wrong_passcode": "sai mật khẩu"
 }

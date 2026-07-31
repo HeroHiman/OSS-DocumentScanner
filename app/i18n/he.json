@@ -299,6 +299,7 @@
     "ok": "אוקיי",
     "on": "דלוק",
     "open": "פתח",
+    "open_trash": "לפתוח אשפה",
     "operations": "פעולות",
     "operations_settings_desc": "הגדרות הקשורות לפעולות המיושמות על תמונות",
     "optional_pdf_password": "סיסמת PDF (אפשרי)",
@@ -433,6 +434,5 @@
     "webdav_sync_desc": "אפשר ל-webdav לסנכרן את המסמכים שלך (גיבוי)",
     "whitepaper": "נייר לבן",
     "whitepaper_desc": "שיפור עבור מסמכים מסוג נייר לבן",
-    "wrong_passcode": "סיסמא שגויה",
-    "open_trash": "לפתוח אשפה"
+    "wrong_passcode": "סיסמא שגויה"
 }
