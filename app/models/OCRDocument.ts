@@ -27,6 +27,7 @@ import {
     EVENT_FOLDER_ADDED,
     EVENT_FOLDER_UPDATED,
     IMG_FORMAT,
+    OCR_ITERATOR_LEVEL,
     SEPARATOR,
     SETTINGS_DOCUMENT_NAME_FORMAT,
     getImageExportSettings
@@ -416,6 +417,7 @@ export class OCRDocument extends Observable implements Document {
                 rotation: page.rotation,
                 // oem: 0,
                 detectContours: 0,
+                iteratorLevel: OCR_ITERATOR_LEVEL,
                 trim: false
             },
             onProgress

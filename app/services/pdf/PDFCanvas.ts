@@ -1,5 +1,5 @@
 import { DeviceContext } from '@nativescript-community/sentry/integrations';
-import { Canvas, ColorMatrixColorFilter, LayoutAlignment, Paint, StaticLayout } from '@nativescript-community/ui-canvas';
+import { Canvas, ColorMatrixColorFilter, Paint } from '@nativescript-community/ui-canvas';
 import { ApplicationSettings, Screen, Utils } from '@nativescript/core';
 import { getActualLanguage } from '@shared/helpers/lang';
 import type { OCRDocument, OCRPage } from '~/models/OCRDocument';
@@ -52,6 +52,14 @@ textOverlayPaint.color = '#00000077';
 const bgPaint = new Paint();
 bgPaint.color = 'white';
 bgPaint.setShadowLayer(6, 0, 2, '#00000088');
+
+// OCR text layer geometry. A tesseract line box spans ascenders to descenders:
+// the font size is the box height and the baseline sits just above the box bottom.
+// Keep in sync with PDFUtils.kt (android).
+const OCR_FONT_SIZE_RATIO = 1;
+const OCR_BASELINE_RATIO = 0.8;
+const OCR_MIN_HORIZONTAL_SCALE = 0.25;
+const OCR_MAX_HORIZONTAL_SCALE = 4;
 
 function ptToPixel(value, dpi) {
     //1pt = 1/72 inch
@@ -155,7 +163,6 @@ export default class PDFCanvas {
             return;
         }
 
-        const textScale = Screen.mainScreen.scale * (__IOS__ ? 2.2 : 1.4);
         const src = page.imagePath;
         let imageWidth = page.width;
         let imageHeight = page.height;
@@ -191,17 +198,36 @@ export default class PDFCanvas {
         recycleImages(image);
 
         if (this.options.draw_ocr_text && page.ocrData) {
-            const ocrScale = toDrawWidth / page.ocrData.imageWidth;
-            canvas.scale(ocrScale, ocrScale, 0, 0);
+            const ocrData = page.ocrData;
+            // ocr boxes live in the ocr image space, which is already rotated (the ocr ran with page.rotation)
+            const scaleX = toDrawWidth / ocrData.imageWidth;
+            const scaleY = toDrawHeight / ocrData.imageHeight;
             textPaint.color = !PRODUCTION && DEV_LOG ? '#ff000088' : '#ffffff01';
-            page.ocrData.blocks.forEach((block) => {
-                canvas.save();
-                // TODO: understand why that kind of scale is necessary
-                textPaint.textSize = (block.fontSize || 16) * textScale;
-                const staticLayout = new StaticLayout(block.text, textPaint, block.box.width, LayoutAlignment.ALIGN_NORMAL, 1, 0, true);
-                canvas.translate(block.box.x, block.box.y);
-                staticLayout.draw(canvas);
-                canvas.restore();
+            ocrData.blocks.forEach((block) => {
+                // a block holds several lines when the ocr ran at paragraph level (documents
+                // scanned before line level ocr): share the box height between them
+                const lines = block.text
+                    .split('\n')
+                    .map((line) => line.trim())
+                    .filter((line) => line.length > 0);
+                if (lines.length === 0) {
+                    return;
+                }
+                const boxWidth = block.box.width * scaleX;
+                const boxTop = block.box.y * scaleY;
+                const lineHeight = (block.box.height * scaleY) / lines.length;
+                textPaint.textSize = lineHeight * OCR_FONT_SIZE_RATIO;
+                lines.forEach((line, lineIndex) => {
+                    const measured = textPaint.measureText(line);
+                    // stretch the run so that it covers exactly the detected box
+                    const horizontalScale = measured > 0 ? Math.min(Math.max(boxWidth / measured, OCR_MIN_HORIZONTAL_SCALE), OCR_MAX_HORIZONTAL_SCALE) : 1;
+                    canvas.save();
+                    // canvas is y down here: the baseline sits below the line top
+                    canvas.translate(block.box.x * scaleX, boxTop + (lineIndex + OCR_BASELINE_RATIO) * lineHeight);
+                    canvas.scale(horizontalScale, 1, 0, 0);
+                    canvas.drawText(line, 0, 0, textPaint);
+                    canvas.restore();
+                });
             });
         }
     }

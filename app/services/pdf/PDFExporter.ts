@@ -1,5 +1,5 @@
 import { WorkerEventType } from '@akylas/nativescript-app-utils/worker/BaseWorker';
-import { Screen, Utils, knownFolders, path } from '@nativescript/core';
+import { Utils, knownFolders, path } from '@nativescript/core';
 import { wrapNativeException } from '@nativescript/core/utils';
 import { getActualLanguage } from '@shared/helpers/lang';
 import { CustomError, SilentError, TimeoutError } from '@akylas/nativescript-app-utils/error';
@@ -47,7 +47,6 @@ export async function exportPDFAsync({ compress, document, filename, folder, opt
         const options = JSON.stringify({
             ...defaultOptions,
             // page_padding: Utils.layout.toDevicePixels(pdfCanvas.options.page_padding),
-            text_scale: Screen.mainScreen.scale * 1.4,
             pages: pages.map((p) => ({ ...p.page, colorMatrix: getPageColorMatrix(p.page, black_white ? 'grayscale' : undefined) })),
             ...(baseOptions ? baseOptions : {}),
             debug: false

@@ -20,7 +20,6 @@ import android.print.PrintManager
 import android.util.Log
 import com.itextpdf.io.font.PdfEncodings
 import com.itextpdf.io.image.ImageDataFactory
-import com.itextpdf.kernel.colors.Color
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.font.PdfFont
 import com.itextpdf.kernel.font.PdfFontFactory
@@ -41,19 +40,10 @@ import com.itextpdf.kernel.pdf.canvas.parser.PdfCanvasProcessor
 import com.itextpdf.kernel.pdf.canvas.parser.data.IEventData
 import com.itextpdf.kernel.pdf.canvas.parser.data.ImageRenderInfo
 import com.itextpdf.kernel.pdf.canvas.parser.listener.IEventListener
-import com.itextpdf.kernel.pdf.extgstate.PdfExtGState
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject
-import com.itextpdf.layout.Canvas
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.AreaBreak
 import com.itextpdf.layout.element.Image
-import com.itextpdf.layout.element.Paragraph
-import com.itextpdf.layout.layout.LayoutArea
-import com.itextpdf.layout.layout.LayoutContext
-import com.itextpdf.layout.layout.LayoutResult
-import com.itextpdf.layout.properties.TextAlignment
-import com.itextpdf.layout.properties.VerticalAlignment
-import com.itextpdf.layout.renderer.IRenderer
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -323,133 +313,92 @@ class PDFUtils {
             }
         }
 
+        // OCR text layer geometry. A tesseract line box spans ascenders to descenders:
+        // the font size is the box height and the baseline sits just above the box bottom.
+        // Keep in sync with PDFCanvas.ts (ios).
+        private const val OCR_FONT_SIZE_RATIO = 1f
+        private const val OCR_BASELINE_RATIO = 0.8f
+        private const val OCR_MIN_HORIZONTAL_SCALE = 25f
+        private const val OCR_MAX_HORIZONTAL_SCALE = 400f
+
         /**
-         * Try decreasing font size until the Paragraph fits inside the box.
+         * Draw the ocr text layer on top of the image drawn at [posX], [posY] with
+         * size [drawnWidth] x [drawnHeight] (in pdf points).
+         * Each block is drawn as a single run placed on its baseline and horizontally
+         * scaled to cover exactly the detected box: no reflow, no wrapping.
          */
-        fun findFittingFontSize(
-            text: String,
-            font: PdfFont,
-            box: Rectangle,
-            pageNumber: Int,
-            layoutDoc: Document,
-            maxFontSize: Float,
-            minFontSize: Float = 4f,
-            step: Float = 0.5f
-        ): Float {
-            var size = maxFontSize
-            while (size >= minFontSize) {
-                val p = Paragraph(text).setFont(font).setFontSize(size).setMultipliedLeading(1f).setMargin(0f).setFirstLineIndent(0f).setPadding(0f)
-                    .setTextAlignment(TextAlignment.LEFT)
-                    .setVerticalAlignment(VerticalAlignment.TOP)
-                val renderer: IRenderer = p.createRendererSubTree()
-                renderer.parent = layoutDoc.renderer // uses LayoutDocument.getRenderer() under the hood
-                try {
-                    val layoutArea = LayoutArea(pageNumber, box)
-                    val result = renderer.layout(LayoutContext(layoutArea))
-
-                    // LayoutResult.FULL means the whole paragraph fits in the provided area
-                    if (result.status == LayoutResult.FULL) {
-                        return size
-                    }
-                } catch (e: Exception) {
-                    // Catch and log the exception so you can see why it crashed for this size.
-                    // Don't rethrow here — we try smaller sizes as fallback.
-                    System.err.println("layout() failed at size $size -> ${e::class.simpleName}: ${e.message}")
-                    e.printStackTrace()
-                }
-                size -= step
-            }
-            return minFontSize
-        }
-
-        fun drawTextInBox(
-            pdfCanvas: PdfCanvas,
-            pdf: PdfDocument,
-            box: Rectangle,
-            text: String,
-            font: PdfFont,
-            fontSize: Float,
-            color: Color = ColorConstants.BLACK,
-            textRenderingMode: Int,
-            hAlign: TextAlignment = TextAlignment.LEFT,   // LEFT, CENTER, RIGHT, JUSTIFIED
-            vAlign: VerticalAlignment = VerticalAlignment.TOP // TOP, MIDDLE, BOTTOM
-        ) {
-            val canvas = Canvas(pdfCanvas, box)
-                .setTextRenderingMode(textRenderingMode)
-                .setFont(font)
-                .setFontSize(fontSize)
-                .setFontColor(color)
-
-            canvas.showTextAligned(
-                text,
-                when (hAlign) {
-                    TextAlignment.LEFT -> box.left
-                    TextAlignment.CENTER -> box.left + box.width / 2
-                    TextAlignment.RIGHT -> box.right
-                    else -> box.left // fallback for JUSTIFIED etc.
-                },
-                when (vAlign) {
-                    VerticalAlignment.TOP -> box.top
-                    VerticalAlignment.MIDDLE -> box.bottom + box.height / 2
-                    VerticalAlignment.BOTTOM -> box.bottom
-                },
-                hAlign,
-                vAlign,
-                0f
-            )
-        }
-
         private fun drawOCRData(
             pdfDoc: PdfDocument,
-            doc: Document,
             page: JSONObject,
             posX: Float,
             posY: Float,
-            imageScale: Float,
-            toDrawHeight: Float,
-            textScale: Float,
+            drawnWidth: Float,
+            drawnHeight: Float,
             debug: Boolean,
             fontCache: FontCache
         ) {
-            val ocrData = page.optJSONObject("ocrData")
-            if (ocrData != null) {
-    //            val imageWidth = ocrData.getDouble("imageWidth").toFloat()
-                val imageHeight = ocrData.getDouble("imageHeight").toFloat()
-                val blocks = ocrData.getJSONArray("blocks")
-    //                canvas
-                for (i in 0..<blocks.length()) {
-                    val block = blocks.getJSONObject(i)
-                    val box = block.getJSONObject("box")
-                    val width = box.getDouble("width").toFloat()
-                    val height = box.getDouble("height").toFloat()
-                    val newHeight = height * 1f;
-                    val heightDecale = newHeight - height;
-                    val boxMargin = 10f
-                    val rect = Rectangle(
-                        posX + box.getDouble("x").toFloat() * imageScale,
-                        posY + (imageHeight - height - box.getDouble("y").toFloat() - heightDecale) * imageScale - boxMargin ,
-                        width * imageScale,
-                        newHeight * imageScale + 2*boxMargin
-                    )
-                    val fontSize = block.optDouble("fontSize", 15.0).toFloat() * textScale * imageScale
+            val ocrData = page.optJSONObject("ocrData") ?: return
+            // ocr boxes live in the ocr image space, which is already rotated (the ocr ran with page rotation)
+            val ocrImageWidth = ocrData.getDouble("imageWidth").toFloat()
+            val ocrImageHeight = ocrData.getDouble("imageHeight").toFloat()
+            if (ocrImageWidth <= 0 || ocrImageHeight <= 0) {
+                return
+            }
+            val scaleX = drawnWidth / ocrImageWidth
+            val scaleY = drawnHeight / ocrImageHeight
+            val blocks = ocrData.getJSONArray("blocks")
+            val canvas = PdfCanvas(pdfDoc.lastPage)
+            for (i in 0..<blocks.length()) {
+                val block = blocks.getJSONObject(i)
+                val text = block.getString("text")
+                if (text.isEmpty()) {
+                    continue
+                }
+                // a block holds several lines when the ocr ran at paragraph level (documents
+                // scanned before line level ocr): share the box height between them
+                val lines = text.split('\n').map { it.trim() }.filter { it.isNotEmpty() }
+                if (lines.isEmpty()) {
+                    continue
+                }
+                val box = block.getJSONObject("box")
+                val boxWidth = box.getDouble("width").toFloat() * scaleX
+                val boxHeight = box.getDouble("height").toFloat() * scaleY
+                val left = posX + box.getDouble("x").toFloat() * scaleX
+                // pdf is y up: the box top is measured from the bottom of the drawn image
+                val boxTop = posY + drawnHeight - box.getDouble("y").toFloat() * scaleY
+                val lineHeight = boxHeight / lines.size
+                val fontSize = lineHeight * OCR_FONT_SIZE_RATIO
+                if (fontSize <= 0) {
+                    continue
+                }
+                val font = fontCache.getFont(text)
+                lines.forEachIndexed { lineIndex, line ->
+                    val lineTop = boxTop - lineIndex * lineHeight
+                    val textWidth = font.getWidth(line, fontSize)
+                    // stretch the run so that it covers exactly the detected box
+                    val horizontalScale = if (textWidth > 0) {
+                        (100f * boxWidth / textWidth).coerceIn(OCR_MIN_HORIZONTAL_SCALE, OCR_MAX_HORIZONTAL_SCALE)
+                    } else {
+                        100f
+                    }
 
-                    val canvas = PdfCanvas(pdfDoc.lastPage)
-
-                    val gState = PdfExtGState()
-                    gState.fillOpacity = 0.5f
-                    // draw a debug rectangle
                     if (debug) {
-                        canvas.saveState().rectangle(rect)
-    //                        .setExtGState(gState)
+                        canvas.saveState()
+                            .rectangle(Rectangle(left, lineTop - lineHeight, boxWidth, lineHeight))
                             .setFillColor(ColorConstants.WHITE)
                             .fill().restoreState()
                     }
 
-                    val text = block.getString("text")
-                    val font = fontCache.getFont(text)
-                    val actualFontSize = findFittingFontSize(text, font, rect, pdfDoc.numberOfPages, doc, fontSize, 4.0f, 2.0f)
-
-                    drawTextInBox(canvas, pdfDoc, rect, text, font, actualFontSize, if (debug) ColorConstants.RED else ColorConstants.BLACK, if (debug) PdfCanvasConstants.TextRenderingMode.FILL else PdfCanvasConstants.TextRenderingMode.INVISIBLE)
+                    canvas.saveState()
+                        .beginText()
+                        .setTextRenderingMode(if (debug) PdfCanvasConstants.TextRenderingMode.FILL else PdfCanvasConstants.TextRenderingMode.INVISIBLE)
+                        .setFillColor(if (debug) ColorConstants.RED else ColorConstants.BLACK)
+                        .setFontAndSize(font, fontSize)
+                        .setHorizontalScaling(horizontalScale)
+                        .setTextMatrix(left, lineTop - lineHeight * OCR_BASELINE_RATIO)
+                        .showText(line)
+                        .endText()
+                        .restoreState()
                 }
             }
         }
@@ -480,7 +429,6 @@ class PDFUtils {
             val overwrite = jsonOps.optBoolean("overwrite", false)
             val debug = jsonOps.optBoolean("debug", false)
             val pagePadding = jsonOps.optInt("page_padding", 0).toFloat()
-            val textScale = jsonOps.optDouble("text_scale", 3.0).toFloat()
             val imageScale = jsonOps.optDouble("image_page_scale", 2.0).toFloat()
 //            var pagePadding = 100F
             var itemsPerPage = jsonOps.optInt("items_per_page", 1)
@@ -549,7 +497,6 @@ class PDFUtils {
                         colorMatrix,
                         loadImageOptions
                     ) ?: continue
-                    var imageRatio = image.imageHeight / imageHeight
 
                     val pageSize = if (imageRotation % 180 != 0) PageSize(
                         image.imageHeight,
@@ -566,12 +513,12 @@ class PDFUtils {
                     }
                     document.add(image)
                     if (drawOcrText) {
+                        // the image fills the whole page (page sized from it, no margins)
                         drawOCRData(
-                            pdfDoc, document, page,
+                            pdfDoc, page,
                             0F, 0F,
-                            imageRatio.toFloat(),
-                            imageHeight.toFloat(),
-                            textScale, debug,
+                            pageSize.width, pageSize.height,
+                            debug,
                             fontCache
                         )
                     }
@@ -660,12 +607,10 @@ class PDFUtils {
                             }
                             var reqWidth = toDrawWidth * imageScale
                             var reqHeight = toDrawHeight * imageScale
-                            var imageRatio = toDrawHeight / imageHeight
                             if (imageRotation % 180 != 0) {
                                 val temp = reqWidth
                                 reqWidth = reqHeight
                                 reqHeight = temp
-                                imageRatio = toDrawHeight / imageWidth
                             }
                             val image =
                                 loadImage(
@@ -685,8 +630,10 @@ class PDFUtils {
 
 
                             val posX = ddx + itemAvailableWidth / 2 - toDrawWidth.toFloat() / 2
-                            var posY = ddy + itemAvailableHeight / 2 - toDrawHeight.toFloat() / 2
-                            
+                            // where the image actually lands on the page, before the rotation anchor fixups
+                            val imagePosY = ddy + itemAvailableHeight / 2 - toDrawHeight.toFloat() / 2
+                            var posY = imagePosY
+
                             if ((imageRotation % 360) == 180) {
                                 posY += toDrawHeight.toFloat()
                             } else if ((imageRotation % 360) == 90) {
@@ -696,9 +643,10 @@ class PDFUtils {
                             document!!.add(image)
                             if (drawOcrText) {
                                 drawOCRData(
-                                    pdfDoc, document, page,
-                                    posX, posY,
-                                    imageRatio.toFloat(), toDrawHeight.toFloat(), textScale, debug,
+                                    pdfDoc, page,
+                                    posX, imagePosY,
+                                    toDrawWidth.toFloat(), toDrawHeight.toFloat(),
+                                    debug,
                                     fontCache
                                 )
                             }
