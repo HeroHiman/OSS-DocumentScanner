@@ -102,6 +102,9 @@ export const DEFAULT_VIEW_STYLE = CARD_APP ? 'columns' : 'default';
 export const DEFAULT_FOLDER_VIEW_STYLE = 'horizontal';
 export const DEFAULT_FORCE_WHITE_BACKGROUND_QRCODE = false;
 export const DEFAULT_OCR_COPY_USE_SPACE = false;
+// tesseract PageIteratorLevel.RIL_TEXTLINE: one OCR block per text line.
+// Line boxes are what makes the PDF text layer land on the raster text.
+export const OCR_ITERATOR_LEVEL = 2;
 export const DEFAULT_PDF_OPTIONS = {
     paper_size: 'full',
     color: 'color',

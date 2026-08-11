@@ -1,4 +1,4 @@
-import { Screen, Utils, knownFolders } from '@nativescript/core';
+import { Utils, knownFolders } from '@nativescript/core';
 import { PDF_EXT } from '~/utils/constants';
 import { getColorMatrix } from '~/utils/matrix';
 import { PDFExportOptions } from './PDFCanvas';
@@ -13,7 +13,7 @@ export default class PDFExportCanvas extends PDFExportCanvasBase {
                 page.colorMatrix = getColorMatrix(page.colorType);
             }
         });
-        const options = JSON.stringify({ ...this.options, text_scale: Screen.mainScreen.scale * 1.4, pages });
+        const options = JSON.stringify({ ...this.options, pages });
         DEV_LOG && console.log('PDFExportCanvas', 'export', folder, filename, compress, options);
         const outputPath = com.akylas.documentscanner.utils.PDFUtils.Companion.generatePDF(Utils.android.getApplicationContext(), folder, filename, options);
         DEV_LOG && console.log('PDFExportCanvas', 'export done', JSON.stringify(this.options), options.length, Date.now() - start, 'ms');

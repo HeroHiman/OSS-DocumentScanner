@@ -4,6 +4,7 @@ import { NoNetworkError } from '@akylas/nativescript-app-utils/error';
 import { ocrDocumentFromFile } from 'plugin-nativeprocessor';
 import type { OCRDocument } from '~/models/OCRDocument';
 import { networkService, wrapNativeHttpException } from '~/services/api';
+import { OCR_ITERATOR_LEVEL } from '~/utils/constants';
 
 export const OCRLanguages = {
     afr: 'Afrikaans',
@@ -268,6 +269,7 @@ export class OCRService extends Observable {
                 // rotation: page.rotation,
                 // oem: 0,
                 detectContours: 0,
+                iteratorLevel: OCR_ITERATOR_LEVEL,
                 trim: false
             },
             onProgress
