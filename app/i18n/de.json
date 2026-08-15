@@ -314,7 +314,7 @@
     "move_data": "Daten verschieben?",
     "move_data_desc": "All deine Anwendungsdaten werden verschoben und im Anschluss ein Neustart der App erzwungen",
     "move_folder": "In Ordner verschieben",
-    "move_folder_desc": "Verschiebe das ausgewählte Dokument in einen Ordner. Feld leerlassen, um es aus allen Ordnern zu entfernen",
+    "move_folder_desc": "Ausgewähltes Dokument in einen Ordner verschieben. Eingabefeld leer lassen, um es von beliebigem Ordner zu entfernen",
     "move_to_trash": "In den Papierkorb verschieben",
     "moving_files": "Verschiebe Dateien",
     "name": "Name",
