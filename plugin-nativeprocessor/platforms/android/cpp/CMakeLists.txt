@@ -70,3 +70,12 @@ else()
 endif()
 
 target_link_libraries(${TARGET} tesseract leptonica pngx jpeg -fopenmp -static-openmp)
+
+
+target_compile_options(${TARGET} PRIVATE
+    -fvisibility=hidden -fvisibility-inlines-hidden
+    -ffunction-sections -fdata-sections)
+target_link_options(${TARGET} PRIVATE
+    -Wl,--exclude-libs,ALL
+    -Wl,--gc-sections
+    -Wl,--icf=all)
