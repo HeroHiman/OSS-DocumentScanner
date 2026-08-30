@@ -7,6 +7,7 @@
     import { AndroidActivityBackPressedEventData } from '@nativescript/core/application';
     import { throttle } from '@nativescript/core/utils';
     import { filesize } from 'filesize';
+    import dayjs from 'dayjs';
     import { onDestroy, onMount } from 'svelte';
     import { Template } from '@nativescript-community/svelte-native/components';
     import { NativeViewElementNode } from '@nativescript-community/svelte-native/dom';
@@ -146,6 +147,41 @@
             await showImagePopoverMenu(getSelectedPages(), event.object);
         } catch (err) {
             showError(err);
+        }
+    }
+
+    async function onDateBadgeTap(item: Item, event) {
+        try {
+            const initialDate = item.page.extra?.date ? new Date(item.page.extra.date as string) : new Date(item.page.createdDate || Date.now());
+            const { DateTimePicker } = await import('@nativescript/datetimepicker');
+            const result = await DateTimePicker.pickDate({
+                context: page?.nativeView?._context,
+                date: initialDate,
+                title: lc('select_date'),
+                okButtonText: lc('ok'),
+                cancelButtonText: lc('cancel')
+            });
+            if (result) {
+                const newDate = result.toISOString();
+                const dateTimestamp = result.getTime();
+                const currentExtra = item.page.extra || {};
+                await document.updatePage(
+                    item.index,
+                    {
+                        extra: {
+                            ...currentExtra,
+                            date: newDate,
+                            dateTimestamp
+                        }
+                    },
+                    false,
+                    true,
+                    true
+                );
+                refreshCollectionView();
+            }
+        } catch (error) {
+            showError(error);
         }
     }
 
@@ -606,6 +642,8 @@
             { id: 'rename', name: lc('rename'), icon: 'mdi-rename' },
             { id: 'favorite', name: lc('toggle_favorite'), icon: document.favorite === 1 ? 'mdi-star' : 'mdi-star-outline' },
             { id: 'select_all', name: lc('select_all'), icon: 'mdi-select-all' },
+            { id: 'sort_date_asc', name: lc('sort_date_asc'), icon: 'mdi-sort-calendar-ascending' },
+            { id: 'sort_date_desc', name: lc('sort_date_desc'), icon: 'mdi-sort-calendar-descending' },
             { id: 'reorder', name: lc('reorder_pages'), icon: 'mdi-reorder-horizontal' },
             { id: 'transform', name: lc('transform_images'), icon: 'mdi-auto-fix' },
             { id: 'ocr', name: lc('ocr_document'), icon: 'mdi-text-recognition' },
@@ -626,6 +664,12 @@
                         break;
                     case 'select_all':
                         selectAll();
+                        break;
+                    case 'sort_date_asc':
+                        await document.sortPages('date_asc');
+                        break;
+                    case 'sort_date_desc':
+                        await document.sortPages('date_desc');
                         break;
                     case 'ocr':
                         await detectOCR({ documents: [document] });
@@ -792,6 +836,21 @@
                         />
                         <!-- <cspan color={colorOnSurfaceVariant} fontSize={12} paddingTop={36} text={dayjs(item.doc.createdDate).format('L LT')} /> -->
                         <!-- <cspan color={colorOnSurfaceVariant} fontSize={12} paddingTop={50} text={lcp('nb_pages', item.doc.pages.length)} /> -->
+                    </canvaslabel>
+                    <canvaslabel
+                        color={colorOnSurfaceVariant}
+                        fontSize={11 * $fontScale}
+                        padding="4 8"
+                        backgroundColor="#00000044"
+                        borderRadius={6}
+                        horizontalAlignment="left"
+                        verticalAlignment="bottom"
+                        margin={6}
+                        rowSpan={2}
+                        on:tap={(e) => onDateBadgeTap(item, e)}
+                    >
+                        <cspan fontFamily={$fonts.mdi} fontSize={14 * $fontScale} text="mdi-calendar" color={colorPrimary} />
+                        <cspan text={` ${dayjs(item.page.extra?.date || item.page.createdDate).format('L')}`} color="white" />
                     </canvaslabel>
                     <SelectedIndicator rowSpan={2} selected={item.selected} />
                     <PageIndicator rowSpan={2} scale={$fontScale} text={index + 1} on:longPress={(event) => startDragging(item, event)} />

@@ -198,6 +198,12 @@ repositories {
       maven { url "https://repo.itextsupport.com/android" }
 }
 
+dependencies {
+    // Bundled ML Kit Text Recognition: English/Latin + Hindi/Devanagari (100% offline support)
+    implementation 'com.google.mlkit:text-recognition:16.0.1'
+    implementation 'com.google.mlkit:text-recognition-devanagari:16.0.1'
+}
+
 if (project.hasProperty("sentryEnabled")) {
   sentry {
     debug = false

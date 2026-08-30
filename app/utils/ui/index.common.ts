@@ -208,48 +208,91 @@ export async function importAndScanImageOrPdfFromUris({ canGoToView = true, docu
                 })
         );
 
-        // now we process all image files
-        // We do it in batch of 5 to prevent memory issues
-        items = await doInBatch(
-            images.concat(pdfImages.flat()),
+        // Process PDF images: skip edge detection / autoCrop as PDF pages are already flat & cropped
+        const pdfFlatImages = pdfImages.flat();
+        const pdfItems: ImportImageData[] = await doInBatch(
+            pdfFlatImages,
             (sourceImagePath: string) =>
                 new Promise<ImportImageData>(async (resolve, reject) => {
                     try {
                         const start = Date.now();
-                        DEV_LOG && console.log('importFromImage', sourceImagePath);
+                        DEV_LOG && console.log('importFromPdfImage', sourceImagePath);
                         const imageSize = await getImageSize(sourceImagePath);
-                        DEV_LOG && console.log('importFromImage', sourceImagePath, JSON.stringify(imageSize), Date.now() - start, 'ms');
-
+                        DEV_LOG && console.log('importFromPdfImage', sourceImagePath, JSON.stringify(imageSize), Date.now() - start, 'ms');
                         const imageRotation = imageSize.rotation;
-                        // TODO: detect JSON and QRCode in one go
-                        DEV_LOG && console.log('[importAndScanImageFromUris] getJSONDocumentCornersFromFile', sourceImagePath, resizeThreshold);
-                        const quads = cropEnabled ? await getJSONDocumentCornersFromFile(sourceImagePath, { resizeThreshold, areaScaleMinFactor }) : undefined;
                         let qrcode;
                         if (CARD_APP) {
-                            // try to get the qrcode to show it in the import screen
                             qrcode = await detectQRCodeFromFile(sourceImagePath, { resizeThreshold: QRCODE_RESIZE_THRESHOLD });
                         }
-                        if (cropEnabled && quads.length === 0) {
-                            let { width } = imageSize;
-                            let { height } = imageSize;
-                            if (imageRotation % 180 !== 0) {
-                                width = imageSize.height;
-                                height = imageSize.width;
-                            }
-                            quads.push([
-                                [noDetectionMargin, noDetectionMargin],
-                                [width - noDetectionMargin, noDetectionMargin],
-                                [width - noDetectionMargin, height - noDetectionMargin],
-                                [noDetectionMargin, height - noDetectionMargin]
-                            ]);
-                        }
-                        DEV_LOG && console.log('importFromImage done', sourceImagePath, Date.now() - start, 'ms');
-                        resolve({ quads, imagePath: sourceImagePath, qrcode, imageWidth: imageSize.width, imageHeight: imageSize.height, imageRotation, undos: [], redos: [] });
+                        resolve({ quads: undefined, imagePath: sourceImagePath, qrcode, imageWidth: imageSize.width, imageHeight: imageSize.height, imageRotation, undos: [], redos: [] });
                     } catch (error) {
                         reject(error);
                     }
                 })
         );
+
+        // Process standard camera/gallery images with edge detection if enabled
+        let standardImageItems: ImportImageData[] = [];
+        if (images.length > 0) {
+            standardImageItems = await doInBatch(
+                images,
+                (sourceImagePath: string) =>
+                    new Promise<ImportImageData>(async (resolve, reject) => {
+                        try {
+                            const start = Date.now();
+                            DEV_LOG && console.log('importFromImage', sourceImagePath);
+                            const imageSize = await getImageSize(sourceImagePath);
+                            DEV_LOG && console.log('importFromImage', sourceImagePath, JSON.stringify(imageSize), Date.now() - start, 'ms');
+
+                            const imageRotation = imageSize.rotation;
+                            // TODO: detect JSON and QRCode in one go
+                            DEV_LOG && console.log('[importAndScanImageFromUris] getJSONDocumentCornersFromFile', sourceImagePath, resizeThreshold);
+                            const quads = cropEnabled ? await getJSONDocumentCornersFromFile(sourceImagePath, { resizeThreshold, areaScaleMinFactor }) : undefined;
+                            let qrcode;
+                            if (CARD_APP) {
+                                // try to get the qrcode to show it in the import screen
+                                qrcode = await detectQRCodeFromFile(sourceImagePath, { resizeThreshold: QRCODE_RESIZE_THRESHOLD });
+                            }
+                            if (cropEnabled && quads.length === 0) {
+                                let { width } = imageSize;
+                                let { height } = imageSize;
+                                if (imageRotation % 180 !== 0) {
+                                    width = imageSize.height;
+                                    height = imageSize.width;
+                                }
+                                quads.push([
+                                    [noDetectionMargin, noDetectionMargin],
+                                    [width - noDetectionMargin, noDetectionMargin],
+                                    [width - noDetectionMargin, height - noDetectionMargin],
+                                    [noDetectionMargin, height - noDetectionMargin]
+                                ]);
+                            }
+                            DEV_LOG && console.log('importFromImage done', sourceImagePath, Date.now() - start, 'ms');
+                            resolve({ quads, imagePath: sourceImagePath, qrcode, imageWidth: imageSize.width, imageHeight: imageSize.height, imageRotation, undos: [], redos: [] });
+                        } catch (error) {
+                            reject(error);
+                        }
+                    })
+            );
+
+            if (cropEnabled && standardImageItems.length > 0) {
+                const ModalImportImage = (await import('~/components/ModalImportImages.svelte')).default;
+                const newItems: ImportImageData[] = await showModal({
+                    page: ModalImportImage,
+                    animated: true,
+                    fullscreen: true,
+                    props: {
+                        items: standardImageItems
+                    }
+                });
+                if (!newItems) {
+                    return;
+                }
+                standardImageItems = newItems;
+            }
+        }
+
+        items = standardImageItems.concat(pdfItems);
 
         DEV_LOG &&
             console.log(
@@ -257,20 +300,6 @@ export async function importAndScanImageOrPdfFromUris({ canGoToView = true, docu
                 items.map((i) => i.imagePath)
             );
         if (items?.length) {
-            if (cropEnabled) {
-                const ModalImportImage = (await import('~/components/ModalImportImages.svelte')).default;
-                const newItems: ImportImageData[] = await showModal({
-                    page: ModalImportImage,
-                    animated: true,
-                    fullscreen: true,
-                    props: {
-                        items
-                    }
-                });
-                if (!newItems) {
-                    return;
-                }
-            }
             if (items) {
                 const transforms = ApplicationSettings.getString(SETTINGS_DEFAULT_TRANSFORM, DEFAULT_TRANSFORM);
                 const colorType = ApplicationSettings.getString(SETTINGS_DEFAULT_COLORTYPE, DEFAULT_COLORTYPE) as MatricesTypes;

@@ -119,78 +119,83 @@ class PDFUtils : NSObject {
       DispatchQueue.concurrentPerform(iterations: pdfDocument.numberOfPages) { i in
         guard _error == nil else { return }   // Page number starts at 1, not 0
         
-        let pdfPage = pdfDocument.page(at: i + 1)!
-        if (importPDFImages) {
-          // Extract resources dictionary
-          guard let resources = pdfPage.dictionary?.getDictionary(key: "Resources") else {
-            return
-          }
-          
-          // Extract XObject dictionary
-          guard let xObjects = resources.getDictionary(key: "XObject") else {
-            return
-          }
-          
-          CGPDFDictionaryApplyBlock(xObjects, { key, object, _ in
-            var stream: CGPDFStreamRef?
-            guard CGPDFObjectGetValue(object, .stream, &stream),
-                  let objectStream = stream,
-                  let streamDictionary = CGPDFStreamGetDictionary(objectStream) else {
-              return true
+        autoreleasepool {
+          let pdfPage = pdfDocument.page(at: i + 1)!
+          if (importPDFImages) {
+            // Extract resources dictionary
+            guard let resources = pdfPage.dictionary?.getDictionary(key: "Resources") else {
+              return
             }
             
-            var subtype: UnsafePointer<Int8>?
-            guard CGPDFDictionaryGetName(streamDictionary, "Subtype", &subtype), let subtypeName = subtype else {
-              return true
+            // Extract XObject dictionary
+            guard let xObjects = resources.getDictionary(key: "XObject") else {
+              return
             }
             
-            if String(cString: subtypeName) == "Image" {
-              // Extract image data
-              guard let imageData = extractImageDataFromXObject(object: object) else {
+            CGPDFDictionaryApplyBlock(xObjects, { key, object, _ in
+              var stream: CGPDFStreamRef?
+              guard CGPDFObjectGetValue(object, .stream, &stream),
+                    let objectStream = stream,
+                    let streamDictionary = CGPDFStreamGetDictionary(objectStream) else {
                 return true
               }
               
-              // Convert image data to UIImage
-              if let image = UIImage(data: imageData) {
-                let imageURL = tmpDirURL.appendingPathComponent("\(pdfFileName)_\(nbImages+1).\(compressFormat)")
-                do {
-                  if (compressFormat == "jpg") {
-                    try image.jpegData(compressionQuality: CGFloat(compressQuality) / 100.0)?.write(to: imageURL, options: Data.WritingOptions.atomic)
-                  } else {
-                    try image.pngData()?.write(to: imageURL, options: Data.WritingOptions.atomic)
+              var subtype: UnsafePointer<Int8>?
+              guard CGPDFDictionaryGetName(streamDictionary, "Subtype", &subtype), let subtypeName = subtype else {
+                return true
+              }
+              
+              if String(cString: subtypeName) == "Image" {
+                // Extract image data
+                guard let imageData = extractImageDataFromXObject(object: object) else {
+                  return true
+                }
+                
+                // Convert image data to UIImage
+                if let image = UIImage(data: imageData) {
+                  let imageURL = tmpDirURL.appendingPathComponent("\(pdfFileName)_\(nbImages+1).\(compressFormat)")
+                  do {
+                    if (compressFormat == "jpg") {
+                      try image.jpegData(compressionQuality: CGFloat(compressQuality) / 100.0)?.write(to: imageURL, options: Data.WritingOptions.atomic)
+                    } else {
+                      try image.pngData()?.write(to: imageURL, options: Data.WritingOptions.atomic)
+                    }
+                    urls[nbImages] = imageURL.absoluteString.removingPercentEncoding!
+                    nbImages += 1
+                  } catch {
+                    _error = error
                   }
-                  urls[nbImages] = imageURL.absoluteString.removingPercentEncoding!
-                  nbImages += 1
-                } catch {
-                  _error = error
                 }
               }
+              return true
+            }, nil)
+          } else {
+            let mediaBoxRect = pdfPage.getBoxRect(CGPDFBox.mediaBox)
+            let maxWidth: CGFloat = 1500.0
+            let pdfWidth = mediaBoxRect.width
+            let safeScale = (pdfWidth * CGFloat(scale) > maxWidth) ? (maxWidth / pdfWidth) : CGFloat(scale)
+            let width = max(1, Int(mediaBoxRect.width * safeScale))
+            let height = max(1, Int(mediaBoxRect.height * safeScale))
+            
+            let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0, space: colorSpace, bitmapInfo: bitmapInfo)!
+            context.interpolationQuality = .high
+            context.setFillColor(UIColor.white.cgColor)
+            context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+            context.scaleBy(x: safeScale, y: safeScale)
+            context.drawPDFPage(pdfPage)
+            
+            let image = UIImage.init(cgImage: context.makeImage()!)
+            let imageURL = tmpDirURL.appendingPathComponent("\(pdfFileName)_\(i+1).\(compressFormat)", isDirectory: false)
+            do {
+              if (compressFormat == "jpg") {
+                try image.jpegData(compressionQuality: CGFloat(compressQuality) / 100.0)?.write(to: imageURL, options: Data.WritingOptions.atomic)
+              } else {
+                try image.pngData()?.write(to: imageURL, options: Data.WritingOptions.atomic)
+              }
+              urls[i] = imageURL.absoluteString.removingPercentEncoding!
+            } catch {
+              _error = error
             }
-            return true
-          }, nil)
-        } else {
-          let mediaBoxRect = pdfPage.getBoxRect(CGPDFBox.mediaBox)
-          let width = Int(mediaBoxRect.width * scale)
-          let height = Int(mediaBoxRect.height * scale)
-          
-          let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0, space: colorSpace, bitmapInfo: bitmapInfo)!
-          context.interpolationQuality = .high
-          context.setFillColor(UIColor.white.cgColor)
-          context.fill(CGRect(x: 0, y: 0, width: width, height: height))
-          context.scaleBy(x: scale, y: scale)
-          context.drawPDFPage(pdfPage)
-          
-          let image = UIImage.init(cgImage: context.makeImage()!)
-          let imageURL = tmpDirURL.appendingPathComponent("\(pdfFileName)_\(i+1).\(compressFormat)", isDirectory: false)
-          do {
-            if (compressFormat == "jpg") {
-              try image.jpegData(compressionQuality: CGFloat(compressQuality) / 100.0)?.write(to: imageURL, options: Data.WritingOptions.atomic)
-            } else {
-              try image.pngData()?.write(to: imageURL, options: Data.WritingOptions.atomic)
-            }
-            urls[i] = imageURL.absoluteString.removingPercentEncoding!
-          } catch {
-            _error = error
           }
         }
       }

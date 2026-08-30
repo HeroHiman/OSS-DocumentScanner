@@ -657,6 +657,28 @@
             hideLoading();
         }
     }
+
+    async function textEdit() {
+        try {
+            const item = items.getItem(currentIndex);
+            if (!item) {
+                return;
+            }
+            const component = (await import('~/components/edit/TextEditView.svelte')).default;
+            await showModal({
+                page: component,
+                fullscreen: true,
+                props: {
+                    item,
+                    document,
+                    pageIndex: currentIndex
+                }
+            });
+        } catch (error) {
+            showError(error);
+        }
+    }
+
     function refreshPager() {
         pager?.nativeView?.refresh();
     }
@@ -772,6 +794,7 @@
 
         <stacklayout borderTopColor={colorOutline} borderTopWidth={1} orientation="horizontal" row={4}>
             <mdbutton class="icon-btn" text="mdi-crop" variant="text" on:tap={() => cropEdit()} />
+            <mdbutton class="icon-btn" text="mdi-format-text" variant="text" on:tap={() => textEdit()} />
             <mdbutton class="icon-btn" text="mdi-rotate-left" variant="text" on:tap={() => rotateImageLeft()} />
             <mdbutton class="icon-btn" text="mdi-rotate-right" variant="text" on:tap={() => rotateImageRight()} />
             <mdbutton class="icon-btn" text="mdi-auto-fix" variant="text" on:tap={showEnhancements} />

@@ -520,6 +520,16 @@ export class OCRDocument extends Observable implements Document {
         }
     }
 
+    async sortPages(order: 'date_asc' | 'date_desc' = 'date_asc') {
+        const sortedPages = [...this.pages].sort((a, b) => {
+            const dateA = (a.extra?.dateTimestamp as number) || (a.extra?.date ? new Date(a.extra.date as string).getTime() : a.createdDate || 0);
+            const dateB = (b.extra?.dateTimestamp as number) || (b.extra?.date ? new Date(b.extra.date as string).getTime() : b.createdDate || 0);
+            return order === 'date_asc' ? dateA - dateB : dateB - dateA;
+        });
+        const newOrder = sortedPages.map((p) => p.id);
+        await this.save({ pagesOrder: newOrder }, true, true);
+    }
+
     toString() {
         return JSON.stringify(this.toJSON());
     }

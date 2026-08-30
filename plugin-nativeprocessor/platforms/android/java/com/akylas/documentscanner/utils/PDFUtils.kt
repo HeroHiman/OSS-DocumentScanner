@@ -748,74 +748,95 @@ class PDFUtils {
                     if (importPDFImages) {
                         inputStream = context.contentResolver.openInputStream(uri)
                         val pdfDoc = PdfDocument(PdfReader(inputStream))
-                        for (i in 1..pdfDoc.getNumberOfPages()) {
-                            PdfCanvasProcessor(object : IEventListener {
-                                override fun eventOccurred(data: IEventData?, type: EventType?) {
-                                    if (data is ImageRenderInfo) {
-                                        try {
-                                            val bitmap = BitmapFactory.decodeByteArray(
-                                                data.image.imageBytes,
-                                                0,
-                                                data.image.imageBytes.size
-                                            )
-                                            val temp = File.createTempFile(
-                                                "${pdfFileName}_$i",
-                                                ".$compressFormat", context.cacheDir
-                                            )
-                                            FileOutputStream(temp).use { out ->
-                                                bitmap.compress(
-                                                    ImageUtil.getTargetFormat(compressFormat),
-                                                    compressQuality,
-                                                    out
+                        try {
+                            for (i in 1..pdfDoc.getNumberOfPages()) {
+                                PdfCanvasProcessor(object : IEventListener {
+                                    override fun eventOccurred(data: IEventData?, type: EventType?) {
+                                        if (data is ImageRenderInfo) {
+                                            var bitmap: Bitmap? = null
+                                            try {
+                                                bitmap = BitmapFactory.decodeByteArray(
+                                                    data.image.imageBytes,
+                                                    0,
+                                                    data.image.imageBytes.size
                                                 )
+                                                if (bitmap != null) {
+                                                    val temp = File.createTempFile(
+                                                        "${pdfFileName}_$i",
+                                                        ".$compressFormat", context.cacheDir
+                                                    )
+                                                    FileOutputStream(temp).use { out ->
+                                                        bitmap.compress(
+                                                            ImageUtil.getTargetFormat(compressFormat),
+                                                            compressQuality,
+                                                            out
+                                                        )
+                                                    }
+                                                    result.put(temp.path)
+                                                }
+                                            } catch (e: IOException) {
+                                                System.err.println("Error while extracting image: " + e.message)
+                                            } finally {
+                                                if (bitmap != null && !bitmap.isRecycled) {
+                                                    bitmap.recycle()
+                                                }
                                             }
-                                            result.put(temp.path)
-                                        } catch (e: IOException) {
-                                            System.err.println("Error while extracting image: " + e.message)
                                         }
                                     }
-                                }
 
-                                override fun getSupportedEvents(): MutableSet<EventType> {
-                                    return mutableSetOf(EventType.RENDER_IMAGE); }
-                            }).processPageContent(pdfDoc.getPage(i));
+                                    override fun getSupportedEvents(): MutableSet<EventType> {
+                                        return mutableSetOf(EventType.RENDER_IMAGE)
+                                    }
+                                }).processPageContent(pdfDoc.getPage(i))
+                            }
+                        } finally {
+                            pdfDoc.close()
                         }
                     } else {
                         parcelFileDescriptor = context.contentResolver.openFileDescriptor(uri, "r")
                         if (parcelFileDescriptor != null) {
                             renderer = PdfRenderer(parcelFileDescriptor)
 
-                            // Loop over all pages to find barcodes
-                            var renderedPage: Bitmap
+                            // Render pages with safe scale cap (MAX_WIDTH = 1500px)
+                            val MAX_WIDTH = 1500f
                             for (i in 0 until renderer.pageCount) {
                                 val page = renderer.openPage(i)
-                                renderedPage = Bitmap.createBitmap(
-                                    (page.width * scale).toInt(),
-                                    (page.height * scale).toInt(),
+                                val pdfWidth = page.width
+                                val safeScale = if (pdfWidth * scale > MAX_WIDTH) (MAX_WIDTH / pdfWidth) else scale.toFloat()
+                                val renderedWidth = max(1, (page.width * safeScale).toInt())
+                                val renderedHeight = max(1, (page.height * safeScale).toInt())
+                                val renderedPage = Bitmap.createBitmap(
+                                    renderedWidth,
+                                    renderedHeight,
                                     Bitmap.Config.ARGB_8888
                                 )
-                                val canvas = android.graphics.Canvas(renderedPage);
-                                canvas.drawColor(android.graphics.Color.WHITE);
-                                page.render(
-                                    renderedPage,
-                                    null,
-                                    null,
-                                    PdfRenderer.Page.RENDER_MODE_FOR_PRINT
-                                )
-                                page.close()
-                                val temp = File.createTempFile(
-                                    "${pdfFileName}_$i",
-                                    ".$compressFormat", context.cacheDir
-                                )
-                                FileOutputStream(temp).use { out ->
-                                    renderedPage.compress(
-                                        ImageUtil.getTargetFormat(compressFormat),
-                                        compressQuality,
-                                        out
+                                try {
+                                    val canvas = android.graphics.Canvas(renderedPage)
+                                    canvas.drawColor(android.graphics.Color.WHITE)
+                                    page.render(
+                                        renderedPage,
+                                        null,
+                                        null,
+                                        PdfRenderer.Page.RENDER_MODE_FOR_PRINT
                                     )
+                                    page.close()
+                                    val temp = File.createTempFile(
+                                        "${pdfFileName}_$i",
+                                        ".$compressFormat", context.cacheDir
+                                    )
+                                    FileOutputStream(temp).use { out ->
+                                        renderedPage.compress(
+                                            ImageUtil.getTargetFormat(compressFormat),
+                                            compressQuality,
+                                            out
+                                        )
+                                    }
+                                    result.put(temp.path)
+                                } finally {
+                                    if (!renderedPage.isRecycled) {
+                                        renderedPage.recycle()
+                                    }
                                 }
-                                result.put(temp.path)
-                                renderedPage?.recycle()
                             }
                         } else {
                             throw ImageUtil.ImageNotFoundException(src)
