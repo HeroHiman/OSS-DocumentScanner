@@ -46,6 +46,7 @@ jobs:
 
       - name: Install NativeScript CLI
         run: |
+          python3 -m pip install --upgrade pip six
           npm i -g @akylas/nativescript-cli --ignore-scripts --legacy-peer-deps
           ns package-manager set yarn2
           ns usage-reporting disable
@@ -54,10 +55,9 @@ jobs:
       - name: Download Native Libraries (OpenCV & Tesseract)
         run: |
           mkdir -p /tmp/dev_resources
-          curl -sL -o /tmp/dev_resources/dev_resources.zip https://github.com/ossappscollective/OSS-DocumentScanner/releases/download/dev_resources/dev_resources.zip || true
-          if [ -f /tmp/dev_resources/dev_resources.zip ]; then
-            unzip -o -q /tmp/dev_resources/dev_resources.zip -d .
-          fi
+          curl -fL -o /tmp/dev_resources/android.zip https://github.com/ossappscollective/OSS-DocumentScanner/releases/download/dev_resources/android.zip
+          unzip -o -q /tmp/dev_resources/android.zip -d .
+          rm -rf /tmp/dev_resources
 
       - name: Install dependencies
         run: yarn install
