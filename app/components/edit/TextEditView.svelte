@@ -97,7 +97,7 @@
     }
 
     async function onSave() {
-        if (!overlayText || !overlayText.trim()) {
+        if (!overlayText || !overlayText.trim() || overlayText === lc('tap_to_edit_text')) {
             closeModal(false);
             return;
         }
