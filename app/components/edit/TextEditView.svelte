@@ -97,9 +97,15 @@
     }
 
     async function onSave() {
-        if (!overlayText || !overlayText.trim() || overlayText === lc('tap_to_edit_text')) {
+        if (!overlayText || !overlayText.trim()) {
             closeModal(false);
             return;
+        }
+        if (overlayText === lc('tap_to_edit_text')) {
+            await editTextDialog();
+            if (!overlayText || !overlayText.trim() || overlayText === lc('tap_to_edit_text')) {
+                return;
+            }
         }
         try {
             await showLoading(lc('computing'));

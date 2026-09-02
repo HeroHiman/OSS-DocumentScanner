@@ -843,8 +843,21 @@ constructor(
                 )
                 if (saveInFolder != null) {
                     try {
-
-                        var imagePath = "$saveInFolder/${fileName ?: "cropedBitmap_$index.$compressFormat"}"
+                        val finalFileName = if (fileName != null) {
+                            if (jsonArray.length() > 1) {
+                                val dotIndex = fileName.lastIndexOf('.')
+                                if (dotIndex != -1) {
+                                    "${fileName.substring(0, dotIndex)}_$index.${fileName.substring(dotIndex + 1)}"
+                                } else {
+                                    "${fileName}_$index"
+                                }
+                            } else {
+                                fileName
+                            }
+                        } else {
+                            "cropedBitmap_${System.currentTimeMillis()}_$index.$compressFormat"
+                        }
+                        var imagePath = "$saveInFolder/$finalFileName"
                         FileOutputStream(imagePath).use { out ->
                             cropBitmap.compress(
                                 ImageUtil.getTargetFormat(compressFormat),

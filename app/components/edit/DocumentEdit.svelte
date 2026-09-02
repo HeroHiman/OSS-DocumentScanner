@@ -2,7 +2,7 @@
     import { Template } from '@nativescript-community/svelte-native/components';
     import { NativeViewElementNode } from '@nativescript-community/svelte-native/dom';
     import { CollectionView } from '@nativescript-community/ui-collectionview';
-    import { Img } from '@nativescript-community/ui-image';
+    import { Img, getImagePipeline } from '@nativescript-community/ui-image';
     import { showBottomSheet } from '@nativescript-community/ui-material-bottomsheet/svelte';
     import { confirm } from '@nativescript-community/ui-material-dialogs';
     import { Pager } from '@nativescript-community/ui-pager';
@@ -675,6 +675,11 @@
                 }
             });
             if (result) {
+                const page = document.pages[currentIndex];
+                if (page) {
+                    items.setItem(currentIndex, page);
+                }
+                await getImagePipeline().evictFromCache(item.imagePath);
                 await updateImageUris();
                 refreshPager();
             }

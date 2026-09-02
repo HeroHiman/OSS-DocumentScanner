@@ -2,6 +2,7 @@ import { Canvas, Paint, Style } from '@nativescript-community/ui-canvas';
 import { getImagePipeline } from '@nativescript-community/ui-image';
 import { Color, File, ImageSource } from '@nativescript/core';
 import { getImageExportSettings } from '~/utils/constants';
+import { recycleImages } from '~/utils/images';
 
 export interface DisplayBounds {
     displayedWidth: number;
@@ -165,8 +166,13 @@ export async function burnTextToImageFile({
         uiFontSize: fontSize
     });
 
-    // Create Canvas over ImageSource bitmap
-    const canvas = new Canvas(imageSource);
+    // Create a new mutable Canvas with the exact image dimensions
+    const canvas = new Canvas(imageWidth, imageHeight);
+    if (__ANDROID__ && imageSource.android) {
+        canvas.setDensity(imageSource.android.getDensity());
+    }
+    canvas.drawBitmap(imageSource, 0, 0, null);
+
     const paint = new Paint();
     paint.color = new Color(color);
     paint.style = Style.FILL;
@@ -186,7 +192,10 @@ export async function burnTextToImageFile({
     const quality = compressQuality !== undefined ? compressQuality : imageExportSettings.imageQuality;
     const format = cleanPath.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
 
-    const saved = imageSource.saveToFile(cleanPath, format as any, quality);
+    const outputImage = new ImageSource(canvas.getImage());
+    const saved = await outputImage.saveToFileAsync(cleanPath, format as any, quality);
+    recycleImages(imageSource, outputImage);
+    canvas.release();
 
     if (saved) {
         try {

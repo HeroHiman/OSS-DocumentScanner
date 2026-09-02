@@ -40,6 +40,10 @@
             showError(err);
         }
     }
+
+    export function updateImageUri() {
+        return (SVImageView?.nativeElement as any)?.updateImageUri?.();
+    }
     let imageToDestroy;
     function getImageSrc(item) {
         if (imageToDestroy) {

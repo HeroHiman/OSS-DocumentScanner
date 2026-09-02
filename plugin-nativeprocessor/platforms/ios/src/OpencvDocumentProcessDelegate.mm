@@ -398,8 +398,19 @@ uint32_t bitmapInfo = kCGImageAlphaPremultipliedLast;
         }
       }
       if (saveInFolder != nil && ![saveInFolder isEqual:[NSNull null]]) {
-        
-          NSString* imagePath = [NSString stringWithFormat:@"%@/%@", saveInFolder, fileName ?: [NSString stringWithFormat:@"cropedBitmap_%lu.%@", static_cast<unsigned long>(index), compressFormat]];
+        NSString* actualFileName;
+        if (fileName != nil && ![fileName isEqual:[NSNull null]]) {
+          if ([quadsArray count] > 1) {
+            NSString* ext = [fileName pathExtension];
+            NSString* base = [fileName stringByDeletingPathExtension];
+            actualFileName = [NSString stringWithFormat:@"%@_%lu.%@", base, static_cast<unsigned long>(index), ext];
+          } else {
+            actualFileName = fileName;
+          }
+        } else {
+          actualFileName = [NSString stringWithFormat:@"cropedBitmap_%lu.%@", static_cast<unsigned long>(index), compressFormat];
+        }
+        NSString* imagePath = [NSString stringWithFormat:@"%@/%@", saveInFolder, actualFileName];
         if ([compressFormat isEqualToString:@"jpg"]) {
           NSError *error = nil;
           //          std::vector<int> compression_params;
