@@ -1,6 +1,6 @@
 <script lang="ts">
     import { NativeViewElementNode } from '@nativescript-community/svelte-native/dom';
-    import { Application, EventData, Page, PanGestureEventData, View, layout } from '@nativescript/core';
+    import { Application, EventData, Page, PanGestureEventData, Utils, View } from '@nativescript/core';
     import { AndroidActivityBackPressedEventData } from '@nativescript/core/application';
     import { closeModal } from '@shared/utils/svelte/ui';
     import { showError } from '@shared/utils/showError';
@@ -52,8 +52,8 @@
     function onContainerLayout(event: EventData) {
         const view = event.object as View;
         if (view) {
-            const measuredW = layout.toDeviceIndependentPixels(view.getMeasuredWidth());
-            const measuredH = layout.toDeviceIndependentPixels(view.getMeasuredHeight());
+            const measuredW = Utils.layout.toDeviceIndependentPixels(view.getMeasuredWidth());
+            const measuredH = Utils.layout.toDeviceIndependentPixels(view.getMeasuredHeight());
             if (measuredW > 0 && measuredH > 0) {
                 containerWidth = measuredW;
                 containerHeight = measuredH;
