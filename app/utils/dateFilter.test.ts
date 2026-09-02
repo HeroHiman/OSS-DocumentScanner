@@ -4,7 +4,22 @@ import { filterPagesByDateRange, getPageTimestamp } from './dateFilter';
 import type { OCRDocument, OCRPage } from '~/models/OCRDocument';
 
 describe('getPageTimestamp', () => {
-    it('returns page.createdDate if present', () => {
+    it('prioritizes page.extra.dateTimestamp or page.extra.date if present', () => {
+        const pageWithExtra = {
+            createdDate: 1725264000000, // Today
+            extra: { date: '2026-02-26' }
+        } as any;
+        const expected = dayjs('2026-02-26').valueOf();
+        expect(getPageTimestamp(pageWithExtra)).toBe(expected);
+
+        const pageWithTimestamp = {
+            createdDate: 1725264000000,
+            extra: { dateTimestamp: 1772064000000 }
+        } as any;
+        expect(getPageTimestamp(pageWithTimestamp)).toBe(1772064000000);
+    });
+
+    it('returns page.createdDate if extra date is absent', () => {
         const page = { createdDate: 1700000000000 } as OCRPage;
         expect(getPageTimestamp(page)).toBe(1700000000000);
     });
@@ -38,7 +53,7 @@ describe('filterPagesByDateRange', () => {
 
     const samplePages = [
         { page: { id: 'p1', createdDate: jan10 } as OCRPage, document: { id: 'd1' } as OCRDocument },
-        { page: { id: 'p2', createdDate: feb26 } as OCRPage, document: { id: 'd1' } as OCRDocument },
+        { page: { id: 'p2', createdDate: feb26, extra: { date: '2026-02-26' } } as any, document: { id: 'd1' } as OCRDocument },
         { page: { id: 'p3', createdDate: mar15 } as OCRPage, document: { id: 'd1' } as OCRDocument },
         { page: { id: 'p4', createdDate: apr26 } as OCRPage, document: { id: 'd1' } as OCRDocument },
         { page: { id: 'p5', createdDate: may10 } as OCRPage, document: { id: 'd1' } as OCRDocument }
@@ -54,6 +69,12 @@ describe('filterPagesByDateRange', () => {
         const endDate = dayjs('2026-04-26').valueOf();
         const filtered = filterPagesByDateRange(samplePages, startDate, endDate);
 
+        expect(filtered.length).toBe(3);
+        expect(filtered.map((item) => item.page.id)).toEqual(['p2', 'p3', 'p4']);
+    });
+
+    it('filters pages with string date parameters', () => {
+        const filtered = filterPagesByDateRange(samplePages, '2026-02-26', '2026-04-26');
         expect(filtered.length).toBe(3);
         expect(filtered.map((item) => item.page.id)).toEqual(['p2', 'p3', 'p4']);
     });

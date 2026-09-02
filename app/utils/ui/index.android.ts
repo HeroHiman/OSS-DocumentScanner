@@ -177,12 +177,26 @@ export async function pickColor(color: Color | string, options: { alpha?: boolea
 
 export async function pickDate(currentDate: Dayjs) {
     return new Promise<number>((resolve, reject) => {
+        let confirmed = false;
+        let selectedValue: number = null;
         const datePicker = com.google.android.material.datepicker.MaterialDatePicker.Builder.datePicker().setTitleText(lc('pick_date')).setSelection(new java.lang.Long(currentDate.valueOf())).build();
+        datePicker.addOnPositiveButtonClickListener(
+            new com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener({
+                onPositiveButtonClick: (selection) => {
+                    confirmed = true;
+                    selectedValue = selection ? (selection as java.lang.Long).longValue() : null;
+                }
+            })
+        );
         datePicker.addOnDismissListener(
             new android.content.DialogInterface.OnDismissListener({
                 onDismiss: () => {
-                    const selection = datePicker.getSelection();
-                    resolve(selection ? selection.longValue() : null);
+                    if (confirmed && selectedValue != null) {
+                        const offsetMs = new Date().getTimezoneOffset() * 60 * 1000;
+                        resolve(selectedValue + offsetMs);
+                    } else {
+                        resolve(null);
+                    }
                 }
             })
         );
