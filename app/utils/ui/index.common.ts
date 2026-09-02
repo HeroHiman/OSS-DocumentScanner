@@ -777,8 +777,10 @@ export async function showPDFPopoverMenu({
                                     const password = componentInstanceInfo.viewInstance.password;
                                     const jpegQuality = componentInstanceInfo.viewInstance.jpegQuality;
                                     const folder = componentInstanceInfo.viewInstance.folder;
+                                    const startDate = componentInstanceInfo.viewInstance.startDate;
+                                    const endDate = componentInstanceInfo.viewInstance.endDate;
                                     showLoading(lc('exporting'));
-                                    DEV_LOG && console.log('exportPDF', folder, filename, jpegQuality, !!password);
+                                    DEV_LOG && console.log('exportPDF', folder, filename, jpegQuality, !!password, startDate, endDate);
                                     if (__ANDROID__) {
                                         await requestStoragePermission();
                                     }
@@ -787,6 +789,8 @@ export async function showPDFPopoverMenu({
                                         document,
                                         folder,
                                         filename,
+                                        startDate,
+                                        endDate,
                                         options: {
                                             jpegQuality,
                                             password
@@ -850,6 +854,8 @@ export async function showPDFPopoverMenu({
                                 const password = componentInstanceInfo.viewInstance.password;
                                 const jpegQuality = componentInstanceInfo.viewInstance.jpegQuality;
                                 const folder = componentInstanceInfo.viewInstance.folder;
+                                const startDate = componentInstanceInfo.viewInstance.startDate;
+                                const endDate = componentInstanceInfo.viewInstance.endDate;
                                 DEV_LOG &&
                                     console.log(
                                         'bulk export',
@@ -866,6 +872,8 @@ export async function showPDFPopoverMenu({
                                         document: doc,
                                         folder,
                                         filename,
+                                        startDate,
+                                        endDate,
                                         options: {
                                             jpegQuality,
                                             password

@@ -31,6 +31,8 @@ export interface PDFExportOptions {
     folder?: string;
     filename?: string;
     compress?: boolean;
+    startDate?: number;
+    endDate?: number;
     options?: Partial<PDFExportBaseOptions>;
 }
 

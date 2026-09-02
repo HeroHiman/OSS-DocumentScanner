@@ -6,11 +6,18 @@ import { CustomError, SilentError, TimeoutError } from '@akylas/nativescript-app
 import { generatePDFASync } from 'plugin-nativeprocessor';
 import { getFileNameForDocument, lc } from '~/helpers/locale';
 import { PDF_EXT } from '~/utils/constants';
+import { filterPagesByDateRange } from '~/utils/dateFilter';
 import { recycleImages } from '~/utils/images';
 import { getPageColorMatrix } from '~/utils/matrix';
 import { pkpassToImage } from '~/utils/pkpass';
 import { PDFExportOptions, getPDFDefaultExportOptions } from './PDFCanvas';
-export async function exportPDFAsync({ compress, document, filename, folder, options: baseOptions, pages }: PDFExportOptions): Promise<string> {
+export async function exportPDFAsync({ compress, document, filename, folder, options: baseOptions, pages, startDate, endDate }: PDFExportOptions): Promise<string> {
+    if (startDate || endDate) {
+        pages = filterPagesByDateRange(pages, startDate, endDate);
+        if (!pages.length) {
+            throw new SilentError(lc('no_pages_in_date_range'));
+        }
+    }
     DEV_LOG && console.log('exportPDFAsync', pages.length, folder, filename);
     if (!filename) {
         filename = getFileNameForDocument(document) + PDF_EXT;
