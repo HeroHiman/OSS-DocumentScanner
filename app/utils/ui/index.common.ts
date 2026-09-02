@@ -417,14 +417,14 @@ export async function importAndScanImageOrPdfFromUris({ canGoToView = true, docu
                 if (pagesToAdd.length) {
                     const nbPagesBefore = document?.pages.length ?? 0;
                     if (document) {
-                        await document.addPages(pagesToAdd);
+                        await document.addPages(pagesToAdd, true, false, 0);
                         await document.save({}, true);
                         showSnack({ message: lcp('imported_nb_pages', pagesToAdd.length) });
                     } else {
                         document = await OCRDocument.createDocument(pagesToAdd, folder);
                     }
 
-                    await goToDocumentAfterScan(document, nbPagesBefore, canGoToView);
+                    await goToDocumentAfterScan(document, nbPagesBefore, canGoToView, 0);
                     return document;
                 }
             }
@@ -1843,10 +1843,10 @@ export async function processCameraImage({
     showSnack({ message: lc('no_document_found') });
     return false;
 }
-export async function goToDocumentAfterScan(document?: OCRDocument, oldPagesNumber = 0, canGoToView = true) {
+export async function goToDocumentAfterScan(document?: OCRDocument, oldPagesNumber = 0, canGoToView = true, startPageIndex = 0) {
     await hideLoading();
     // await timeout(1000);
-    DEV_LOG && console.log('goToDocumentAfterScan', document.pages.length, oldPagesNumber, canGoToView);
+    DEV_LOG && console.log('goToDocumentAfterScan', document.pages.length, oldPagesNumber, canGoToView, startPageIndex);
     if (oldPagesNumber === 0 || document.pages.length - oldPagesNumber === 1) {
         const component = (await import('~/components/edit/DocumentEdit.svelte')).default;
         DEV_LOG && console.log('goToDocumentAfterScan', document.pages.length);
@@ -1854,7 +1854,7 @@ export async function goToDocumentAfterScan(document?: OCRDocument, oldPagesNumb
             page: component,
             props: {
                 document,
-                startPageIndex: document.pages.length - 1,
+                startPageIndex: startPageIndex ?? 0,
                 transitionOnBack: null
             }
         });

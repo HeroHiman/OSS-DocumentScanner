@@ -265,7 +265,7 @@ export class OCRDocument extends Observable implements Document {
         return addedPage;
     }
 
-    async addPages(pagesData?: PageData[], notify = true, createIfNotExisting = false) {
+    async addPages(pagesData?: PageData[], notify = true, createIfNotExisting = false, index?: number) {
         const dataFolderPath = documentsService.dataFolder.path;
         DEV_LOG && console.log('addPages', dataFolderPath, JSON.stringify(pagesData));
         if (pagesData) {
@@ -348,7 +348,11 @@ export class OCRDocument extends Observable implements Document {
             });
             // for (let index = 0; index < length; index++) {}
             if (this.pages) {
-                this.pages.push(...pages);
+                if (index !== undefined) {
+                    this.pages.splice(index, 0, ...pages);
+                } else {
+                    this.pages.push(...pages);
+                }
             } else {
                 this.pages = pages;
             }
@@ -360,7 +364,11 @@ export class OCRDocument extends Observable implements Document {
                 );
             // this.save();
             if (this.#observables) {
-                this.#observables.push(...pages);
+                if (index !== undefined) {
+                    this.#observables.splice(index, 0, ...pages);
+                } else {
+                    this.#observables.push(...pages);
+                }
             }
             if (notify) {
                 documentsService.notify({ eventName: EVENT_DOCUMENT_PAGES_ADDED, pages, doc: this } as DocumentPagesAddedEventData);

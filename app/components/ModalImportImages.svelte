@@ -67,6 +67,44 @@
         currentIndex += delta;
     }
 
+    function addCrop() {
+        const item = items[currentIndex];
+        if (!item.quads) {
+            item.quads = [];
+        }
+        const shouldInverse = item.imageRotation % 180 !== 0;
+        const imageWidth = shouldInverse ? item.imageHeight : item.imageWidth;
+        const imageHeight = shouldInverse ? item.imageWidth : item.imageHeight;
+
+        const count = item.quads.length;
+        const offset = (count * 40) % 160;
+        const marginX = Math.min(imageWidth * 0.15 + offset, imageWidth * 0.4);
+        const marginY = Math.min(imageHeight * 0.15 + offset, imageHeight * 0.4);
+
+        item.quads = [
+            ...item.quads,
+            [
+                [marginX, marginY],
+                [imageWidth - marginX, marginY],
+                [imageWidth - marginX, imageHeight - marginY],
+                [marginX, imageHeight - marginY]
+            ]
+        ];
+        items = [...items];
+        currentItem = items[currentIndex];
+        pager?.nativeView?.refreshVisibleItems();
+    }
+
+    function removeCrop() {
+        const item = items[currentIndex];
+        if (item.quads && item.quads.length > 1) {
+            item.quads = item.quads.slice(0, item.quads.length - 1);
+            items = [...items];
+            currentItem = items[currentIndex];
+            pager?.nativeView?.refreshVisibleItems();
+        }
+    }
+
     function resetCrop() {
         const item = items[currentIndex];
         const shouldInverse = item.imageRotation % 180 !== 0;
@@ -74,12 +112,16 @@
         const imageHeight = shouldInverse ? item.imageWidth : item.imageHeight;
         DEV_LOG && console.log('resetCrop', item);
         // const editingImage = item.editingImage;
-        item.quads = item.quads.map((quad) => [
-            [0, 0],
-            [imageWidth - 0, 0],
-            [imageWidth - 0, imageHeight - 0],
-            [0, imageHeight - 0]
-        ]);
+        item.quads = [
+            [
+                [0, 0],
+                [imageWidth - 0, 0],
+                [imageWidth - 0, imageHeight - 0],
+                [0, imageHeight - 0]
+            ]
+        ];
+        items = [...items];
+        currentItem = items[currentIndex];
         pager.nativeView.refreshVisibleItems();
     }
 
@@ -136,6 +178,12 @@
             on:tap={() => changePage(1)}
         />
         <mdbutton class="fab" colSpan={3} elevation={0} horizontalAlignment="center" row={4} text="mdi-check" variant="text" on:tap={onTapFinish} />
+        <stacklayout colSpan={3} horizontalAlignment="left" orientation="horizontal" row={4}>
+            <mdbutton class="icon-btn" color={textColor} text="mdi-crop" variant="text" verticalAlignment="center" on:tap={addCrop} />
+            {#if currentItem?.quads?.length > 1}
+                <mdbutton class="icon-btn" color={textColor} text="mdi-crop-rotate" variant="text" verticalAlignment="center" on:tap={removeCrop} />
+            {/if}
+        </stacklayout>
         <mdbutton
             class="icon-btn"
             colSpan={3}
@@ -149,8 +197,12 @@
             on:tap={resetCrop}
         />
         <CActionBar backgroundColor="transparent" buttonsDefaultVisualState={visualState} colSpan={3} modalWindow={true} {onGoBack} title={null}>
-            <mdbutton class="actionBarButton" defaultVisualState={visualState} isEnabled={currentItem?.undos.length > 0} text="mdi-undo" variant="text" on:tap={onUndo} />
-            <mdbutton class="actionBarButton" defaultVisualState={visualState} isEnabled={currentItem?.redos.length > 0} text="mdi-redo" variant="text" on:tap={onRedo} />
+            {#if currentItem?.quads?.length > 1}
+                <mdbutton class="actionBarButton" defaultVisualState={visualState} text="mdi-vector-rectangle-remove" variant="text" on:tap={removeCrop} />
+            {/if}
+            <mdbutton class="actionBarButton" defaultVisualState={visualState} text="mdi-vector-rectangle" variant="text" on:tap={addCrop} />
+            <mdbutton class="actionBarButton" defaultVisualState={visualState} isEnabled={currentItem?.undos?.length > 0} text="mdi-undo" variant="text" on:tap={onUndo} />
+            <mdbutton class="actionBarButton" defaultVisualState={visualState} isEnabled={currentItem?.redos?.length > 0} text="mdi-redo" variant="text" on:tap={onRedo} />
         </CActionBar>
     </gridlayout>
 </page>
