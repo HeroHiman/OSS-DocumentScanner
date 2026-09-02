@@ -181,7 +181,8 @@ export async function pickDate(currentDate: Dayjs) {
         datePicker.addOnDismissListener(
             new android.content.DialogInterface.OnDismissListener({
                 onDismiss: () => {
-                    resolve(datePicker.getSelection().longValue());
+                    const selection = datePicker.getSelection();
+                    resolve(selection ? selection.longValue() : null);
                 }
             })
         );

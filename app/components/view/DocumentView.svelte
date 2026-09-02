@@ -48,6 +48,7 @@
         importAndScanImage,
         importImageFromCamera,
         onBackButton,
+        pickDate,
         showImagePopoverMenu,
         showLoading,
         showPDFPopoverMenu,
@@ -152,18 +153,12 @@
 
     async function onDateBadgeTap(item: Item, event) {
         try {
-            const initialDate = item.page.extra?.date ? new Date(item.page.extra.date as string) : new Date(item.page.createdDate || Date.now());
-            const { DateTimePicker } = await import('@nativescript/datetimepicker');
-            const result = await DateTimePicker.pickDate({
-                context: page?.nativeView?._context,
-                date: initialDate,
-                title: lc('select_date'),
-                okButtonText: lc('ok'),
-                cancelButtonText: lc('cancel')
-            });
-            if (result) {
-                const newDate = result.toISOString();
-                const dateTimestamp = result.getTime();
+            const initialDate = item.page.extra?.date ? dayjs(item.page.extra.date as string) : dayjs(item.page.createdDate || Date.now());
+            const resultTimestamp = await pickDate(initialDate);
+            if (resultTimestamp) {
+                const pickedDayjs = dayjs(resultTimestamp);
+                const newDate = pickedDayjs.toISOString();
+                const dateTimestamp = pickedDayjs.valueOf();
                 const currentExtra = item.page.extra || {};
                 await document.updatePage(
                     item.index,
