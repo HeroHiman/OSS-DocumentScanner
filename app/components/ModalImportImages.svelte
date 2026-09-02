@@ -148,6 +148,7 @@
                 <CropView {...item} on:undosChanged={onUndosChanged} />
             </Template>
         </pager>
+        <label colSpan={3} color={textColor} fontSize={13} fontWeight="bold" horizontalAlignment="left" margin="10 0 0 12" row={2} text={`${lc('image')} ${currentIndex + 1} / ${items.length}`} />
         <PageIndicator colSpan={3} horizontalAlignment="right" margin="10 10 0 0" row={2} scale={$fontScale} text={`${currentIndex + 1}/${items.length}`} />
         <mdbutton
             class="icon-btn"
@@ -196,7 +197,7 @@
             verticalAlignment="center"
             on:tap={resetCrop}
         />
-        <CActionBar backgroundColor="transparent" buttonsDefaultVisualState={visualState} colSpan={3} modalWindow={true} {onGoBack} title={null}>
+        <CActionBar backgroundColor="transparent" buttonsDefaultVisualState={visualState} colSpan={3} modalWindow={true} {onGoBack} title={`${currentIndex + 1} / ${items.length}`}>
             {#if currentItem?.quads?.length > 1}
                 <mdbutton class="actionBarButton" defaultVisualState={visualState} text="mdi-vector-rectangle-remove" variant="text" on:tap={removeCrop} />
             {/if}

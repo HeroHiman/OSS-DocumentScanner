@@ -189,9 +189,10 @@ export async function importAndScanImageOrPdfFromUris({ canGoToView = true, docu
         // We do it in batch of 5 to prevent memory issues
         const pdfImages = await doInBatch(
             pdf,
-            (pdfPath: string) =>
+            (pdfPath: string, index) =>
                 new Promise<string[]>(async (resolve, reject) => {
                     try {
+                        updateLoadingProgress({ text: `${lc('importing')} (${index + 1}/${pdf.length})` });
                         const start = Date.now();
                         DEV_LOG && console.log('importFromPdf', pdfPath, Date.now() - start, 'ms');
 
@@ -212,9 +213,10 @@ export async function importAndScanImageOrPdfFromUris({ canGoToView = true, docu
         const pdfFlatImages = pdfImages.flat();
         const pdfItems: ImportImageData[] = await doInBatch(
             pdfFlatImages,
-            (sourceImagePath: string) =>
+            (sourceImagePath: string, index) =>
                 new Promise<ImportImageData>(async (resolve, reject) => {
                     try {
+                        updateLoadingProgress({ text: `${lc('importing')} (${index + 1}/${pdfFlatImages.length})` });
                         const start = Date.now();
                         DEV_LOG && console.log('importFromPdfImage', sourceImagePath);
                         const imageSize = await getImageSize(sourceImagePath);
@@ -236,9 +238,10 @@ export async function importAndScanImageOrPdfFromUris({ canGoToView = true, docu
         if (images.length > 0) {
             standardImageItems = await doInBatch(
                 images,
-                (sourceImagePath: string) =>
+                (sourceImagePath: string, index) =>
                     new Promise<ImportImageData>(async (resolve, reject) => {
                         try {
+                            updateLoadingProgress({ text: `${lc('importing')} (${index + 1}/${images.length})` });
                             const start = Date.now();
                             DEV_LOG && console.log('importFromImage', sourceImagePath);
                             const imageSize = await getImageSize(sourceImagePath);
@@ -323,6 +326,7 @@ export async function importAndScanImageOrPdfFromUris({ canGoToView = true, docu
                         (item: ImportImageData, index) =>
                             new Promise<PageData[]>(async (resolve, reject) => {
                                 try {
+                                    updateLoadingProgress({ text: `${lc('processing')} (${index + 1}/${items.length})` });
                                     const start = Date.now();
                                     DEV_LOG && console.log('about to cropDocument', index, JSON.stringify(item));
                                     const images: CropResult[] = [];
