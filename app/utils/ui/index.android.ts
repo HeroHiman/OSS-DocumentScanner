@@ -2,7 +2,9 @@ import { lc } from '@nativescript-community/l';
 import { AndroidActivityNewIntentEventData, Application, Color, Frame, Utils, View } from '@nativescript/core';
 import { throttle } from '@nativescript/core/utils';
 import { showError } from '@shared/utils/showError';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
+import { DateTimePicker } from '@nativescript/datetimepicker';
+import { lang } from '~/helpers/locale';
 import { documentsService } from '~/services/documents';
 import { ocrService } from '~/services/ocr';
 import { securityService } from '~/services/security';
@@ -175,33 +177,17 @@ export async function pickColor(color: Color | string, options: { alpha?: boolea
     });
 }
 
-export async function pickDate(currentDate: Dayjs) {
-    return new Promise<number>((resolve, reject) => {
-        try {
-            const activity = Application.android.foregroundActivity || Application.android.startActivity;
-            const date = currentDate || dayjs();
-            const picker = new android.app.DatePickerDialog(
-                activity,
-                new android.app.DatePickerDialog.OnDateSetListener({
-                    onDateSet: (view, year, month, dayOfMonth) => {
-                        const selected = dayjs().year(year).month(month).date(dayOfMonth).startOf('day');
-                        resolve(selected.valueOf());
-                    }
-                }),
-                date.year(),
-                date.month(),
-                date.date()
-            );
-            picker.setOnCancelListener(
-                new android.content.DialogInterface.OnCancelListener({
-                    onCancel: () => {
-                        resolve(null);
-                    }
-                })
-            );
-            picker.show();
-        } catch (error) {
-            reject(error);
-        }
+export async function pickDate(currentDate: Dayjs, context?) {
+    const activity = context || Application.android.foregroundActivity || Application.android.startActivity;
+    const result = await DateTimePicker.pickDate({
+        context: activity,
+        date: (currentDate || dayjs()).toDate(),
+        locale: lang,
+        okButtonText: lc('ok'),
+        cancelButtonText: lc('cancel')
     });
+    if (result) {
+        return result.valueOf();
+    }
+    return null;
 }
