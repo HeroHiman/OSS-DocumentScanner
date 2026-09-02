@@ -665,7 +665,7 @@
                 return;
             }
             const component = (await import('~/components/edit/TextEditView.svelte')).default;
-            await showModal({
+            const result = await showModal({
                 page: component,
                 fullscreen: true,
                 props: {
@@ -674,6 +674,10 @@
                     pageIndex: currentIndex
                 }
             });
+            if (result) {
+                await updateImageUris();
+                refreshPager();
+            }
         } catch (error) {
             showError(error);
         }

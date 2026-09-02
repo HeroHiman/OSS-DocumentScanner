@@ -504,10 +504,22 @@
             items.setItem(i, item);
         }
     }
+    function refreshItems() {
+        const newItems = document.pages.map((page, index) => ({ selected: false, page, index }));
+        if (items) {
+            items.splice(0, items.length, ...newItems);
+        } else {
+            items = new ObservableArray(newItems);
+        }
+        refreshCollectionView();
+    }
     function onDocumentUpdated(event: DocumentUpdatedEventData) {
         // DEV_LOG && console.log('onDocumentUpdated', document);
         if (document.id === event.doc.id) {
             document = event.doc;
+            if (event.changedProps?.has('pagesOrder')) {
+                refreshItems();
+            }
         }
     }
     function onDocumentsDeleted(event: DocumentDeletedEventData) {
@@ -670,9 +682,11 @@
                         break;
                     case 'sort_date_asc':
                         await document.sortPages('date_asc');
+                        refreshItems();
                         break;
                     case 'sort_date_desc':
                         await document.sortPages('date_desc');
+                        refreshItems();
                         break;
                     case 'ocr':
                         await detectOCR({ documents: [document] });
@@ -813,7 +827,7 @@
                         minDist: 20
                     })}
                     rippleColor={colorSurface}
-                    rows={`*,${40 * $fontScale}`}
+                    rows={`*,${48 * $fontScale}`}
                     on:tap={(e) => onItemTap(item, e)}
                     on:touch={(e) => onTouch(item, e)}
                     on:pan={(e) => onPan(item, e)}
@@ -829,34 +843,42 @@
                         stretch="aspectFit"
                         verticalAlignment="center"
                     />
-                    <canvaslabel color={colorOnSurfaceVariant} fontSize={14 * $fontScale} padding="10 0 0 0" row={1}>
-                        <cspan fontFamily={$fonts.mdi} fontSize={24} text="mdi-reorder-horizontal" visibility={inEditMode ? 'visible' : 'hidden'} />
-                        <cspan
-                            paddingLeft={inEditMode ? 30 : 0}
-                            text={`${item.page.width} x ${item.page.height}\n${filesize(item.page.size, { output: 'string' })}`}
-                            textAlignment="left"
-                            verticalAlignment="bottom"
-                        />
-                        <!-- <cspan color={colorOnSurfaceVariant} fontSize={12} paddingTop={36} text={dayjs(item.doc.createdDate).format('L LT')} /> -->
-                        <!-- <cspan color={colorOnSurfaceVariant} fontSize={12} paddingTop={50} text={lcp('nb_pages', item.doc.pages.length)} /> -->
-                    </canvaslabel>
-                    <stacklayout
-                        horizontalAlignment="left"
-                        verticalAlignment="bottom"
-                        margin="0 5 5 5"
-                        rowSpan={2}
-                        on:tap={(e) => onDateBadgeTap(item, e)}
-                    >
-                        <label
-                            text={`📅 ${formatDisplayDate(item.page.extra?.date || item.page.createdDate)}`}
-                            fontSize={11 * $fontScale}
-                            color="#ffffff"
-                            textWrap={true}
-                            backgroundColor="#333333"
-                            padding="2 6"
-                            borderRadius={4}
-                        />
-                    </stacklayout>
+
+                    <!-- Left Column: Stacked Metadata -->
+                    <gridlayout row={1} columns="auto,*" verticalAlignment="center" margin="4 0 4 8">
+                        {#if inEditMode}
+                            <label col={0} fontFamily={$fonts.mdi} fontSize={20 * $fontScale} text="mdi-reorder-horizontal" color={colorOnSurfaceVariant} verticalAlignment="center" marginRight={6} />
+                        {/if}
+                        <stacklayout col={1} verticalAlignment="center">
+                            <!-- Resolution -->
+                            <label
+                                text={`${item.page.width} x ${item.page.height}`}
+                                fontSize={11 * $fontScale}
+                                color="#9CA3AF"
+                                marginBottom={2}
+                            />
+
+                            <!-- Date Badge (Fixed wrapping and overlap) -->
+                            <stacklayout
+                                orientation="horizontal"
+                                backgroundColor="#374151"
+                                padding="2 6"
+                                borderRadius={4}
+                                horizontalAlignment="left"
+                                on:tap={(e) => onDateBadgeTap(item, e)}
+                            >
+                                <label text="📅 " fontSize={11 * $fontScale} verticalAlignment="center" />
+                                <label
+                                    text={formatDisplayDate(item.page.extra?.date || item.page.createdDate) || 'No Date'}
+                                    fontSize={11 * $fontScale}
+                                    color="#60A5FA"
+                                    fontWeight="bold"
+                                    verticalAlignment="center"
+                                />
+                            </stacklayout>
+                        </stacklayout>
+                    </gridlayout>
+
                     <SelectedIndicator rowSpan={2} selected={item.selected} />
                     <PageIndicator rowSpan={2} scale={$fontScale} text={index + 1} on:longPress={(event) => startDragging(item, event)} />
                 </gridlayout>

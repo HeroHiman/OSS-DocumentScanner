@@ -146,9 +146,10 @@ export async function burnTextToImageFile({
         return { success: false, width: 0, height: 0, size: 0 };
     }
 
-    const imageSource = await ImageSource.fromFile(imagePath);
+    const cleanPath = imagePath.split('?')[0];
+    const imageSource = await ImageSource.fromFile(cleanPath);
     if (!imageSource) {
-        throw new Error(`Failed to load image from path: ${imagePath}`);
+        throw new Error(`Failed to load image from path: ${cleanPath}`);
     }
 
     const imageWidth = imageSource.width;
@@ -183,17 +184,20 @@ export async function burnTextToImageFile({
 
     const imageExportSettings = getImageExportSettings();
     const quality = compressQuality !== undefined ? compressQuality : imageExportSettings.imageQuality;
-    const format = imagePath.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
+    const format = cleanPath.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
 
-    const saved = imageSource.saveToFile(imagePath, format as any, quality);
+    const saved = imageSource.saveToFile(cleanPath, format as any, quality);
 
     if (saved) {
         try {
-            await getImagePipeline().evictFromCache(imagePath);
+            await getImagePipeline().evictFromCache(cleanPath);
+            if (imagePath !== cleanPath) {
+                await getImagePipeline().evictFromCache(imagePath);
+            }
         } catch (e) {
             DEV_LOG && console.log('evictFromCache error (ignored):', e);
         }
-        const file = File.fromPath(imagePath);
+        const file = File.fromPath(cleanPath);
         return {
             success: true,
             width: imageWidth,

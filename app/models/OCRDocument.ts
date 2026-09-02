@@ -522,10 +522,18 @@ export class OCRDocument extends Observable implements Document {
 
     async sortPages(order: 'date_asc' | 'date_desc' = 'date_asc') {
         const sortedPages = [...this.pages].sort((a, b) => {
-            const dateA = (a.extra?.dateTimestamp as number) || (a.extra?.date ? new Date(a.extra.date as string).getTime() : a.createdDate || 0);
-            const dateB = (b.extra?.dateTimestamp as number) || (b.extra?.date ? new Date(b.extra.date as string).getTime() : b.createdDate || 0);
-            return order === 'date_asc' ? dateA - dateB : dateB - dateA;
+            const rawA = a.extra?.dateTimestamp ?? (typeof a.extra?.date === 'string' ? new Date(a.extra.date).getTime() : a.createdDate);
+            const rawB = b.extra?.dateTimestamp ?? (typeof b.extra?.date === 'string' ? new Date(b.extra.date).getTime() : b.createdDate);
+            const timeA = typeof rawA === 'number' && !isNaN(rawA) ? rawA : (typeof rawA === 'string' ? new Date(rawA).getTime() : 0) || 0;
+            const timeB = typeof rawB === 'number' && !isNaN(rawB) ? rawB : (typeof rawB === 'string' ? new Date(rawB).getTime() : 0) || 0;
+            const safeA = isNaN(timeA) ? 0 : timeA;
+            const safeB = isNaN(timeB) ? 0 : timeB;
+            return order === 'date_asc' ? safeA - safeB : safeB - safeA;
         });
+        this.pages = [...sortedPages];
+        if (this.#observables) {
+            this.#observables.splice(0, this.#observables.length, ...this.pages);
+        }
         const newOrder = sortedPages.map((p) => p.id);
         await this.save({ pagesOrder: newOrder }, true, true);
     }
