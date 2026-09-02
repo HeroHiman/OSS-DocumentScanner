@@ -78,9 +78,11 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: document-scanner-apk
+          name: document-scanner-debug-apk
           path: |
-            platforms/android/app/build/outputs/apk/**/*.apk
+            build/**/outputs/apk/**/*.apk
+            build/**/*.apk
+            platforms/**/outputs/apk/**/*.apk
             dist/*.apk
           retention-days: 7
-          if-no-files-found: warn
+          if-no-files-found: error
