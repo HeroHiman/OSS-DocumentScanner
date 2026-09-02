@@ -170,7 +170,7 @@ export async function burnTextToImageFile({
     paint.color = new Color(color);
     paint.style = Style.FILL;
     paint.textSize = canvasFontSize;
-    paint.antiAlias = true;
+    paint.setAntiAlias(true);
 
     // Text rendering: support multiple lines
     const lines = text.split('\n');

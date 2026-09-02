@@ -151,6 +151,14 @@
         }
     }
 
+    function formatDisplayDate(dateValue: any) {
+        if (!dateValue) return '';
+        if (typeof dateValue === 'string' && dateValue.includes(' ')) {
+            return dayjs(dateValue).isValid() ? dayjs(dateValue).format('L') : dateValue.split(' ')[0];
+        }
+        return dayjs(dateValue).format('L');
+    }
+
     async function onDateBadgeTap(item: Item, event) {
         try {
             const initialDate = item.page.extra?.date ? dayjs(item.page.extra.date as string) : dayjs(item.page.createdDate || Date.now());
@@ -832,21 +840,23 @@
                         <!-- <cspan color={colorOnSurfaceVariant} fontSize={12} paddingTop={36} text={dayjs(item.doc.createdDate).format('L LT')} /> -->
                         <!-- <cspan color={colorOnSurfaceVariant} fontSize={12} paddingTop={50} text={lcp('nb_pages', item.doc.pages.length)} /> -->
                     </canvaslabel>
-                    <canvaslabel
-                        color={colorOnSurfaceVariant}
-                        fontSize={11 * $fontScale}
-                        padding="4 8"
-                        backgroundColor="#00000044"
-                        borderRadius={6}
+                    <stacklayout
                         horizontalAlignment="left"
                         verticalAlignment="bottom"
-                        margin={6}
+                        margin="0 5 5 5"
                         rowSpan={2}
                         on:tap={(e) => onDateBadgeTap(item, e)}
                     >
-                        <cspan fontFamily={$fonts.mdi} fontSize={14 * $fontScale} text="mdi-calendar" color={colorPrimary} />
-                        <cspan text={` ${dayjs(item.page.extra?.date || item.page.createdDate).format('L')}`} color="white" />
-                    </canvaslabel>
+                        <label
+                            text={`📅 ${formatDisplayDate(item.page.extra?.date || item.page.createdDate)}`}
+                            fontSize={11 * $fontScale}
+                            color="#ffffff"
+                            textWrap={true}
+                            backgroundColor="#333333"
+                            padding="2 6"
+                            borderRadius={4}
+                        />
+                    </stacklayout>
                     <SelectedIndicator rowSpan={2} selected={item.selected} />
                     <PageIndicator rowSpan={2} scale={$fontScale} text={index + 1} on:longPress={(event) => startDragging(item, event)} />
                 </gridlayout>
@@ -868,6 +878,7 @@
             {/if}
         </stacklayout>
         <CActionBar
+            row={0}
             forceCanGoBack={inEditMode || nbSelected > 0}
             onGoBack={nbSelected ? unselectAll : inEditMode ? switchEditMode : null}
             onTitleTap={() => (editingTitle = true)}

@@ -2,6 +2,7 @@
     import { NativeViewElementNode } from '@nativescript-community/svelte-native/dom';
     import { Application, EventData, Page, PanGestureEventData, Utils, View } from '@nativescript/core';
     import { AndroidActivityBackPressedEventData } from '@nativescript/core/application';
+    import { prompt } from '@nativescript/core/ui/dialogs';
     import { closeModal } from '@shared/utils/svelte/ui';
     import { showError } from '@shared/utils/showError';
     import { onDestroy, onMount } from 'svelte';
@@ -11,7 +12,7 @@
     import { OCRDocument, OCRPage } from '~/models/OCRDocument';
     import { burnTextToImageFile } from '~/utils/textOverlay';
     import { hideLoading, onBackButton, showLoading, showSnack } from '~/utils/ui';
-    import { colors, screenHeightDips, screenWidthDips, windowInset } from '~/variables';
+    import { colors, fonts, screenHeightDips, screenWidthDips, windowInset } from '~/variables';
 
     let { colorBackground, colorOnBackground, colorPrimary, colorOutline, colorSurfaceContainer } = $colors;
     $: ({ colorBackground, colorOnBackground, colorPrimary, colorOutline, colorSurfaceContainer } = $colors);
@@ -32,7 +33,6 @@
     let panStartY = 0;
     let selectedColor = '#ff0000';
     let fontSize = 24;
-    let isEditingText = true;
 
     // Viewport dimensions
     let containerWidth = screenWidthDips;
@@ -58,6 +58,25 @@
                 containerWidth = measuredW;
                 containerHeight = measuredH;
             }
+        }
+    }
+
+    // Open a native dialog to edit the text safely
+    async function editTextDialog() {
+        try {
+            const result = await prompt({
+                title: lc('add_text'),
+                message: lc('tap_to_edit_text'),
+                defaultText: overlayText === lc('tap_to_edit_text') ? '' : overlayText,
+                okButtonText: lc('apply'),
+                cancelButtonText: lc('cancel')
+            });
+
+            if (result.result && result.text.trim() !== '') {
+                overlayText = result.text;
+            }
+        } catch (error) {
+            showError(error);
         }
     }
 
@@ -149,39 +168,46 @@
 
             <!-- Interactive Absolute Text Placement Layer -->
             <absolutelayout width="100%" height="100%">
-                <gridlayout
+                <label
+                    text={overlayText}
                     left={textX}
                     top={textY}
                     on:pan={onPan}
-                    backgroundColor="#00000033"
+                    on:tap={editTextDialog}
+                    color={selectedColor}
+                    fontSize={fontSize}
+                    fontWeight="bold"
+                    padding="4"
+                    borderWidth="2"
                     borderColor={selectedColor}
+                    backgroundColor="#00000033"
                     borderRadius={4}
-                    borderWidth={1}
-                    padding={4}
-                >
-                    <label
-                        text={overlayText}
-                        color={selectedColor}
-                        fontSize={fontSize}
-                        textWrap={true}
-                    />
-                </gridlayout>
+                    textWrap={true}
+                />
             </absolutelayout>
         </gridlayout>
 
         <!-- Bottom Controls Layer -->
         <stacklayout row={2} backgroundColor={colorSurfaceContainer} padding={12} borderTopColor={colorOutline} borderTopWidth={1}>
-            <!-- Text Input Field -->
-            <gridlayout columns="*,auto" margin="0 0 8 0">
-                <textfield
+            <!-- Tap to edit text card/button -->
+            <gridlayout columns="*,auto" margin="0 0 8 0" backgroundColor="#00000022" borderRadius={8} padding="10 12" on:tap={editTextDialog}>
+                <label
                     col={0}
                     text={overlayText}
-                    hint={lc('tap_to_edit_text')}
-                    on:textChange={(e) => (overlayText = e.value)}
                     color={textColor}
-                    fontSize={16}
-                    autocapitalizationType="sentences"
+                    fontSize={15}
                     verticalAlignment="center"
+                    maxLines={2}
+                    lineBreak="end"
+                />
+                <label
+                    col={1}
+                    text="mdi-pencil"
+                    fontFamily={$fonts.mdi}
+                    fontSize={20}
+                    color={colorPrimary}
+                    verticalAlignment="center"
+                    marginLeft={8}
                 />
             </gridlayout>
 
