@@ -71,7 +71,7 @@ jobs:
         run: |
           ns build android --env.devlog --env.production=0
         env:
-          APP_ID: com.akylas.documentscanner
+          APP_ID: com.herohiman.documentscanner
           APP_BUILD_PATH: build/documentscanner
           APP_RESOURCES: App_Resources/documentscanner
 
