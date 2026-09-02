@@ -95,11 +95,11 @@
             <gridlayout columns="*,*" margin="0 10 10 10">
                 <gridlayout col={0} margin="0 4 0 0" padding="10 12" backgroundColor="#00000011" borderRadius={8} on:tap={selectStartDate} rows="auto,auto">
                     <label row={0} text={lc('from_date')} fontSize={11} color="gray" />
-                    <label row={1} text={startDate ? dayjs(startDate).format('ll') : lc('any_date')} fontSize={14} fontWeight="500" />
+                    <label row={1} text={startDate ? dayjs(startDate).format('MMM D, YYYY') : lc('any_date')} fontSize={14} fontWeight="500" />
                 </gridlayout>
                 <gridlayout col={1} margin="0 0 0 4" padding="10 12" backgroundColor="#00000011" borderRadius={8} on:tap={selectEndDate} rows="auto,auto">
                     <label row={0} text={lc('to_date')} fontSize={11} color="gray" />
-                    <label row={1} text={endDate ? dayjs(endDate).format('ll') : lc('any_date')} fontSize={14} fontWeight="500" />
+                    <label row={1} text={endDate ? dayjs(endDate).format('MMM D, YYYY') : lc('any_date')} fontSize={14} fontWeight="500" />
                 </gridlayout>
             </gridlayout>
         </stacklayout>

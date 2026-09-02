@@ -177,17 +177,13 @@ export async function pickColor(color: Color | string, options: { alpha?: boolea
     });
 }
 
-export async function pickDate(currentDate: Dayjs, context?) {
-    const activity = context || Application.android.foregroundActivity || Application.android.startActivity;
-    const result = await DateTimePicker.pickDate({
-        context: activity,
-        date: (currentDate || dayjs()).toDate(),
-        locale: lang,
-        okButtonText: lc('ok'),
-        cancelButtonText: lc('cancel')
+export async function pickDate(currentDate?: Dayjs | Date | number, context?) {
+    const view = (await import('~/components/common/DatePickerModal.svelte')).default;
+    return showBottomSheet({
+        view,
+        skipCollapsedState: true,
+        props: {
+            date: currentDate
+        }
     });
-    if (result) {
-        return result.valueOf();
-    }
-    return null;
 }

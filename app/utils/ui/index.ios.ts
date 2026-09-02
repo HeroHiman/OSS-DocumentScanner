@@ -1,6 +1,7 @@
 import { lc } from '@nativescript-community/l';
 import { Color, IOSHelper, View } from '@nativescript/core';
 import { DateTimePicker } from '@nativescript/datetimepicker';
+import { showBottomSheet } from '@nativescript-community/ui-material-bottomsheet/svelte';
 import { Dayjs } from 'dayjs';
 import { lang } from '~/helpers/locale';
 import { showSnack } from './index.common';
@@ -150,17 +151,13 @@ export async function pickColor(color: Color | string, { alpha, anchor }: { alph
     });
 }
 
-export async function pickDate(currentDate: Dayjs, context?) {
-    const result = await DateTimePicker.pickDate({
-        context,
-        date: currentDate.toDate(),
-        // minDate: currentDate.subtract(100, 'y').toDate(),
-        // maxDate: currentTime.add(100, 'y').toDate(),
-        locale: lang,
-        okButtonText: lc('ok'),
-        cancelButtonText: lc('cancel')
+export async function pickDate(currentDate?: Dayjs | Date | number, context?) {
+    const view = (await import('~/components/common/DatePickerModal.svelte')).default;
+    return showBottomSheet({
+        view,
+        skipCollapsedState: true,
+        props: {
+            date: currentDate
+        }
     });
-    if (result) {
-        return result.valueOf();
-    }
 }
