@@ -1,6 +1,6 @@
 const webpackConfig = require('./webpack.config.js');
 const webpack = require('webpack');
-const { readdirSync, readFileSync } = require('fs');
+const { existsSync, readdirSync, readFileSync } = require('fs');
 const { dirname, isAbsolute, join, relative, resolve } = require('path');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const nsWebpack = require('@akylas/nativescript-webpack');
@@ -166,7 +166,10 @@ module.exports = (env, params = {}) => {
     const supportedLocales = readdirSync(join(projectRoot, appPath, 'i18n'))
         .filter((s) => s.endsWith('.json'))
         .map((s) => s.replace('.json', ''));
-    const supportedColorThemes = readdirSync(join(projectRoot, appPath, 'themes', appId))
+    const themeDir = existsSync(join(projectRoot, appPath, 'themes', appId))
+        ? join(projectRoot, appPath, 'themes', appId)
+        : join(projectRoot, appPath, 'themes', CARD_APP ? 'com.akylas.cardwallet' : 'com.akylas.documentscanner');
+    const supportedColorThemes = readdirSync(themeDir)
         .filter((s) => s.endsWith('.json'))
         .map((s) => s.replace('.json', ''));
     console.log('supportedLocales', supportedLocales);

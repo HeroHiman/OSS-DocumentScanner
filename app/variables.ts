@@ -13,7 +13,13 @@ initVariables({
     onInitRootView: () => {
         hasCamera.set(deviceHasCamera());
     },
-    getTheme: (colorTheme) => require(`~/themes/${__APP_ID__}/${colorTheme}.json`)
+    getTheme: (colorTheme) => {
+        try {
+            return require(`~/themes/${__APP_ID__}/${colorTheme}.json`);
+        } catch (e) {
+            return require(`~/themes/com.akylas.documentscanner/${colorTheme}.json`);
+        }
+    }
 });
 
 export const startOnCam = ApplicationSettings.getBoolean(SETTINGS_START_ON_CAM, START_ON_CAM);
