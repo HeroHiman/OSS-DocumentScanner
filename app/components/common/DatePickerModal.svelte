@@ -29,6 +29,7 @@
     const yearsList = Array.from({ length: 24 }, (_, i) => currentYear - 12 + i);
 
     interface CalendarDay {
+        key: string;
         day: number;
         month: number;
         year: number;
@@ -48,6 +49,9 @@
 
         const days: CalendarDay[] = [];
         const today = dayjs();
+        const todayYear = today.year();
+        const todayMonth = today.month();
+        const todayDay = today.date();
 
         let row = 0;
         let col = 0;
@@ -57,30 +61,36 @@
             const d = daysInPrevMonth - i;
             const prevMonth = viewingMonth === 0 ? 11 : viewingMonth - 1;
             const prevYear = viewingMonth === 0 ? viewingYear - 1 : viewingYear;
+            const isSelected = selectedYear === prevYear && selectedMonth === prevMonth && selectedDay === d;
+            const isToday = todayYear === prevYear && todayMonth === prevMonth && todayDay === d;
             days.push({
+                key: `prev-${prevYear}-${prevMonth}-${d}`,
                 day: d,
                 month: prevMonth,
                 year: prevYear,
                 row,
                 col,
                 isCurrentMonth: false,
-                isSelected: selectedYear === prevYear && selectedMonth === prevMonth && selectedDay === d,
-                isToday: today.year() === prevYear && today.month() === prevMonth && today.date() === d
+                isSelected,
+                isToday
             });
             col++;
         }
 
         // Current month days
         for (let d = 1; d <= daysInMonth; d++) {
+            const isSelected = selectedYear === viewingYear && selectedMonth === viewingMonth && selectedDay === d;
+            const isToday = todayYear === viewingYear && todayMonth === viewingMonth && todayDay === d;
             days.push({
+                key: `cur-${viewingYear}-${viewingMonth}-${d}`,
                 day: d,
                 month: viewingMonth,
                 year: viewingYear,
                 row,
                 col,
                 isCurrentMonth: true,
-                isSelected: selectedYear === viewingYear && selectedMonth === viewingMonth && selectedDay === d,
-                isToday: today.year() === viewingYear && today.month() === viewingMonth && today.date() === d
+                isSelected,
+                isToday
             });
             col++;
             if (col === 7) {
@@ -94,15 +104,18 @@
         while (col > 0 && col < 7) {
             const nextMonth = viewingMonth === 11 ? 0 : viewingMonth + 1;
             const nextYear = viewingMonth === 11 ? viewingYear + 1 : viewingYear;
+            const isSelected = selectedYear === nextYear && selectedMonth === nextMonth && selectedDay === nextDay;
+            const isToday = todayYear === nextYear && todayMonth === nextMonth && todayDay === nextDay;
             days.push({
+                key: `next-${nextYear}-${nextMonth}-${nextDay}`,
                 day: nextDay,
                 month: nextMonth,
                 year: nextYear,
                 row,
                 col,
                 isCurrentMonth: false,
-                isSelected: selectedYear === nextYear && selectedMonth === nextMonth && selectedDay === nextDay,
-                isToday: today.year() === nextYear && today.month() === nextMonth && today.date() === nextDay
+                isSelected,
+                isToday
             });
             nextDay++;
             col++;
@@ -229,7 +242,7 @@
 
             <!-- Calendar Month Days -->
             <gridlayout row={2} columns="*,*,*,*,*,*,*" rows="auto,auto,auto,auto,auto,auto">
-                {#each calendarDays as d}
+                {#each calendarDays as d (d.key)}
                     <gridlayout
                         col={d.col}
                         row={d.row}
@@ -237,29 +250,37 @@
                         height={38}
                         borderRadius={19}
                         backgroundColor={d.isSelected ? colorPrimary : 'transparent'}
-                        borderColor={d.isToday && !d.isSelected ? colorPrimary : 'transparent'}
-                        borderWidth={d.isToday && !d.isSelected ? 1 : 0}
                         horizontalAlignment="center"
                         verticalAlignment="center"
-                        opacity={d.isCurrentMonth ? 1 : 0.35}
+                        opacity={d.isCurrentMonth ? 1 : 0.3}
                         margin="2"
                         on:tap={() => selectDay(d)}
                     >
                         <label
                             text={`${d.day}`}
                             fontSize={14}
-                            fontWeight={d.isSelected || d.isToday ? 'bold' : 'normal'}
-                            color={d.isSelected ? '#ffffff' : colorOnSurface}
+                            fontWeight={d.isSelected ? 'bold' : (d.isToday ? 'bold' : 'normal')}
+                            color={d.isSelected ? '#ffffff' : (d.isToday ? colorPrimary : colorOnSurface)}
                             horizontalAlignment="center"
                             verticalAlignment="center"
                         />
+                        {#if d.isToday && !d.isSelected}
+                            <label
+                                text="•"
+                                fontSize={10}
+                                color={colorPrimary}
+                                horizontalAlignment="center"
+                                verticalAlignment="bottom"
+                                margin="0 0 2 0"
+                            />
+                        {/if}
                     </gridlayout>
                 {/each}
             </gridlayout>
         {:else}
             <!-- View Mode 2: Year Selector Grid -->
             <gridlayout row={2} columns="*,*,*,*" rows="auto,auto,auto,auto,auto,auto" height={220} margin="8 0">
-                {#each yearsList as y, idx}
+                {#each yearsList as y, idx (y)}
                     <gridlayout
                         col={idx % 4}
                         row={Math.floor(idx / 4)}
