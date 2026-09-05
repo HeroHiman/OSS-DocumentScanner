@@ -8,7 +8,9 @@
 
 <script lang="ts">
     import dayjs from 'dayjs';
+    import { parseDateToTimestamp } from '~/utils/dateFilter';
     import { pickDate } from '~/utils/ui';
+    import { fonts } from '~/variables';
 
     export let jpegQuality;
     export let folder;
@@ -18,10 +20,37 @@
     export let startDate: number = null;
     export let endDate: number = null;
 
+    let startDateInputText = startDate ? dayjs(startDate).format('YYYY-MM-DD') : '';
+    let endDateInputText = endDate ? dayjs(endDate).format('YYYY-MM-DD') : '';
+
     $: DEV_LOG && console.log('jpegQuality', jpegQuality);
 
     function onFolderSelect(e) {
         folder = e.text;
+    }
+
+    function onStartDateTextChange(text: string) {
+        startDateInputText = text;
+        if (!text || !text.trim()) {
+            startDate = null;
+            return;
+        }
+        const ts = parseDateToTimestamp(text);
+        if (ts) {
+            startDate = ts;
+        }
+    }
+
+    function onEndDateTextChange(text: string) {
+        endDateInputText = text;
+        if (!text || !text.trim()) {
+            endDate = null;
+            return;
+        }
+        const ts = parseDateToTimestamp(text);
+        if (ts) {
+            endDate = ts;
+        }
     }
 
     async function selectStartDate() {
@@ -29,6 +58,7 @@
             const date = await pickDate(startDate ? dayjs(startDate) : dayjs());
             if (date) {
                 startDate = date;
+                startDateInputText = dayjs(date).format('YYYY-MM-DD');
             }
         } catch (error) {
             DEV_LOG && console.log('selectStartDate error', error);
@@ -40,6 +70,7 @@
             const date = await pickDate(endDate ? dayjs(endDate) : dayjs());
             if (date) {
                 endDate = date;
+                endDateInputText = dayjs(date).format('YYYY-MM-DD');
             }
         } catch (error) {
             DEV_LOG && console.log('selectEndDate error', error);
@@ -49,6 +80,8 @@
     function clearDateFilter() {
         startDate = null;
         endDate = null;
+        startDateInputText = '';
+        endDateInputText = '';
     }
 </script>
 
@@ -85,21 +118,72 @@
                 on:textChange={(e) => (password = e['value'].length ? e['value'] : null)}
             />
 
-            <!-- Date Range Filter Section -->
+            <!-- Date Range Filter Section with Direct Typing & Calendar Picker -->
             <gridlayout columns="*,auto" margin="10 10 4 10">
                 <label col={0} class="sectionHeader" text={lc('filter_by_date')} verticalAlignment="center" />
-                {#if startDate || endDate}
+                {#if startDate || endDate || startDateInputText || endDateInputText}
                     <label col={1} class="icon-btn" text="mdi-close-circle" fontSize={20} color="gray" verticalAlignment="center" on:tap={clearDateFilter} />
                 {/if}
             </gridlayout>
             <gridlayout columns="*,*" margin="0 10 10 10">
-                <gridlayout col={0} margin="0 4 0 0" padding="10 12" backgroundColor="#00000011" borderRadius={8} on:tap={selectStartDate} rows="auto,auto">
-                    <label row={0} text={lc('from_date')} fontSize={11} color="gray" />
-                    <label row={1} text={startDate ? dayjs(startDate).format('MMM D, YYYY') : lc('any_date')} fontSize={14} fontWeight="500" />
+                <!-- From Date Input -->
+                <gridlayout col={0} columns="*,auto" margin="0 4 0 0" padding="4 6" backgroundColor="#00000011" borderRadius={8} verticalAlignment="center">
+                    <stacklayout col={0} verticalAlignment="center">
+                        <label text={lc('from_date')} fontSize={10} color="gray" />
+                        <textfield
+                            hint="YYYY-MM-DD"
+                            placeholder={lc('any_date')}
+                            fontSize={13}
+                            padding="0"
+                            margin="2 0 0 0"
+                            text={startDateInputText}
+                            autocorrect={false}
+                            autocapitalizationType="none"
+                            keyboardType="datetime"
+                            on:textChange={(e) => onStartDateTextChange(e['value'])}
+                        />
+                    </stacklayout>
+                    <mdbutton
+                        col={1}
+                        variant="text"
+                        text="mdi-calendar"
+                        fontFamily={$fonts.mdi}
+                        fontSize={20}
+                        width={36}
+                        height={36}
+                        verticalAlignment="center"
+                        on:tap={selectStartDate}
+                    />
                 </gridlayout>
-                <gridlayout col={1} margin="0 0 0 4" padding="10 12" backgroundColor="#00000011" borderRadius={8} on:tap={selectEndDate} rows="auto,auto">
-                    <label row={0} text={lc('to_date')} fontSize={11} color="gray" />
-                    <label row={1} text={endDate ? dayjs(endDate).format('MMM D, YYYY') : lc('any_date')} fontSize={14} fontWeight="500" />
+
+                <!-- To Date Input -->
+                <gridlayout col={1} columns="*,auto" margin="0 0 0 4" padding="4 6" backgroundColor="#00000011" borderRadius={8} verticalAlignment="center">
+                    <stacklayout col={0} verticalAlignment="center">
+                        <label text={lc('to_date')} fontSize={10} color="gray" />
+                        <textfield
+                            hint="YYYY-MM-DD"
+                            placeholder={lc('any_date')}
+                            fontSize={13}
+                            padding="0"
+                            margin="2 0 0 0"
+                            text={endDateInputText}
+                            autocorrect={false}
+                            autocapitalizationType="none"
+                            keyboardType="datetime"
+                            on:textChange={(e) => onEndDateTextChange(e['value'])}
+                        />
+                    </stacklayout>
+                    <mdbutton
+                        col={1}
+                        variant="text"
+                        text="mdi-calendar"
+                        fontFamily={$fonts.mdi}
+                        fontSize={20}
+                        width={36}
+                        height={36}
+                        verticalAlignment="center"
+                        on:tap={selectEndDate}
+                    />
                 </gridlayout>
             </gridlayout>
         </stacklayout>

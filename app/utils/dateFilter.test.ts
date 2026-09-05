@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import dayjs from 'dayjs';
-import { filterPagesByDateRange, getPageTimestamp } from './dateFilter';
+import { filterPagesByDateRange, getPageTimestamp, parseDateToTimestamp } from './dateFilter';
 import type { OCRDocument, OCRPage } from '~/models/OCRDocument';
 
 describe('getPageTimestamp', () => {
@@ -93,5 +93,37 @@ describe('filterPagesByDateRange', () => {
 
         expect(filtered.length).toBe(2);
         expect(filtered.map((item) => item.page.id)).toEqual(['p1', 'p2']);
+    });
+});
+
+describe('parseDateToTimestamp', () => {
+    it('parses YYYY-MM-DD format', () => {
+        const ts = parseDateToTimestamp('2026-02-26');
+        expect(ts).toBe(dayjs('2026-02-26').valueOf());
+    });
+
+    it('parses DD/MM/YYYY and DD-MM-YYYY formats', () => {
+        const ts1 = parseDateToTimestamp('26/02/2026');
+        expect(ts1).toBe(dayjs('2026-02-26').startOf('day').valueOf());
+
+        const ts2 = parseDateToTimestamp('26-02-2026');
+        expect(ts2).toBe(dayjs('2026-02-26').startOf('day').valueOf());
+    });
+
+    it('parses 8-digit YYYYMMDD string format', () => {
+        const ts = parseDateToTimestamp('20260226');
+        expect(ts).toBe(dayjs('2026-02-26').startOf('day').valueOf());
+    });
+
+    it('parses human-readable date strings like Feb 26, 2026', () => {
+        const ts = parseDateToTimestamp('Feb 26, 2026');
+        expect(dayjs(ts).format('YYYY-MM-DD')).toBe('2026-02-26');
+    });
+
+    it('returns null for empty or invalid inputs', () => {
+        expect(parseDateToTimestamp('')).toBeNull();
+        expect(parseDateToTimestamp(null)).toBeNull();
+        expect(parseDateToTimestamp(undefined)).toBeNull();
+        expect(parseDateToTimestamp('not-a-date')).toBeNull();
     });
 });

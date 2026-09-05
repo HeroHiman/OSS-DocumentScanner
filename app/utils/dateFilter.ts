@@ -14,10 +14,55 @@ export function parseDateToTimestamp(value: any): number | null {
     }
     if (typeof value === 'string') {
         const trimmed = value.trim();
+        if (!trimmed) {
+            return null;
+        }
+        // 8-digit numeric string: YYYYMMDD (e.g. 20260226)
+        if (trimmed.length === 8 && /^\d{8}$/.test(trimmed)) {
+            const y = parseInt(trimmed.substring(0, 4), 10);
+            const m = parseInt(trimmed.substring(4, 6), 10) - 1;
+            const d = parseInt(trimmed.substring(6, 8), 10);
+            const dt = dayjs().year(y).month(m).date(d).startOf('day');
+            if (dt.isValid()) {
+                return dt.valueOf();
+            }
+        }
         const num = Number(trimmed);
         if (!isNaN(num) && num > 0) {
             return num < 10000000000 ? num * 1000 : num;
         }
+
+        // Try matching DD/MM/YYYY or DD-MM-YYYY or DD.MM.YYYY
+        const dmyMatch = trimmed.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/);
+        if (dmyMatch) {
+            const p1 = parseInt(dmyMatch[1], 10);
+            const p2 = parseInt(dmyMatch[2], 10);
+            const year = parseInt(dmyMatch[3], 10);
+            let day = p1;
+            let month = p2 - 1;
+            if (p1 <= 12 && p2 > 12) {
+                // MM/DD/YYYY
+                month = p1 - 1;
+                day = p2;
+            }
+            const dt = dayjs().year(year).month(month).date(day).startOf('day');
+            if (dt.isValid()) {
+                return dt.valueOf();
+            }
+        }
+
+        // Try matching YYYY/MM/DD or YYYY-MM-DD or YYYY.MM.DD
+        const ymdMatch = trimmed.match(/^(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})$/);
+        if (ymdMatch) {
+            const year = parseInt(ymdMatch[1], 10);
+            const month = parseInt(ymdMatch[2], 10) - 1;
+            const day = parseInt(ymdMatch[3], 10);
+            const dt = dayjs().year(year).month(month).date(day).startOf('day');
+            if (dt.isValid()) {
+                return dt.valueOf();
+            }
+        }
+
         const d = dayjs(trimmed);
         if (d.isValid()) {
             return d.valueOf();

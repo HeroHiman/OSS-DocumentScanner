@@ -2,6 +2,7 @@
     import dayjs, { Dayjs } from 'dayjs';
     import { closeBottomSheet } from '@nativescript-community/ui-material-bottomsheet/svelte';
     import { lc } from '~/helpers/locale';
+    import { parseDateToTimestamp } from '~/utils/dateFilter';
     import { colors, fonts } from '~/variables';
 
     let { colorBackground, colorOnBackground, colorOnSurface, colorOnSurfaceVariant, colorOutline, colorPrimary, colorSurface, colorSurfaceContainer } = $colors;
@@ -18,7 +19,9 @@
     let selectedMonth = initialDate.month();
     let selectedDay = initialDate.date();
 
-    let viewMode: 'calendar' | 'year' = 'calendar';
+    let viewMode: 'calendar' | 'year' | 'input' = 'calendar';
+    let typedDateText = initialDate.format('YYYY-MM-DD');
+    let parsedDateValid = true;
 
     const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
@@ -142,8 +145,18 @@
         }
     }
 
-    function toggleViewMode() {
-        viewMode = viewMode === 'calendar' ? 'year' : 'calendar';
+    function toggleYearMode() {
+        viewMode = viewMode === 'year' ? 'calendar' : 'year';
+    }
+
+    function toggleInputMode() {
+        if (viewMode === 'input') {
+            viewMode = 'calendar';
+        } else {
+            typedDateText = dayjs().year(selectedYear).month(selectedMonth).date(selectedDay).format('YYYY-MM-DD');
+            parsedDateValid = true;
+            viewMode = 'input';
+        }
     }
 
     function selectYear(y: number) {
@@ -160,15 +173,49 @@
             viewingYear = d.year;
             viewingMonth = d.month;
         }
+        typedDateText = dayjs().year(selectedYear).month(selectedMonth).date(selectedDay).format('YYYY-MM-DD');
+        parsedDateValid = true;
+    }
+
+    function onTypedDateTextChange(text: string) {
+        typedDateText = text;
+        if (!text || !text.trim()) {
+            parsedDateValid = false;
+            return;
+        }
+        const ts = parseDateToTimestamp(text);
+        if (ts) {
+            const d = dayjs(ts);
+            selectedYear = d.year();
+            selectedMonth = d.month();
+            selectedDay = d.date();
+            viewingYear = d.year();
+            viewingMonth = d.month();
+            parsedDateValid = true;
+        } else {
+            parsedDateValid = false;
+        }
+    }
+
+    function applyPreset(preset: 'today' | 'yesterday' | 'monthStart' | '7days' | '30days' | '1year') {
+        let d = dayjs();
+        if (preset === 'yesterday') d = d.subtract(1, 'day');
+        else if (preset === 'monthStart') d = d.startOf('month');
+        else if (preset === '7days') d = d.subtract(7, 'day');
+        else if (preset === '30days') d = d.subtract(30, 'day');
+        else if (preset === '1year') d = d.subtract(1, 'year');
+
+        selectedYear = d.year();
+        selectedMonth = d.month();
+        selectedDay = d.date();
+        viewingYear = d.year();
+        viewingMonth = d.month();
+        typedDateText = d.format('YYYY-MM-DD');
+        parsedDateValid = true;
     }
 
     function onToday() {
-        const now = dayjs();
-        viewingYear = now.year();
-        viewingMonth = now.month();
-        selectedYear = now.year();
-        selectedMonth = now.month();
-        selectedDay = now.date();
+        applyPreset('today');
         viewMode = 'calendar';
     }
 
@@ -177,6 +224,13 @@
     }
 
     function onConfirm() {
+        if (viewMode === 'input') {
+            const ts = parseDateToTimestamp(typedDateText);
+            if (ts) {
+                closeBottomSheet(dayjs(ts).startOf('day').valueOf());
+                return;
+            }
+        }
         const result = dayjs().year(selectedYear).month(selectedMonth).date(selectedDay).startOf('day').valueOf();
         closeBottomSheet(result);
     }
@@ -184,19 +238,21 @@
 
 <gesturerootview rows="auto">
     <gridlayout rows="auto,auto,auto,auto" padding="16 16 20 16" backgroundColor={colorSurface}>
-        <!-- Top header: Navigation & Selected date -->
-        <gridlayout row={0} columns="auto,*,auto" verticalAlignment="center" margin="0 0 16 0">
-            <mdbutton
-                col={0}
-                variant="text"
-                text="mdi-chevron-left"
-                fontFamily={$fonts.mdi}
-                fontSize={24}
-                width={44}
-                height={44}
-                on:tap={prevMonth}
-            />
-            <stacklayout col={1} horizontalAlignment="center" verticalAlignment="center" on:tap={toggleViewMode}>
+        <!-- Top header: Navigation & Mode Toggles -->
+        <gridlayout row={0} columns="auto,*,auto,auto" verticalAlignment="center" margin="0 0 16 0">
+            {#if viewMode !== 'input'}
+                <mdbutton
+                    col={0}
+                    variant="text"
+                    text="mdi-chevron-left"
+                    fontFamily={$fonts.mdi}
+                    fontSize={24}
+                    width={40}
+                    height={40}
+                    on:tap={prevMonth}
+                />
+            {/if}
+            <stacklayout col={1} horizontalAlignment="center" verticalAlignment="center" on:tap={toggleYearMode}>
                 <label
                     text={currentMonthYearLabel}
                     fontSize={17}
@@ -212,15 +268,29 @@
                     margin="2 0 0 0"
                 />
             </stacklayout>
+            {#if viewMode !== 'input'}
+                <mdbutton
+                    col={2}
+                    variant="text"
+                    text="mdi-chevron-right"
+                    fontFamily={$fonts.mdi}
+                    fontSize={24}
+                    width={40}
+                    height={40}
+                    on:tap={nextMonth}
+                />
+            {/if}
+            <!-- Toggle Direct Keyboard Input Mode -->
             <mdbutton
-                col={2}
+                col={3}
                 variant="text"
-                text="mdi-chevron-right"
+                text={viewMode === 'input' ? 'mdi-calendar' : 'mdi-keyboard-outline'}
                 fontFamily={$fonts.mdi}
-                fontSize={24}
-                width={44}
-                height={44}
-                on:tap={nextMonth}
+                fontSize={22}
+                width={40}
+                height={40}
+                color={colorPrimary}
+                on:tap={toggleInputMode}
             />
         </gridlayout>
 
@@ -277,7 +347,7 @@
                     </gridlayout>
                 {/each}
             </gridlayout>
-        {:else}
+        {:else if viewMode === 'year'}
             <!-- View Mode 2: Year Selector Grid -->
             <gridlayout row={2} columns="*,*,*,*" rows="auto,auto,auto,auto,auto,auto" height={220} margin="8 0">
                 {#each yearsList as y, idx (y)}
@@ -302,6 +372,40 @@
                     </gridlayout>
                 {/each}
             </gridlayout>
+        {:else if viewMode === 'input'}
+            <!-- View Mode 3: Direct Date Typing Input & Quick Presets -->
+            <stacklayout row={2} height={220} margin="8 0">
+                <label text={lc('enter_date_hint', 'Enter date (e.g. 2026-02-26 or 26/02/2026)')} fontSize={12} color="gray" margin="0 0 4 0" />
+                <textfield
+                    variant="outline"
+                    hint="YYYY-MM-DD (e.g. 2026-02-26)"
+                    fontSize={16}
+                    text={typedDateText}
+                    autocorrect={false}
+                    autocapitalizationType="none"
+                    keyboardType="datetime"
+                    margin="0 0 8 0"
+                    on:textChange={(e) => onTypedDateTextChange(e['value'])}
+                />
+                <label
+                    text={parsedDateValid ? dayjs().year(selectedYear).month(selectedMonth).date(selectedDay).format('dddd, MMMM D, YYYY') : lc('invalid_date', 'Invalid date format')}
+                    fontSize={13}
+                    fontWeight="500"
+                    color={parsedDateValid ? colorPrimary : '#d32f2f'}
+                    margin="0 0 12 0"
+                />
+
+                <!-- Quick Presets -->
+                <label text={lc('quick_presets', 'Quick Presets')} fontSize={11} color="gray" margin="0 0 4 0" />
+                <gridlayout columns="*,*,*" rows="auto,auto">
+                    <mdbutton col={0} row={0} variant="outline" text={lc('today')} fontSize={11} margin={2} on:tap={() => applyPreset('today')} />
+                    <mdbutton col={1} row={0} variant="outline" text={lc('yesterday', 'Yesterday')} fontSize={11} margin={2} on:tap={() => applyPreset('yesterday')} />
+                    <mdbutton col={2} row={0} variant="outline" text={lc('start_of_month', 'Month Start')} fontSize={11} margin={2} on:tap={() => applyPreset('monthStart')} />
+                    <mdbutton col={0} row={1} variant="outline" text="7 Days Ago" fontSize={11} margin={2} on:tap={() => applyPreset('7days')} />
+                    <mdbutton col={1} row={1} variant="outline" text="30 Days Ago" fontSize={11} margin={2} on:tap={() => applyPreset('30days')} />
+                    <mdbutton col={2} row={1} variant="outline" text="1 Year Ago" fontSize={11} margin={2} on:tap={() => applyPreset('1year')} />
+                </gridlayout>
+            </stacklayout>
         {/if}
 
         <!-- Bottom Action Buttons -->
