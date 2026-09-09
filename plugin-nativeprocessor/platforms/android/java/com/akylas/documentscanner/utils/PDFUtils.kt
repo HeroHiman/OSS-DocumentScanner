@@ -773,8 +773,7 @@ class PDFUtils {
                         } catch (ignored: JSONException) {
                         }
                     }
-                    var pageMetaArray: JSONArray? = null
-                    try {
+                    val pageMetaArray: JSONArray? = try {
                         val metaStream = if (src.startsWith("content://")) {
                             context.contentResolver.openInputStream(uri)
                         } else {
@@ -786,7 +785,9 @@ class PDFUtils {
                             try {
                                 val rawMeta = metaPdfDoc.documentInfo.getMoreInfo("OSSDocScannerPages")
                                 if (!rawMeta.isNullOrEmpty()) {
-                                    pageMetaArray = JSONArray(rawMeta)
+                                    JSONArray(rawMeta)
+                                } else {
+                                    null
                                 }
                             } finally {
                                 metaPdfDoc.close()
@@ -794,6 +795,7 @@ class PDFUtils {
                         }
                     } catch (e: Exception) {
                         Log.d("PDFUtils", "Failed to read OSSDocScannerPages metadata: " + e.message)
+                        null
                     }
 
                     if (importPDFImages) {
@@ -829,8 +831,9 @@ class PDFUtils {
                                                         )
                                                     }
                                                     val pageIdx = i - 1
-                                                    if (pageMetaArray != null && pageIdx < pageMetaArray.length()) {
-                                                        val meta = pageMetaArray.optJSONObject(pageIdx)
+                                                    val metaArray = pageMetaArray
+                                                    if (metaArray != null && pageIdx < metaArray.length()) {
+                                                        val meta = metaArray.optJSONObject(pageIdx)
                                                         val itemObj = JSONObject()
                                                         itemObj.put("imagePath", temp.path)
                                                         if (meta != null) {
@@ -908,8 +911,9 @@ class PDFUtils {
                                             out
                                         )
                                     }
-                                    if (pageMetaArray != null && i < pageMetaArray.length()) {
-                                        val meta = pageMetaArray.optJSONObject(i)
+                                    val metaArray = pageMetaArray
+                                    if (metaArray != null && i < metaArray.length()) {
+                                        val meta = metaArray.optJSONObject(i)
                                         val itemObj = JSONObject()
                                         itemObj.put("imagePath", temp.path)
                                         if (meta != null) {
