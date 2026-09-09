@@ -13,7 +13,14 @@ export default class PDFExportCanvas extends PDFExportCanvasBase {
                 page.colorMatrix = getColorMatrix(page.colorType);
             }
         });
-        const options = JSON.stringify({ ...this.options, pages });
+        const options = JSON.stringify({
+            ...this.options,
+            pages: pages.map((p) => ({
+                ...p.page,
+                extra: p.page.extra,
+                createdDate: p.page.createdDate
+            }))
+        });
         DEV_LOG && console.log('PDFExportCanvas', 'export', folder, filename, compress, options);
         const outputPath = com.akylas.documentscanner.utils.PDFUtils.Companion.generatePDF(Utils.android.getApplicationContext(), folder, filename, options);
         DEV_LOG && console.log('PDFExportCanvas', 'export done', JSON.stringify(this.options), options.length, Date.now() - start, 'ms');

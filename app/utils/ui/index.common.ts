@@ -190,7 +190,7 @@ export async function importAndScanImageOrPdfFromUris({ canGoToView = true, docu
         const pdfImages = await doInBatch(
             pdf,
             (pdfPath: string, index) =>
-                new Promise<string[]>(async (resolve, reject) => {
+                new Promise<any[]>(async (resolve, reject) => {
                     try {
                         updateLoadingProgress({ text: `${lc('importing')} (${index + 1}/${pdf.length})` });
                         const start = Date.now();
@@ -213,9 +213,13 @@ export async function importAndScanImageOrPdfFromUris({ canGoToView = true, docu
         const pdfFlatImages = pdfImages.flat();
         const pdfItems: ImportImageData[] = await doInBatch(
             pdfFlatImages,
-            (sourceImagePath: string, index) =>
+            (item: any, index) =>
                 new Promise<ImportImageData>(async (resolve, reject) => {
                     try {
+                        const sourceImagePath: string = typeof item === 'string' ? item : item.imagePath;
+                        const restoredExtra = typeof item === 'object' && item !== null ? item.extra : undefined;
+                        const restoredCreatedDate = typeof item === 'object' && item !== null ? item.createdDate : undefined;
+
                         updateLoadingProgress({ text: `${lc('importing')} (${index + 1}/${pdfFlatImages.length})` });
                         const start = Date.now();
                         DEV_LOG && console.log('importFromPdfImage', sourceImagePath);
@@ -226,7 +230,18 @@ export async function importAndScanImageOrPdfFromUris({ canGoToView = true, docu
                         if (CARD_APP) {
                             qrcode = await detectQRCodeFromFile(sourceImagePath, { resizeThreshold: QRCODE_RESIZE_THRESHOLD });
                         }
-                        resolve({ quads: undefined, imagePath: sourceImagePath, qrcode, imageWidth: imageSize.width, imageHeight: imageSize.height, imageRotation, undos: [], redos: [] });
+                        resolve({
+                            quads: undefined,
+                            imagePath: sourceImagePath,
+                            qrcode,
+                            imageWidth: imageSize.width,
+                            imageHeight: imageSize.height,
+                            imageRotation,
+                            undos: [],
+                            redos: [],
+                            extra: restoredExtra,
+                            createdDate: restoredCreatedDate
+                        });
                     } catch (error) {
                         reject(error);
                     }
@@ -397,13 +412,23 @@ export async function importAndScanImageOrPdfFromUris({ canGoToView = true, docu
                                                 sourceImageHeight: item.imageHeight,
                                                 sourceImageRotation: item.imageRotation,
                                                 // rotation: item.imageRotation,
+                                                extra: item.extra
+                                                    ? (CARD_APP && colors?.length
+                                                          ? {
+                                                                color: colors.length > 1 ? colors[0] : new Color(colors[0]).getBrightness() < 145 ? '#ffffff' : '#000000',
+                                                                ...item.extra
+                                                            }
+                                                          : item.extra)
+                                                    : (CARD_APP
+                                                          ? {
+                                                                color: colors.length > 1 ? colors[0] : new Color(colors[0]).getBrightness() < 145 ? '#ffffff' : '#000000'
+                                                            }
+                                                          : undefined),
+                                                createdDate: item.createdDate || undefined,
                                                 ...(CARD_APP
                                                     ? {
                                                           qrcode,
-                                                          colors,
-                                                          extra: {
-                                                              color: colors.length > 1 ? colors[0] : new Color(colors[0]).getBrightness() < 145 ? '#ffffff' : '#000000'
-                                                          }
+                                                          colors
                                                       }
                                                     : {})
                                             } as PageData);

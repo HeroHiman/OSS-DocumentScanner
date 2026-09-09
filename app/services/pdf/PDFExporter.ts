@@ -54,7 +54,12 @@ export async function exportPDFAsync({ compress, document, filename, folder, opt
         const options = JSON.stringify({
             ...defaultOptions,
             // page_padding: Utils.layout.toDevicePixels(pdfCanvas.options.page_padding),
-            pages: pages.map((p) => ({ ...p.page, colorMatrix: getPageColorMatrix(p.page, black_white ? 'grayscale' : undefined) })),
+            pages: pages.map((p) => ({
+                ...p.page,
+                extra: p.page.extra,
+                createdDate: p.page.createdDate,
+                colorMatrix: getPageColorMatrix(p.page, black_white ? 'grayscale' : undefined)
+            })),
             ...(baseOptions ? baseOptions : {}),
             debug: false
         });

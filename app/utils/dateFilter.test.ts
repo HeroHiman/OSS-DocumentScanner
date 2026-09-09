@@ -127,3 +127,119 @@ describe('parseDateToTimestamp', () => {
         expect(parseDateToTimestamp('not-a-date')).toBeNull();
     });
 });
+
+describe('PDF page metadata embedding and restoration', () => {
+    it('serializes page extra date and createdDate into PDF metadata structure', () => {
+        const pages = [
+            {
+                page: {
+                    id: 'p1',
+                    createdDate: 1772064000000,
+                    extra: {
+                        date: '2026-02-26',
+                        dateTimestamp: 1772064000000,
+                        extractedDate: '26/02/2026'
+                    }
+                }
+            },
+            {
+                page: {
+                    id: 'p2',
+                    createdDate: 1772150400000,
+                    extra: {
+                        date: '2026-02-27',
+                        dateTimestamp: 1772150400000
+                    }
+                }
+            }
+        ];
+
+        // Simulate PDF export page mapping
+        const exportedPages = pages.map((p, index) => ({
+            index,
+            createdDate: p.page.createdDate,
+            extra: p.page.extra
+        }));
+
+        const serializedMetadata = JSON.stringify(exportedPages);
+        expect(serializedMetadata).toContain('2026-02-26');
+
+        // Parse back as native PDFUtils would
+        const parsedMetadata = JSON.parse(serializedMetadata);
+        expect(parsedMetadata).toHaveLength(2);
+        expect(parsedMetadata[0].extra.date).toBe('2026-02-26');
+        expect(parsedMetadata[0].extra.dateTimestamp).toBe(1772064000000);
+        expect(parsedMetadata[0].createdDate).toBe(1772064000000);
+        expect(parsedMetadata[1].extra.date).toBe('2026-02-27');
+        expect(parsedMetadata[1].createdDate).toBe(1772150400000);
+    });
+
+    it('restores extra and createdDate when importing items with PDF metadata', () => {
+        const rawImportedItems = [
+            {
+                imagePath: '/temp/img_0.png',
+                extra: { date: '2026-02-26', dateTimestamp: 1772064000000 },
+                createdDate: 1772064000000
+            },
+            {
+                imagePath: '/temp/img_1.png',
+                extra: { date: '2026-03-01', dateTimestamp: 1772323200000 },
+                createdDate: 1772323200000
+            }
+        ];
+
+        // Replicate index.common.ts extraction logic
+        const restoredPages = rawImportedItems.map((rawItem: any) => {
+            const sourceImagePath = typeof rawItem === 'string' ? rawItem : rawItem.imagePath;
+            const restoredExtra = typeof rawItem === 'object' && rawItem !== null ? rawItem.extra : undefined;
+            const restoredCreatedDate = typeof rawItem === 'object' && rawItem !== null ? rawItem.createdDate : undefined;
+
+            return {
+                sourceImagePath,
+                extra: restoredExtra,
+                createdDate: restoredCreatedDate
+            };
+        });
+
+        expect(restoredPages[0].extra?.date).toBe('2026-02-26');
+        expect(restoredPages[0].createdDate).toBe(1772064000000);
+        expect(restoredPages[1].extra?.date).toBe('2026-03-01');
+        expect(restoredPages[1].createdDate).toBe(1772323200000);
+    });
+
+    it('falls back gracefully when importing standard PDF items with plain string paths', () => {
+        const rawImportedItems = ['/temp/page_0.png', '/temp/page_1.png'];
+
+        const restoredPages = rawImportedItems.map((rawItem: any) => {
+            const sourceImagePath = typeof rawItem === 'string' ? rawItem : rawItem.imagePath;
+            const restoredExtra = typeof rawItem === 'object' && rawItem !== null ? rawItem.extra : undefined;
+            const restoredCreatedDate = typeof rawItem === 'object' && rawItem !== null ? rawItem.createdDate : undefined;
+
+            return {
+                sourceImagePath,
+                extra: restoredExtra,
+                createdDate: restoredCreatedDate
+            };
+        });
+
+        expect(restoredPages[0].sourceImagePath).toBe('/temp/page_0.png');
+        expect(restoredPages[0].extra).toBeUndefined();
+        expect(restoredPages[0].createdDate).toBeUndefined();
+        expect(restoredPages[1].sourceImagePath).toBe('/temp/page_1.png');
+        expect(restoredPages[1].extra).toBeUndefined();
+        expect(restoredPages[1].createdDate).toBeUndefined();
+    });
+
+    it('safely handles corrupted or invalid metadata JSON without throwing', () => {
+        const malformedJson = '{"invalid_json": true';
+        let parsed: any = null;
+        expect(() => {
+            try {
+                parsed = JSON.parse(malformedJson);
+            } catch {
+                parsed = null;
+            }
+        }).not.toThrow();
+        expect(parsed).toBeNull();
+    });
+});

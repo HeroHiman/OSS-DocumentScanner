@@ -399,7 +399,7 @@ export class PageRepository extends BaseRepository<OCRPage, Page> {
 
     async createPage(page: OCRPage, dataFolder: string) {
         const { extra, ...others } = page;
-        const createdDate = Date.now();
+        const createdDate = page.createdDate || Date.now();
         return this.create(
             cleanUndefined({
                 modifiedDate: createdDate,

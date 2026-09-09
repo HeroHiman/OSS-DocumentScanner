@@ -665,6 +665,34 @@ class PDFUtils {
             if (document == null) {
                 throw Exception("no document created while exporting PDF $fileName in $destFolder")
             }
+            try {
+                val pageMetaArray = JSONArray()
+                for (i in 0 until pagesCount) {
+                    val pageObj = pages.getJSONObject(i)
+                    val actualPage = if (pageObj.has("page")) pageObj.optJSONObject("page") ?: pageObj else pageObj
+                    val pageMeta = JSONObject()
+                    pageMeta.put("index", i)
+                    if (actualPage.has("createdDate") && !actualPage.isNull("createdDate")) {
+                        pageMeta.put("createdDate", actualPage.optLong("createdDate"))
+                    }
+                    if (actualPage.has("extra") && !actualPage.isNull("extra")) {
+                        val extra = actualPage.opt("extra")
+                        if (extra is JSONObject) {
+                            pageMeta.put("extra", extra)
+                        } else if (extra is String && extra.isNotEmpty()) {
+                            try {
+                                pageMeta.put("extra", JSONObject(extra))
+                            } catch (ignored: Exception) {
+                                pageMeta.put("extra", extra)
+                            }
+                        }
+                    }
+                    pageMetaArray.put(pageMeta)
+                }
+                pdfDoc.documentInfo.setMoreInfo("OSSDocScannerPages", pageMetaArray.toString())
+            } catch (e: Exception) {
+                Log.e("PDFUtils", "Failed to embed OSSDocScannerPages metadata: " + e.message)
+            }
             document!!.close()
             if (needsCopy) {
                 val outDocument =
@@ -745,8 +773,36 @@ class PDFUtils {
                         } catch (ignored: JSONException) {
                         }
                     }
+                    var pageMetaArray: JSONArray? = null
+                    try {
+                        val metaStream = if (src.startsWith("content://")) {
+                            context.contentResolver.openInputStream(uri)
+                        } else {
+                            val filePath = if (src.startsWith("file://")) src.substring(7) else src
+                            FileInputStream(File(filePath))
+                        }
+                        metaStream?.use { stream ->
+                            val metaPdfDoc = PdfDocument(PdfReader(stream))
+                            try {
+                                val rawMeta = metaPdfDoc.documentInfo.getMoreInfo("OSSDocScannerPages")
+                                if (!rawMeta.isNullOrEmpty()) {
+                                    pageMetaArray = JSONArray(rawMeta)
+                                }
+                            } finally {
+                                metaPdfDoc.close()
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.d("PDFUtils", "Failed to read OSSDocScannerPages metadata: " + e.message)
+                    }
+
                     if (importPDFImages) {
-                        inputStream = context.contentResolver.openInputStream(uri)
+                        inputStream = if (src.startsWith("content://")) {
+                            context.contentResolver.openInputStream(uri)
+                        } else {
+                            val filePath = if (src.startsWith("file://")) src.substring(7) else src
+                            FileInputStream(File(filePath))
+                        }
                         val pdfDoc = PdfDocument(PdfReader(inputStream))
                         try {
                             for (i in 1..pdfDoc.getNumberOfPages()) {
@@ -772,7 +828,23 @@ class PDFUtils {
                                                             out
                                                         )
                                                     }
-                                                    result.put(temp.path)
+                                                    val pageIdx = i - 1
+                                                    if (pageMetaArray != null && pageIdx < pageMetaArray.length()) {
+                                                        val meta = pageMetaArray.optJSONObject(pageIdx)
+                                                        val itemObj = JSONObject()
+                                                        itemObj.put("imagePath", temp.path)
+                                                        if (meta != null) {
+                                                            if (meta.has("extra") && !meta.isNull("extra")) {
+                                                                itemObj.put("extra", meta.opt("extra"))
+                                                            }
+                                                            if (meta.has("createdDate") && !meta.isNull("createdDate")) {
+                                                                itemObj.put("createdDate", meta.optLong("createdDate"))
+                                                            }
+                                                        }
+                                                        result.put(itemObj)
+                                                    } else {
+                                                        result.put(temp.path)
+                                                    }
                                                 }
                                             } catch (e: IOException) {
                                                 System.err.println("Error while extracting image: " + e.message)
@@ -793,7 +865,12 @@ class PDFUtils {
                             pdfDoc.close()
                         }
                     } else {
-                        parcelFileDescriptor = context.contentResolver.openFileDescriptor(uri, "r")
+                        parcelFileDescriptor = if (src.startsWith("content://")) {
+                            context.contentResolver.openFileDescriptor(uri, "r")
+                        } else {
+                            val filePath = if (src.startsWith("file://")) src.substring(7) else src
+                            ParcelFileDescriptor.open(File(filePath), ParcelFileDescriptor.MODE_READ_ONLY)
+                        }
                         if (parcelFileDescriptor != null) {
                             renderer = PdfRenderer(parcelFileDescriptor)
 
@@ -831,7 +908,22 @@ class PDFUtils {
                                             out
                                         )
                                     }
-                                    result.put(temp.path)
+                                    if (pageMetaArray != null && i < pageMetaArray.length()) {
+                                        val meta = pageMetaArray.optJSONObject(i)
+                                        val itemObj = JSONObject()
+                                        itemObj.put("imagePath", temp.path)
+                                        if (meta != null) {
+                                            if (meta.has("extra") && !meta.isNull("extra")) {
+                                                itemObj.put("extra", meta.opt("extra"))
+                                            }
+                                            if (meta.has("createdDate") && !meta.isNull("createdDate")) {
+                                                itemObj.put("createdDate", meta.optLong("createdDate"))
+                                            }
+                                        }
+                                        result.put(itemObj)
+                                    } else {
+                                        result.put(temp.path)
+                                    }
                                 } finally {
                                     if (!renderedPage.isRecycled) {
                                         renderedPage.recycle()

@@ -48,6 +48,8 @@ export interface ImportImageData {
     qrcode?: QRCodeData;
     undos?: any[];
     redos?: any[];
+    extra?: any;
+    createdDate?: number;
 }
 
 export interface ImageConfig {
