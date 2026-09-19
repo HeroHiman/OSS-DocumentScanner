@@ -29,6 +29,7 @@ export interface TextOverlayItem {
     color?: string;
     hasBorder?: boolean;
     rotation?: number;
+    textRotation?: number;
 }
 
 export interface BurnTextOptions {
@@ -44,6 +45,7 @@ export interface BurnTextOptions {
     imageWidth?: number;
     imageHeight?: number;
     rotation?: number;
+    textRotation?: number;
     hasBorder?: boolean;
 }
 
@@ -200,6 +202,7 @@ export async function burnTextToImageFile({
     color = '#ff0000',
     compressQuality,
     rotation = 0,
+    textRotation = 0,
     hasBorder = false
 }: BurnTextOptions): Promise<{ success: boolean; width: number; height: number; size: number }> {
     if (!imagePath || !text?.trim()) {
@@ -251,12 +254,23 @@ export async function burnTextToImageFile({
         }
     }
     const padding = 4 * fontScale;
-    const totalTextHeight = lines.length * lineHeight;
+    const boxWidth = maxLineWidth + padding * 2;
+    const boxHeight = lines.length * lineHeight + padding * 2;
+
+    const normTextRotation = ((textRotation % 360) + 360) % 360;
 
     canvas.save();
+    // 1. Position and orient to match the page's visual screen coordinate system
     canvas.translate(imageX, imageY);
     if (canvasRotation !== 0) {
         canvas.rotate(canvasRotation);
+    }
+
+    // 2. Rotate text around the center of the text box if textRotation is set
+    if (normTextRotation !== 0) {
+        canvas.translate(boxWidth / 2, boxHeight / 2);
+        canvas.rotate(normTextRotation);
+        canvas.translate(-boxWidth / 2, -boxHeight / 2);
     }
 
     if (hasBorder) {
@@ -265,7 +279,7 @@ export async function burnTextToImageFile({
         borderPaint.style = Style.STROKE;
         borderPaint.strokeWidth = Math.max(2 * fontScale, 2);
         borderPaint.setAntiAlias(true);
-        canvas.drawRoundRect(0, 0, maxLineWidth + padding * 2, totalTextHeight + padding * 2, 4 * fontScale, 4 * fontScale, borderPaint);
+        canvas.drawRoundRect(0, 0, boxWidth, boxHeight, 4 * fontScale, 4 * fontScale, borderPaint);
     }
 
     for (let i = 0; i < lines.length; i++) {
@@ -329,6 +343,7 @@ export async function reapplyTextOverlays(
             fontSize: overlay.fontSize,
             color: overlay.color,
             rotation: overlay.rotation !== undefined ? overlay.rotation : pageRotation,
+            textRotation: overlay.textRotation ?? 0,
             hasBorder: overlay.hasBorder
         });
     }

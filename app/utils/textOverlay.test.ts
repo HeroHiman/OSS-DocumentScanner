@@ -332,4 +332,25 @@ describe('mapScreenToImageCoordinates', () => {
         });
         expect(coords8.canvasFontSize).toBe(16);
     });
+
+    it('supports textRotation property on overlay items and burn options', async () => {
+        const { burnTextToImageFile } = await import('./textOverlay');
+        const emptyResult = await burnTextToImageFile({
+            imagePath: '',
+            text: 'Hello',
+            screenX: 10,
+            screenY: 10,
+            textRotation: 90
+        });
+        expect(emptyResult.success).toBe(false);
+
+        const blankTextResult = await burnTextToImageFile({
+            imagePath: '/fake/path.jpg',
+            text: '   ',
+            screenX: 10,
+            screenY: 10,
+            textRotation: 180
+        });
+        expect(blankTextResult.success).toBe(false);
+    });
 });

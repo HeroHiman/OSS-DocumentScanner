@@ -3,7 +3,7 @@
     import { getImagePipeline } from '@nativescript-community/ui-image';
     import { Application, EventData, File, Page, PanGestureEventData, Utils, View } from '@nativescript/core';
     import { AndroidActivityBackPressedEventData } from '@nativescript/core/application';
-    import { confirm, prompt } from '@nativescript/core/ui/dialogs';
+    import { confirm, inputType, prompt } from '@nativescript/core/ui/dialogs';
     import { closeModal } from '@shared/utils/svelte/ui';
     import { showError } from '@shared/utils/showError';
     import { cropDocumentFromFile } from 'plugin-nativeprocessor';
@@ -45,6 +45,7 @@
     let selectedColor = existingOverlay?.color || '#ff0000';
     let fontSize = existingOverlay?.fontSize ? Math.max(4, Math.min(72, existingOverlay.fontSize)) : 24;
     let hasBorder = existingOverlay?.hasBorder ?? false;
+    let textRotation = existingOverlay?.textRotation ?? 0;
     let isLayoutInitialized = false;
 
     // Viewport dimensions
@@ -118,6 +119,31 @@
         }
     }
 
+    function rotateText() {
+        textRotation = (textRotation + 90) % 360;
+    }
+
+    async function onRotateCustom() {
+        try {
+            const result = await prompt({
+                title: lc('rotate_text', 'Rotate Text'),
+                message: lc('enter_rotation_angle', 'Enter rotation angle in degrees (0 - 360):'),
+                defaultText: `${textRotation}`,
+                okButtonText: lc('apply'),
+                cancelButtonText: lc('cancel'),
+                inputType: inputType.number
+            });
+            if (result.result && result.text.trim() !== '') {
+                const angle = parseInt(result.text.trim(), 10);
+                if (!isNaN(angle)) {
+                    textRotation = ((angle % 360) + 360) % 360;
+                }
+            }
+        } catch (error) {
+            showError(error);
+        }
+    }
+
     function onPan(args: PanGestureEventData) {
         if (args.state === 1) {
             // Start pan
@@ -172,7 +198,8 @@
                 fontSize,
                 color: selectedColor,
                 hasBorder,
-                rotation: item.rotation ?? 0
+                rotation: item.rotation ?? 0,
+                textRotation
             };
 
             const result = await burnTextToImageFile({
@@ -185,6 +212,7 @@
                 fontSize,
                 color: selectedColor,
                 rotation: item.rotation ?? 0,
+                textRotation,
                 hasBorder
             });
 
@@ -288,6 +316,7 @@
     <gridlayout class="pageContent" backgroundColor={visualState} rows="auto,*,auto" android:paddingBottom={$windowInset.bottom}>
         <!-- Top Action Bar -->
         <CActionBar backgroundColor="transparent" buttonsDefaultVisualState={visualState} modalWindow={true} title={hasExistingOverlay ? lc('edit_text', 'Edit Text') : lc('add_text')}>
+            <mdbutton class="actionBarButton" defaultVisualState={visualState} text="mdi-rotate-right" variant="text" on:tap={rotateText} on:longPress={onRotateCustom} />
             {#if hasExistingOverlay}
                 <mdbutton class="actionBarButton" defaultVisualState={visualState} text="mdi-delete" variant="text" on:tap={onRemoveText} />
             {/if}
@@ -312,6 +341,9 @@
                     text={overlayText}
                     left={textX}
                     top={textY}
+                    rotate={textRotation}
+                    originX={0.5}
+                    originY={0.5}
                     on:pan={onPan}
                     on:tap={editTextDialog}
                     color={selectedColor}
@@ -351,8 +383,8 @@
                 />
             </gridlayout>
 
-            <!-- Font Size & Border Toggle Row -->
-            <gridlayout columns="auto,*,auto" verticalAlignment="center" margin="4 0 4 0">
+            <!-- Font Size Row -->
+            <gridlayout columns="auto,*" verticalAlignment="center" margin="2 0 4 0">
                 <label col={0} text={`Size: ${fontSize}px`} color={textColor} fontSize={14} verticalAlignment="center" marginRight={8} />
                 <slider
                     col={1}
@@ -362,13 +394,49 @@
                     on:valueChange={(e) => (fontSize = Math.max(4, Math.round(e.value)))}
                     verticalAlignment="center"
                 />
+            </gridlayout>
+
+            <!-- Rotation & Border Controls Row -->
+            <gridlayout columns="*,*" margin="2 0 6 0">
                 <gridlayout
-                    col={2}
-                    columns="auto,auto"
+                    col={0}
+                    columns="auto,*"
                     verticalAlignment="center"
-                    padding="4 8"
+                    padding="6 10"
+                    margin="0 4 0 0"
+                    borderRadius={8}
+                    backgroundColor="#00000022"
+                    on:tap={rotateText}
+                    on:longPress={onRotateCustom}
+                >
+                    <label
+                        col={0}
+                        text="mdi-rotate-right"
+                        fontFamily={$fonts.mdi}
+                        fontSize={20}
+                        color={colorPrimary}
+                        verticalAlignment="center"
+                    />
+                    <label
+                        col={1}
+                        text={`${lc('rotate', 'Rotate')}: ${textRotation}°`}
+                        fontSize={13}
+                        color={textColor}
+                        verticalAlignment="center"
+                        marginLeft={6}
+                    />
+                </gridlayout>
+
+                <gridlayout
+                    col={1}
+                    columns="auto,*"
+                    verticalAlignment="center"
+                    padding="6 10"
+                    margin="0 0 0 4"
                     borderRadius={8}
                     backgroundColor={hasBorder ? '#00000022' : 'transparent'}
+                    borderColor={hasBorder ? colorPrimary : colorOutline}
+                    borderWidth={1}
                     on:tap={() => (hasBorder = !hasBorder)}
                 >
                     <label
@@ -386,7 +454,7 @@
                         fontWeight={hasBorder ? 'bold' : 'normal'}
                         color={hasBorder ? colorPrimary : textColor}
                         verticalAlignment="center"
-                        marginLeft={4}
+                        marginLeft={6}
                     />
                 </gridlayout>
             </gridlayout>
