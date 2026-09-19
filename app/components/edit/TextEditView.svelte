@@ -144,15 +144,21 @@
         }
     }
 
+    let isPanning = false;
     function onPan(args: PanGestureEventData) {
         if (args.state === 1) {
             // Start pan
-            panStartX = textX;
-            panStartY = textY;
+            if (!isPanning) {
+                isPanning = true;
+                panStartX = textX;
+                panStartY = textY;
+            }
         } else if (args.state === 2) {
             // Panning
-            textX = Math.max(0, Math.min(containerWidth - 60, panStartX + args.deltaX));
+            textX = Math.max(0, Math.min(containerWidth - 40, panStartX + args.deltaX));
             textY = Math.max(0, Math.min(containerHeight - 40, panStartY + args.deltaY));
+        } else if (args.state === 3 || args.state === 0) {
+            isPanning = false;
         }
     }
 
@@ -336,14 +342,12 @@
             />
 
             <!-- Interactive Absolute Text Placement Layer -->
-            <absolutelayout width="100%" height="100%">
+            <absolutelayout width="100%" height="100%" on:pan={onPan}>
                 <label
                     text={overlayText}
                     left={textX}
                     top={textY}
                     rotate={textRotation}
-                    originX={0.5}
-                    originY={0.5}
                     on:pan={onPan}
                     on:tap={editTextDialog}
                     color={selectedColor}
