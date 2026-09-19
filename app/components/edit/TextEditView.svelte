@@ -1,16 +1,20 @@
 <script lang="ts">
     import { NativeViewElementNode } from '@nativescript-community/svelte-native/dom';
-    import { Application, EventData, Page, PanGestureEventData, Utils, View } from '@nativescript/core';
+    import { getImagePipeline } from '@nativescript-community/ui-image';
+    import { Application, EventData, File, Page, PanGestureEventData, Utils, View } from '@nativescript/core';
     import { AndroidActivityBackPressedEventData } from '@nativescript/core/application';
-    import { prompt } from '@nativescript/core/ui/dialogs';
+    import { confirm, prompt } from '@nativescript/core/ui/dialogs';
     import { closeModal } from '@shared/utils/svelte/ui';
     import { showError } from '@shared/utils/showError';
+    import { cropDocumentFromFile } from 'plugin-nativeprocessor';
     import { onDestroy, onMount } from 'svelte';
     import CActionBar from '~/components/common/CActionBar.svelte';
     import { lc } from '~/helpers/locale';
     import { isEInk } from '~/helpers/theme';
     import { OCRDocument, OCRPage } from '~/models/OCRDocument';
-    import { burnTextToImageFile } from '~/utils/textOverlay';
+    import { IMAGE_DECODE_HEIGHT, getImageExportSettings } from '~/utils/constants';
+    import { getPageColorMatrix } from '~/utils/matrix';
+    import { TextOverlayItem, burnTextToImageFile, calculateImageDisplayBounds } from '~/utils/textOverlay';
     import { hideLoading, onBackButton, showLoading, showSnack } from '~/utils/ui';
     import { colors, fonts, screenHeightDips, screenWidthDips, windowInset } from '~/variables';
 
@@ -25,14 +29,23 @@
     const visualState = isEInk ? colorBackground : 'black';
     const textColor = isEInk ? colorOnBackground : 'white';
 
-    // Text state
-    let overlayText = lc('tap_to_edit_text');
-    let textX = 40;
-    let textY = 100;
+    // Check for existing text overlay on this page
+    const existingOverlay: TextOverlayItem | undefined =
+        item.extra?.textOverlays && Array.isArray(item.extra.textOverlays) && item.extra.textOverlays.length > 0
+            ? item.extra.textOverlays[item.extra.textOverlays.length - 1]
+            : undefined;
+    const hasExistingOverlay = !!existingOverlay;
+
+    // Text state (pre-populate from existing overlay if present)
+    let overlayText = existingOverlay?.text || lc('tap_to_edit_text');
+    let textX = existingOverlay?.screenX ?? 40;
+    let textY = existingOverlay?.screenY ?? 100;
     let panStartX = 0;
     let panStartY = 0;
-    let selectedColor = '#ff0000';
-    let fontSize = 24;
+    let selectedColor = existingOverlay?.color || '#ff0000';
+    let fontSize = existingOverlay?.fontSize ? Math.max(4, Math.min(72, existingOverlay.fontSize)) : 24;
+    let hasBorder = existingOverlay?.hasBorder ?? false;
+    let isLayoutInitialized = false;
 
     // Viewport dimensions
     let containerWidth = screenWidthDips;
@@ -57,6 +70,31 @@
             if (measuredW > 0 && measuredH > 0) {
                 containerWidth = measuredW;
                 containerHeight = measuredH;
+
+                if (!isLayoutInitialized) {
+                    isLayoutInitialized = true;
+                    if (existingOverlay) {
+                        if (existingOverlay.containerWidth && existingOverlay.containerHeight) {
+                            const factorX = containerWidth / existingOverlay.containerWidth;
+                            const factorY = containerHeight / existingOverlay.containerHeight;
+                            textX = Math.round(existingOverlay.screenX * factorX);
+                            textY = Math.round(existingOverlay.screenY * factorY);
+                        } else {
+                            textX = existingOverlay.screenX;
+                            textY = existingOverlay.screenY;
+                        }
+                    } else {
+                        const bounds = calculateImageDisplayBounds({
+                            containerWidth,
+                            containerHeight,
+                            imageWidth: item.width || 1000,
+                            imageHeight: item.height || 1000,
+                            rotation: item.rotation || 0
+                        });
+                        textX = Math.round(bounds.offsetX + Math.min(40, bounds.displayedWidth * 0.1));
+                        textY = Math.round(bounds.offsetY + Math.min(60, bounds.displayedHeight * 0.1));
+                    }
+                }
             }
         }
     }
@@ -109,6 +147,34 @@
         }
         try {
             await showLoading(lc('computing'));
+
+            const file = File.fromPath(item.imagePath);
+            const imageExportSettings = getImageExportSettings();
+            const compressFormat = item.sourceImagePath.toLowerCase().endsWith('.png') ? 'png' : imageExportSettings.imageFormat;
+
+            // Re-crop pristine base from sourceImagePath if we had an existing text overlay to prevent ghosting
+            if (hasExistingOverlay && item.sourceImagePath) {
+                await cropDocumentFromFile(item.sourceImagePath, [item.crop], {
+                    transforms: item.transforms,
+                    saveInFolder: file.parent.path,
+                    fileName: file.name,
+                    compressFormat,
+                    compressQuality: imageExportSettings.imageQuality
+                });
+            }
+
+            const overlayData: TextOverlayItem = {
+                text: overlayText,
+                screenX: textX,
+                screenY: textY,
+                containerWidth,
+                containerHeight,
+                fontSize,
+                color: selectedColor,
+                hasBorder,
+                rotation: item.rotation ?? 0
+            };
+
             const result = await burnTextToImageFile({
                 imagePath: item.imagePath,
                 text: overlayText,
@@ -117,16 +183,23 @@
                 containerWidth,
                 containerHeight,
                 fontSize,
-                color: selectedColor
+                color: selectedColor,
+                rotation: item.rotation ?? 0,
+                hasBorder
             });
 
             if (result.success) {
+                const currentExtra = item.extra || {};
                 await document.updatePage(
                     pageIndex,
                     {
                         size: result.size,
                         width: result.width,
-                        height: result.height
+                        height: result.height,
+                        extra: {
+                            ...currentExtra,
+                            textOverlays: [overlayData]
+                        }
                     },
                     true
                 );
@@ -135,6 +208,56 @@
             } else {
                 throw new Error('Failed to burn text to image');
             }
+        } catch (error) {
+            showError(error);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function onRemoveText() {
+        try {
+            const confirmed = await confirm({
+                title: lc('delete_text', 'Delete Text'),
+                message: lc('confirm_delete_text', 'Are you sure you want to remove the text overlay from this page?'),
+                okButtonText: lc('delete', 'Delete'),
+                cancelButtonText: lc('cancel')
+            });
+            if (!confirmed) {
+                return;
+            }
+
+            await showLoading(lc('computing'));
+            const file = File.fromPath(item.imagePath);
+            const imageExportSettings = getImageExportSettings();
+            const compressFormat = item.sourceImagePath.toLowerCase().endsWith('.png') ? 'png' : imageExportSettings.imageFormat;
+
+            const images = await cropDocumentFromFile(item.sourceImagePath, [item.crop], {
+                transforms: item.transforms,
+                saveInFolder: file.parent.path,
+                fileName: file.name,
+                compressFormat,
+                compressQuality: imageExportSettings.imageQuality
+            });
+            const image = images[0];
+            await getImagePipeline().evictFromCache(item.imagePath);
+
+            const newExtra = { ...(item.extra || {}) };
+            delete newExtra.textOverlays;
+
+            const updatedFile = File.fromPath(item.imagePath);
+            await document.updatePage(
+                pageIndex,
+                {
+                    size: updatedFile.size,
+                    width: image ? image.width : item.width,
+                    height: image ? image.height : item.height,
+                    extra: newExtra
+                },
+                true
+            );
+            showSnack({ message: lc('deleted', 'Deleted') });
+            closeModal(true);
         } catch (error) {
             showError(error);
         } finally {
@@ -164,13 +287,24 @@
 <page bind:this={page} id="modalTextEdit" actionBarHidden={true} statusBarStyle="dark">
     <gridlayout class="pageContent" backgroundColor={visualState} rows="auto,*,auto" android:paddingBottom={$windowInset.bottom}>
         <!-- Top Action Bar -->
-        <CActionBar backgroundColor="transparent" buttonsDefaultVisualState={visualState} modalWindow={true} title={lc('add_text')}>
+        <CActionBar backgroundColor="transparent" buttonsDefaultVisualState={visualState} modalWindow={true} title={hasExistingOverlay ? lc('edit_text', 'Edit Text') : lc('add_text')}>
+            {#if hasExistingOverlay}
+                <mdbutton class="actionBarButton" defaultVisualState={visualState} text="mdi-delete" variant="text" on:tap={onRemoveText} />
+            {/if}
             <mdbutton class="actionBarButton" defaultVisualState={visualState} text="mdi-check" variant="text" on:tap={onSave} />
         </CActionBar>
 
         <!-- Canvas / Document Page Preview Layer -->
         <gridlayout row={1} on:layoutChanged={onContainerLayout} clipToBounds={true}>
-            <image src={item.imagePath} stretch="aspectFit" width="100%" height="100%" />
+            <image
+                src={item.imagePath}
+                imageRotation={item?.rotation ?? 0}
+                colorMatrix={getPageColorMatrix(item)}
+                decodeWidth={IMAGE_DECODE_HEIGHT}
+                stretch="aspectFit"
+                width="100%"
+                height="100%"
+            />
 
             <!-- Interactive Absolute Text Placement Layer -->
             <absolutelayout width="100%" height="100%">
@@ -184,9 +318,9 @@
                     fontSize={fontSize}
                     fontWeight="bold"
                     padding="4"
-                    borderWidth="2"
-                    borderColor={selectedColor}
-                    backgroundColor="#00000033"
+                    borderWidth={hasBorder ? 2 : 0}
+                    borderColor={hasBorder ? selectedColor : 'transparent'}
+                    backgroundColor="#00000022"
                     borderRadius={4}
                     textWrap={true}
                 />
@@ -217,17 +351,44 @@
                 />
             </gridlayout>
 
-            <!-- Font Size & Color Palette Selector -->
+            <!-- Font Size & Border Toggle Row -->
             <gridlayout columns="auto,*,auto" verticalAlignment="center" margin="4 0 4 0">
                 <label col={0} text={`Size: ${fontSize}px`} color={textColor} fontSize={14} verticalAlignment="center" marginRight={8} />
                 <slider
                     col={1}
                     value={fontSize}
-                    minValue={12}
+                    minValue={4}
                     maxValue={72}
-                    on:valueChange={(e) => (fontSize = Math.round(e.value))}
+                    on:valueChange={(e) => (fontSize = Math.max(4, Math.round(e.value)))}
                     verticalAlignment="center"
                 />
+                <gridlayout
+                    col={2}
+                    columns="auto,auto"
+                    verticalAlignment="center"
+                    padding="4 8"
+                    borderRadius={8}
+                    backgroundColor={hasBorder ? '#00000022' : 'transparent'}
+                    on:tap={() => (hasBorder = !hasBorder)}
+                >
+                    <label
+                        col={0}
+                        text={hasBorder ? 'mdi-border-all' : 'mdi-border-none'}
+                        fontFamily={$fonts.mdi}
+                        fontSize={20}
+                        color={hasBorder ? colorPrimary : textColor}
+                        verticalAlignment="center"
+                    />
+                    <label
+                        col={1}
+                        text={lc('border', 'Border')}
+                        fontSize={13}
+                        fontWeight={hasBorder ? 'bold' : 'normal'}
+                        color={hasBorder ? colorPrimary : textColor}
+                        verticalAlignment="center"
+                        marginLeft={4}
+                    />
+                </gridlayout>
             </gridlayout>
 
             <!-- Color Selection Chips -->

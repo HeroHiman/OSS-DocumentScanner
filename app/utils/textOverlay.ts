@@ -15,6 +15,20 @@ export interface ImageCoordinates {
     imageX: number;
     imageY: number;
     canvasFontSize: number;
+    canvasRotation?: number;
+    fontScale?: number;
+}
+
+export interface TextOverlayItem {
+    text: string;
+    screenX: number;
+    screenY: number;
+    containerWidth: number;
+    containerHeight: number;
+    fontSize?: number;
+    color?: string;
+    hasBorder?: boolean;
+    rotation?: number;
 }
 
 export interface BurnTextOptions {
@@ -29,21 +43,26 @@ export interface BurnTextOptions {
     compressQuality?: number;
     imageWidth?: number;
     imageHeight?: number;
+    rotation?: number;
+    hasBorder?: boolean;
 }
 
 /**
- * Calculates letterboxed bounds for an aspect-fit image within a given container.
+ * Calculates letterboxed bounds for an aspect-fit image within a given container,
+ * accounting for active image rotation (0, 90, 180, 270).
  */
 export function calculateImageDisplayBounds({
     containerWidth,
     containerHeight,
     imageWidth,
-    imageHeight
+    imageHeight,
+    rotation = 0
 }: {
     containerWidth: number;
     containerHeight: number;
     imageWidth: number;
     imageHeight: number;
+    rotation?: number;
 }): DisplayBounds {
     if (!containerWidth || !containerHeight || !imageWidth || !imageHeight) {
         return {
@@ -54,7 +73,12 @@ export function calculateImageDisplayBounds({
         };
     }
 
-    const imageRatio = imageWidth / imageHeight;
+    const normRotation = ((rotation % 360) + 360) % 360;
+    const isRotated90or270 = normRotation === 90 || normRotation === 270;
+    const effectiveWidth = isRotated90or270 ? imageHeight : imageWidth;
+    const effectiveHeight = isRotated90or270 ? imageWidth : imageHeight;
+
+    const imageRatio = effectiveWidth / effectiveHeight;
     const containerRatio = containerWidth / containerHeight;
 
     let displayedWidth: number;
@@ -85,7 +109,8 @@ export function calculateImageDisplayBounds({
 }
 
 /**
- * Maps screen coordinates (e.g. from AbsoluteLayout / PanGesture) into native image bitmap pixel coordinates.
+ * Maps screen coordinates (e.g. from AbsoluteLayout / PanGesture) into native image bitmap pixel coordinates,
+ * accounting for 0, 90, 180, 270 degree rotations.
  */
 export function mapScreenToImageCoordinates({
     screenX,
@@ -94,7 +119,8 @@ export function mapScreenToImageCoordinates({
     containerHeight,
     imageWidth,
     imageHeight,
-    uiFontSize = 24
+    uiFontSize = 24,
+    rotation = 0
 }: {
     screenX: number;
     screenY: number;
@@ -103,34 +129,65 @@ export function mapScreenToImageCoordinates({
     imageWidth: number;
     imageHeight: number;
     uiFontSize?: number;
+    rotation?: number;
 }): ImageCoordinates {
+    const normRotation = ((rotation % 360) + 360) % 360;
+    const isRotated90or270 = normRotation === 90 || normRotation === 270;
+
     const { displayedWidth, displayedHeight, offsetX, offsetY } = calculateImageDisplayBounds({
         containerWidth,
         containerHeight,
         imageWidth,
-        imageHeight
+        imageHeight,
+        rotation: normRotation
     });
 
-    const scaleX = displayedWidth > 0 ? imageWidth / displayedWidth : 1;
-    const scaleY = displayedHeight > 0 ? imageHeight / displayedHeight : 1;
+    const fontScale = isRotated90or270
+        ? (displayedWidth > 0 ? imageHeight / displayedWidth : 1)
+        : (displayedWidth > 0 ? imageWidth / displayedWidth : 1);
 
     // Clamp relative coordinates within displayed image area
-    const relativeX = Math.max(0, screenX - offsetX);
-    const relativeY = Math.max(0, screenY - offsetY);
+    const relativeX = Math.max(0, Math.min(displayedWidth, screenX - offsetX));
+    const relativeY = Math.max(0, Math.min(displayedHeight, screenY - offsetY));
 
-    const imageX = relativeX * scaleX;
-    const imageY = relativeY * scaleY;
-    const canvasFontSize = uiFontSize * scaleX;
+    const u = displayedWidth > 0 ? relativeX / displayedWidth : 0;
+    const v = displayedHeight > 0 ? relativeY / displayedHeight : 0;
+
+    let imageX: number;
+    let imageY: number;
+    let canvasRotation = 0;
+
+    if (normRotation === 90) {
+        imageX = v * imageWidth;
+        imageY = (1 - u) * imageHeight;
+        canvasRotation = 270;
+    } else if (normRotation === 180) {
+        imageX = (1 - u) * imageWidth;
+        imageY = (1 - v) * imageHeight;
+        canvasRotation = 180;
+    } else if (normRotation === 270) {
+        imageX = (1 - v) * imageWidth;
+        imageY = u * imageHeight;
+        canvasRotation = 90;
+    } else {
+        imageX = u * imageWidth;
+        imageY = v * imageHeight;
+        canvasRotation = 0;
+    }
+
+    const canvasFontSize = uiFontSize * fontScale;
 
     return {
         imageX,
         imageY,
-        canvasFontSize
+        canvasFontSize,
+        canvasRotation,
+        fontScale
     };
 }
 
 /**
- * Renders text directly onto an image bitmap file and overwrites it.
+ * Renders text (and optional border) directly onto an image bitmap file and overwrites it.
  */
 export async function burnTextToImageFile({
     imagePath,
@@ -141,7 +198,9 @@ export async function burnTextToImageFile({
     containerHeight,
     fontSize = 24,
     color = '#ff0000',
-    compressQuality
+    compressQuality,
+    rotation = 0,
+    hasBorder = false
 }: BurnTextOptions): Promise<{ success: boolean; width: number; height: number; size: number }> {
     if (!imagePath || !text?.trim()) {
         return { success: false, width: 0, height: 0, size: 0 };
@@ -156,14 +215,15 @@ export async function burnTextToImageFile({
     const imageWidth = imageSource.width;
     const imageHeight = imageSource.height;
 
-    const { imageX, imageY, canvasFontSize } = mapScreenToImageCoordinates({
+    const { imageX, imageY, canvasFontSize, canvasRotation = 0, fontScale = 1 } = mapScreenToImageCoordinates({
         screenX,
         screenY,
         containerWidth,
         containerHeight,
         imageWidth,
         imageHeight,
-        uiFontSize: fontSize
+        uiFontSize: fontSize,
+        rotation
     });
 
     // Create a new mutable Canvas with the exact image dimensions
@@ -177,16 +237,42 @@ export async function burnTextToImageFile({
     paint.color = new Color(color);
     paint.style = Style.FILL;
     paint.textSize = canvasFontSize;
+    paint.setFontWeight?.('bold');
     paint.setAntiAlias(true);
 
     // Text rendering: support multiple lines
     const lines = text.split('\n');
     const lineHeight = canvasFontSize * 1.2;
+    let maxLineWidth = 0;
+    for (let i = 0; i < lines.length; i++) {
+        const w = paint.measureText(lines[i]);
+        if (w > maxLineWidth) {
+            maxLineWidth = w;
+        }
+    }
+    const padding = 4 * fontScale;
+    const totalTextHeight = lines.length * lineHeight;
+
+    canvas.save();
+    canvas.translate(imageX, imageY);
+    if (canvasRotation !== 0) {
+        canvas.rotate(canvasRotation);
+    }
+
+    if (hasBorder) {
+        const borderPaint = new Paint();
+        borderPaint.color = new Color(color);
+        borderPaint.style = Style.STROKE;
+        borderPaint.strokeWidth = Math.max(2 * fontScale, 2);
+        borderPaint.setAntiAlias(true);
+        canvas.drawRoundRect(0, 0, maxLineWidth + padding * 2, totalTextHeight + padding * 2, 4 * fontScale, 4 * fontScale, borderPaint);
+    }
 
     for (let i = 0; i < lines.length; i++) {
-        // Draw text with baseline adjustment
-        canvas.drawText(lines[i], imageX, imageY + canvasFontSize + i * lineHeight, paint);
+        canvas.drawText(lines[i], padding, padding + canvasFontSize + i * lineHeight, paint);
     }
+
+    canvas.restore();
 
     const imageExportSettings = getImageExportSettings();
     const quality = compressQuality !== undefined ? compressQuality : imageExportSettings.imageQuality;
@@ -216,4 +302,34 @@ export async function burnTextToImageFile({
     }
 
     return { success: false, width: imageWidth, height: imageHeight, size: 0 };
+}
+
+/**
+ * Automatically re-applies stored text overlays onto an image file (e.g. after transform or recrop).
+ */
+export async function reapplyTextOverlays(
+    imagePath: string,
+    textOverlays: TextOverlayItem[],
+    pageRotation: number = 0
+): Promise<void> {
+    if (!imagePath || !textOverlays?.length) {
+        return;
+    }
+    for (const overlay of textOverlays) {
+        if (!overlay.text || !overlay.text.trim()) {
+            continue;
+        }
+        await burnTextToImageFile({
+            imagePath,
+            text: overlay.text,
+            screenX: overlay.screenX,
+            screenY: overlay.screenY,
+            containerWidth: overlay.containerWidth,
+            containerHeight: overlay.containerHeight,
+            fontSize: overlay.fontSize,
+            color: overlay.color,
+            rotation: overlay.rotation !== undefined ? overlay.rotation : pageRotation,
+            hasBorder: overlay.hasBorder
+        });
+    }
 }

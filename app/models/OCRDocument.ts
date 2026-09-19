@@ -34,6 +34,7 @@ import {
 } from '../utils/constants';
 import { getImagePipeline } from '@nativescript-community/ui-image';
 import { PKPass } from './PKPass';
+import { TextOverlayItem, reapplyTextOverlays } from '~/utils/textOverlay';
 
 export const sql = SqlQuery.createFromTemplateString;
 
@@ -142,10 +143,12 @@ export enum ExtraFieldType {
 
 export interface DocumentExtra {
     color?: string;
+    textOverlays?: TextOverlayItem[];
     [k: string]:
         | string
         | number
         | boolean
+        | any[]
         | {
               type: string;
               value: any;
@@ -588,16 +591,24 @@ export class OCRDocument extends Observable implements Document {
         //     // TODO: fix why do we need to clear the whole cache? wrong cache key?
         //     getImagePipeline().clearCaches();
         // } else {
+        if (page.extra?.textOverlays && Array.isArray(page.extra.textOverlays) && page.extra.textOverlays.length > 0) {
+            try {
+                await reapplyTextOverlays(page.imagePath, page.extra.textOverlays, page.rotation);
+            } catch (err) {
+                console.error('Failed to re-apply text overlays after crop:', err);
+            }
+        }
         // eslint-disable-next-line @typescript-eslint/await-thenable
         await getImagePipeline().evictFromCache(croppedImagePath);
         // }
+        const updatedFile = File.fromPath(page.imagePath);
         await this.updatePage(
             pageIndex,
             {
                 crop: quad,
                 width: image.width,
                 height: image.height,
-                size: file.size
+                size: updatedFile.size
             },
             true
         );
@@ -631,11 +642,19 @@ export class OCRDocument extends Observable implements Document {
             });
             const image = images[0];
             if (image) {
+                if (page.extra?.textOverlays && Array.isArray(page.extra.textOverlays) && page.extra.textOverlays.length > 0) {
+                    try {
+                        await reapplyTextOverlays(page.imagePath, page.extra.textOverlays, page.rotation);
+                    } catch (err) {
+                        console.error('Failed to re-apply text overlays after transform:', err);
+                    }
+                }
+                const updatedFile = File.fromPath(page.imagePath);
                 await this.updatePage(
                     pageIndex,
                     {
                         transforms,
-                        size: file.size,
+                        size: updatedFile.size,
                         ...optionalUpdates
                     },
                     true

@@ -110,4 +110,226 @@ describe('mapScreenToImageCoordinates', () => {
 
         expect(coords.imageY).toBe(0);
     });
+
+    it('calculates display bounds with 90 degree rotation (aspect ratio swapped)', () => {
+        // Image: 1000x2000 (portrait, ratio 0.5)
+        // Rotated 90 deg -> effective: 2000x1000 (landscape, ratio 2.0)
+        // Container: 400x800 (ratio 0.5)
+        // Container is narrower/taller than effective image -> letterboxing top/bottom
+        const bounds = calculateImageDisplayBounds({
+            containerWidth: 400,
+            containerHeight: 800,
+            imageWidth: 1000,
+            imageHeight: 2000,
+            rotation: 90
+        });
+
+        expect(bounds.displayedWidth).toBe(400);
+        expect(bounds.displayedHeight).toBe(200); // 400 / 2.0
+        expect(bounds.offsetX).toBe(0);
+        expect(bounds.offsetY).toBe(300); // (800 - 200) / 2
+    });
+
+    it('calculates display bounds with 180 degree rotation (aspect ratio preserved)', () => {
+        const bounds = calculateImageDisplayBounds({
+            containerWidth: 400,
+            containerHeight: 800,
+            imageWidth: 1000,
+            imageHeight: 1000,
+            rotation: 180
+        });
+
+        expect(bounds.displayedWidth).toBe(400);
+        expect(bounds.displayedHeight).toBe(400);
+        expect(bounds.offsetX).toBe(0);
+        expect(bounds.offsetY).toBe(200);
+    });
+
+    it('calculates display bounds with 270 degree rotation (aspect ratio swapped)', () => {
+        const bounds = calculateImageDisplayBounds({
+            containerWidth: 400,
+            containerHeight: 800,
+            imageWidth: 1000,
+            imageHeight: 2000,
+            rotation: 270
+        });
+
+        expect(bounds.displayedWidth).toBe(400);
+        expect(bounds.displayedHeight).toBe(200);
+        expect(bounds.offsetX).toBe(0);
+        expect(bounds.offsetY).toBe(300);
+    });
+
+    it('maps screen coordinates correctly for 90 degree clockwise rotation', () => {
+        // Container: 400x200, Image: 1000x2000 (effective displayed: 400x200)
+        // At 90 deg CW:
+        // Screen top-left (0, 0) -> Bitmap (X=0, Y=2000)
+        // Screen top-right (400, 0) -> Bitmap (X=0, Y=0)
+        // Screen bottom-right (400, 200) -> Bitmap (X=1000, Y=0)
+        // Screen bottom-left (0, 200) -> Bitmap (X=1000, Y=2000)
+        const topLeft = mapScreenToImageCoordinates({
+            screenX: 0,
+            screenY: 0,
+            containerWidth: 400,
+            containerHeight: 200,
+            imageWidth: 1000,
+            imageHeight: 2000,
+            uiFontSize: 16,
+            rotation: 90
+        });
+
+        expect(topLeft.imageX).toBe(0);
+        expect(topLeft.imageY).toBe(2000);
+        expect(topLeft.canvasRotation).toBe(270);
+        expect(topLeft.fontScale).toBe(5); // imageHeight (2000) / displayedWidth (400)
+        expect(topLeft.canvasFontSize).toBe(80); // 16 * 5
+
+        const topRight = mapScreenToImageCoordinates({
+            screenX: 400,
+            screenY: 0,
+            containerWidth: 400,
+            containerHeight: 200,
+            imageWidth: 1000,
+            imageHeight: 2000,
+            uiFontSize: 16,
+            rotation: 90
+        });
+
+        expect(topRight.imageX).toBe(0);
+        expect(topRight.imageY).toBe(0);
+
+        const bottomRight = mapScreenToImageCoordinates({
+            screenX: 400,
+            screenY: 200,
+            containerWidth: 400,
+            containerHeight: 200,
+            imageWidth: 1000,
+            imageHeight: 2000,
+            uiFontSize: 16,
+            rotation: 90
+        });
+
+        expect(bottomRight.imageX).toBe(1000);
+        expect(bottomRight.imageY).toBe(0);
+
+        const bottomLeft = mapScreenToImageCoordinates({
+            screenX: 0,
+            screenY: 200,
+            containerWidth: 400,
+            containerHeight: 200,
+            imageWidth: 1000,
+            imageHeight: 2000,
+            uiFontSize: 16,
+            rotation: 90
+        });
+
+        expect(bottomLeft.imageX).toBe(1000);
+        expect(bottomLeft.imageY).toBe(2000);
+    });
+
+    it('maps screen coordinates correctly for 180 degree rotation', () => {
+        // Container: 500x1000, Image: 1000x2000
+        // Screen top-left (0, 0) -> Bitmap (X=1000, Y=2000)
+        // Screen bottom-right (500, 1000) -> Bitmap (X=0, Y=0)
+        const topLeft = mapScreenToImageCoordinates({
+            screenX: 0,
+            screenY: 0,
+            containerWidth: 500,
+            containerHeight: 1000,
+            imageWidth: 1000,
+            imageHeight: 2000,
+            uiFontSize: 20,
+            rotation: 180
+        });
+
+        expect(topLeft.imageX).toBe(1000);
+        expect(topLeft.imageY).toBe(2000);
+        expect(topLeft.canvasRotation).toBe(180);
+        expect(topLeft.canvasFontSize).toBe(40); // 20 * (1000 / 500)
+
+        const bottomRight = mapScreenToImageCoordinates({
+            screenX: 500,
+            screenY: 1000,
+            containerWidth: 500,
+            containerHeight: 1000,
+            imageWidth: 1000,
+            imageHeight: 2000,
+            uiFontSize: 20,
+            rotation: 180
+        });
+
+        expect(bottomRight.imageX).toBe(0);
+        expect(bottomRight.imageY).toBe(0);
+    });
+
+    it('maps screen coordinates correctly for 270 degree clockwise rotation', () => {
+        // Container: 400x200, Image: 1000x2000
+        // Screen top-left (0, 0) -> Bitmap (X=1000, Y=0)
+        // Screen bottom-right (400, 200) -> Bitmap (X=0, Y=2000)
+        const topLeft = mapScreenToImageCoordinates({
+            screenX: 0,
+            screenY: 0,
+            containerWidth: 400,
+            containerHeight: 200,
+            imageWidth: 1000,
+            imageHeight: 2000,
+            uiFontSize: 20,
+            rotation: 270
+        });
+
+        expect(topLeft.imageX).toBe(1000);
+        expect(topLeft.imageY).toBe(0);
+        expect(topLeft.canvasRotation).toBe(90);
+        expect(topLeft.fontScale).toBe(5);
+
+        const bottomRight = mapScreenToImageCoordinates({
+            screenX: 400,
+            screenY: 200,
+            containerWidth: 400,
+            containerHeight: 200,
+            imageWidth: 1000,
+            imageHeight: 2000,
+            uiFontSize: 20,
+            rotation: 270
+        });
+
+        expect(bottomRight.imageX).toBe(0);
+        expect(bottomRight.imageY).toBe(2000);
+    });
+
+    it('supports small font sizes below 12px (e.g. 4px, 6px, 8px)', () => {
+        // Container: 500x1000, Image: 1000x2000 (Scale 2.0x)
+        const coords4 = mapScreenToImageCoordinates({
+            screenX: 50,
+            screenY: 50,
+            containerWidth: 500,
+            containerHeight: 1000,
+            imageWidth: 1000,
+            imageHeight: 2000,
+            uiFontSize: 4
+        });
+        expect(coords4.canvasFontSize).toBe(8);
+
+        const coords6 = mapScreenToImageCoordinates({
+            screenX: 50,
+            screenY: 50,
+            containerWidth: 500,
+            containerHeight: 1000,
+            imageWidth: 1000,
+            imageHeight: 2000,
+            uiFontSize: 6
+        });
+        expect(coords6.canvasFontSize).toBe(12);
+
+        const coords8 = mapScreenToImageCoordinates({
+            screenX: 50,
+            screenY: 50,
+            containerWidth: 500,
+            containerHeight: 1000,
+            imageWidth: 1000,
+            imageHeight: 2000,
+            uiFontSize: 8
+        });
+        expect(coords8.canvasFontSize).toBe(16);
+    });
 });
