@@ -521,6 +521,170 @@ export async function restoreCleanPatch(
 }
 
 /**
+ * Erases a text overlay area on an image by sampling the surrounding background paper color
+ * and filling the text bounding box. This works as a fallback when cleanPatch is not available.
+ */
+export async function eraseTextOverlayArea(
+    imagePath: string,
+    overlay: TextOverlayItem
+): Promise<boolean> {
+    if (!imagePath || !overlay) {
+        return false;
+    }
+    const cleanPath = imagePath.split('?')[0];
+    if (!File.exists(cleanPath)) {
+        return false;
+    }
+    try {
+        const imageSource = await ImageSource.fromFile(cleanPath);
+        if (!imageSource) {
+            return false;
+        }
+
+        const imageWidth = imageSource.width;
+        const imageHeight = imageSource.height;
+
+        let patchX = overlay.patchX;
+        let patchY = overlay.patchY;
+        let patchWidth = overlay.patchWidth;
+        let patchHeight = overlay.patchHeight;
+
+        if (patchX === undefined || patchY === undefined || !patchWidth || !patchHeight) {
+            const { imageX, imageY, canvasFontSize, canvasRotation = 0, fontScale = 1 } = mapScreenToImageCoordinates({
+                screenX: overlay.screenX,
+                screenY: overlay.screenY,
+                containerWidth: overlay.containerWidth || imageWidth,
+                containerHeight: overlay.containerHeight || imageHeight,
+                imageWidth,
+                imageHeight,
+                uiFontSize: overlay.fontSize || 24,
+                rotation: overlay.rotation || 0
+            });
+
+            const paint = new Paint();
+            paint.textSize = canvasFontSize;
+            paint.setFontWeight?.('bold');
+
+            const lines = (overlay.text || '').split('\n');
+            const lineHeight = canvasFontSize * 1.2;
+            let maxLineWidth = 0;
+            for (let i = 0; i < lines.length; i++) {
+                const w = paint.measureText(lines[i]);
+                if (w > maxLineWidth) {
+                    maxLineWidth = w;
+                }
+            }
+            const padding = 4 * fontScale;
+            const boxWidth = Math.max(maxLineWidth + padding * 2, canvasFontSize * 2);
+            const boxHeight = Math.max(lines.length * lineHeight + padding * 2, canvasFontSize * 1.5);
+
+            const bbox = calculateTextBoundingBoxInImage({
+                imageX,
+                imageY,
+                boxWidth,
+                boxHeight,
+                canvasRotation,
+                textRotation: overlay.textRotation || 0,
+                imageWidth,
+                imageHeight,
+                fontScale
+            });
+
+            patchX = bbox.patchX;
+            patchY = bbox.patchY;
+            patchWidth = bbox.patchWidth;
+            patchHeight = bbox.patchHeight;
+        }
+
+        // Sample background color around bounding box
+        let bgColor = '#ffffff';
+        if (__ANDROID__ && imageSource.android) {
+            try {
+                const bmp = imageSource.android;
+                const samplePoints: number[] = [];
+                const topY = Math.max(0, patchY - 2);
+                const bottomY = Math.min(imageHeight - 1, patchY + patchHeight + 2);
+                const leftX = Math.max(0, patchX - 2);
+                const rightX = Math.min(imageWidth - 1, patchX + patchWidth + 2);
+
+                for (let i = 0; i < 5; i++) {
+                    const sx = Math.floor(patchX + (patchWidth * i) / 4);
+                    const sy = Math.floor(patchY + (patchHeight * i) / 4);
+                    if (sx >= 0 && sx < imageWidth) {
+                        samplePoints.push(bmp.getPixel(sx, topY));
+                        samplePoints.push(bmp.getPixel(sx, bottomY));
+                    }
+                    if (sy >= 0 && sy < imageHeight) {
+                        samplePoints.push(bmp.getPixel(leftX, sy));
+                        samplePoints.push(bmp.getPixel(rightX, sy));
+                    }
+                }
+
+                if (samplePoints.length > 0) {
+                    const rVals = samplePoints.map((p) => (p >> 16) & 0xff).sort((a, b) => a - b);
+                    const gVals = samplePoints.map((p) => (p >> 8) & 0xff).sort((a, b) => a - b);
+                    const bVals = samplePoints.map((p) => p & 0xff).sort((a, b) => a - b);
+                    const mid = Math.floor(samplePoints.length / 2);
+                    bgColor = `rgb(${rVals[mid]}, ${gVals[mid]}, ${bVals[mid]})`;
+                }
+            } catch (e) {
+                bgColor = '#ffffff';
+            }
+        }
+
+        const canvas = new Canvas(imageWidth, imageHeight);
+        if (__ANDROID__ && imageSource.android) {
+            canvas.setDensity(imageSource.android.getDensity());
+        }
+        canvas.drawBitmap(imageSource, 0, 0, null);
+
+        const fillPaint = new Paint();
+        fillPaint.color = new Color(bgColor);
+        fillPaint.style = Style.FILL;
+        fillPaint.setAntiAlias(true);
+
+        canvas.drawRect(patchX, patchY, patchX + patchWidth, patchY + patchHeight, fillPaint);
+
+        const imageExportSettings = getImageExportSettings();
+        const format = cleanPath.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
+        const outputImage = new ImageSource(canvas.getImage());
+        const saved = await outputImage.saveToFileAsync(cleanPath, format as any, imageExportSettings.imageQuality);
+
+        recycleImages(imageSource, outputImage);
+        canvas.release();
+
+        if (saved) {
+            try {
+                await getImagePipeline().evictFromCache(cleanPath);
+                if (imagePath !== cleanPath) {
+                    await getImagePipeline().evictFromCache(imagePath);
+                }
+            } catch (e) {}
+            return true;
+        }
+    } catch (err) {
+        DEV_LOG && console.log('eraseTextOverlayArea error:', err);
+    }
+    return false;
+}
+
+/**
+ * Restores a clean patch if available, or erases the text overlay area with the surrounding background color.
+ */
+export async function restoreCleanPatchOrErase(
+    imagePath: string,
+    overlay: TextOverlayItem
+): Promise<boolean> {
+    if (overlay?.cleanPatch && overlay.patchX !== undefined && overlay.patchY !== undefined) {
+        const restored = await restoreCleanPatch(imagePath, overlay);
+        if (restored) {
+            return true;
+        }
+    }
+    return eraseTextOverlayArea(imagePath, overlay);
+}
+
+/**
  * Automatically re-applies stored text overlays onto an image file (e.g. after transform or recrop).
  */
 export async function reapplyTextOverlays(

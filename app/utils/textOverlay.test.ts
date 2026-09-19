@@ -458,3 +458,28 @@ describe('restoreCleanPatch', () => {
         expect(res2).toBe(false);
     });
 });
+
+describe('eraseTextOverlayArea and restoreCleanPatchOrErase', () => {
+    it('returns false when imagePath is empty or overlay is missing', async () => {
+        const { eraseTextOverlayArea, restoreCleanPatchOrErase } = await import('./textOverlay');
+        const r1 = await eraseTextOverlayArea('', null as any);
+        expect(r1).toBe(false);
+
+        const r2 = await eraseTextOverlayArea('/non/existent/image.jpg', {
+            text: 'Hello',
+            screenX: 10,
+            screenY: 10
+        });
+        expect(r2).toBe(false);
+
+        const r3 = await restoreCleanPatchOrErase('', null as any);
+        expect(r3).toBe(false);
+
+        const r4 = await restoreCleanPatchOrErase('/non/existent/image.jpg', {
+            text: 'Hello',
+            screenX: 10,
+            screenY: 10
+        });
+        expect(r4).toBe(false);
+    });
+});

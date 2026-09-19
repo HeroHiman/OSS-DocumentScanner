@@ -14,7 +14,7 @@
     import { OCRDocument, OCRPage } from '~/models/OCRDocument';
     import { IMAGE_DECODE_HEIGHT, getImageExportSettings } from '~/utils/constants';
     import { getPageColorMatrix } from '~/utils/matrix';
-    import { TextOverlayItem, burnTextToImageFile, calculateImageDisplayBounds, restoreCleanPatch } from '~/utils/textOverlay';
+    import { TextOverlayItem, burnTextToImageFile, calculateImageDisplayBounds, restoreCleanPatch, restoreCleanPatchOrErase } from '~/utils/textOverlay';
     import { hideLoading, onBackButton, showLoading, showSnack } from '~/utils/ui';
     import { colors, fonts, screenHeightDips, screenWidthDips, windowInset } from '~/variables';
 
@@ -194,17 +194,8 @@
                 const cleanFile = File.fromPath(cleanWorkingCopyPath);
                 await cleanFile.copy(item.imagePath);
                 await getImagePipeline().evictFromCache(item.imagePath);
-            } else if (hasExistingOverlay && item.sourceImagePath && item.crop && item.sourceImagePath !== item.imagePath && File.exists(item.sourceImagePath)) {
-                await cropDocumentFromFile(item.sourceImagePath, [item.crop], {
-                    transforms: item.transforms,
-                    saveInFolder: file.parent.path,
-                    fileName: file.name,
-                    compressFormat,
-                    compressQuality: imageExportSettings.imageQuality
-                });
-                await getImagePipeline().evictFromCache(item.imagePath);
-            } else if (hasExistingOverlay && existingOverlay?.cleanPatch) {
-                await restoreCleanPatch(item.imagePath, existingOverlay);
+            } else if (hasExistingOverlay && existingOverlay) {
+                await restoreCleanPatchOrErase(item.imagePath, existingOverlay);
                 await getImagePipeline().evictFromCache(item.imagePath);
             }
 
@@ -280,24 +271,13 @@
             }
 
             await showLoading(lc('computing'));
-            const file = File.fromPath(item.imagePath);
-            const imageExportSettings = getImageExportSettings();
-            const compressFormat = item.sourceImagePath?.toLowerCase().endsWith('.png') ? 'png' : imageExportSettings.imageFormat;
 
-            // Restore clean base onto item.imagePath
+            // 1. Restore clean base onto item.imagePath
             if (cleanWorkingCopyPath && File.exists(cleanWorkingCopyPath)) {
                 const cleanFile = File.fromPath(cleanWorkingCopyPath);
                 await cleanFile.copy(item.imagePath);
-            } else if (item.sourceImagePath && item.crop && item.sourceImagePath !== item.imagePath && File.exists(item.sourceImagePath)) {
-                await cropDocumentFromFile(item.sourceImagePath, [item.crop], {
-                    transforms: item.transforms,
-                    saveInFolder: file.parent.path,
-                    fileName: file.name,
-                    compressFormat,
-                    compressQuality: imageExportSettings.imageQuality
-                });
-            } else if (existingOverlay?.cleanPatch) {
-                await restoreCleanPatch(item.imagePath, existingOverlay);
+            } else if (existingOverlay) {
+                await restoreCleanPatchOrErase(item.imagePath, existingOverlay);
             }
 
             await getImagePipeline().evictFromCache(item.imagePath);
@@ -333,7 +313,7 @@
         if (__ANDROID__) {
             Application.android.on(Application.android.activityBackPressedEvent, onAndroidBackButton);
         }
-        if (hasExistingOverlay) {
+        if (hasExistingOverlay && existingOverlay) {
             try {
                 const tempFolder = knownFolders.temp();
                 const tempFileName = `clean_preview_${Date.now()}_${item.id}.jpg`;
@@ -341,9 +321,22 @@
 
                 let cleanReady = false;
 
-                // Strategy 1: Re-crop pristine base from sourceImagePath if available and valid
-                const hasCleanSource = item.sourceImagePath && item.crop && item.sourceImagePath !== item.imagePath && File.exists(item.sourceImagePath);
-                if (hasCleanSource) {
+                // Priority 1: Restore cleanPatch or erase text overlay area on working copy
+                try {
+                    const sourceFile = File.fromPath(item.imagePath);
+                    await sourceFile.copy(tempPreviewFile.path);
+                    const restored = await restoreCleanPatchOrErase(tempPreviewFile.path, existingOverlay);
+                    if (restored) {
+                        cleanWorkingCopyPath = tempPreviewFile.path;
+                        previewImageSrc = cleanWorkingCopyPath;
+                        cleanReady = true;
+                    }
+                } catch (e) {
+                    DEV_LOG && console.log('Restore/erase clean preview failed:', e);
+                }
+
+                // Priority 2: Fallback to re-cropping from sourceImagePath if cleanPatch/erase wasn't ready
+                if (!cleanReady && item.sourceImagePath && item.crop && item.sourceImagePath !== item.imagePath && File.exists(item.sourceImagePath)) {
                     try {
                         const imageExportSettings = getImageExportSettings();
                         const compressFormat = item.sourceImagePath.toLowerCase().endsWith('.png') ? 'png' : imageExportSettings.imageFormat;
@@ -361,22 +354,6 @@
                         }
                     } catch (e) {
                         DEV_LOG && console.log('Re-crop for clean preview failed:', e);
-                    }
-                }
-
-                // Strategy 2: If no separate sourceImagePath or re-crop failed, restore cleanPatch
-                if (!cleanReady && existingOverlay?.cleanPatch) {
-                    try {
-                        const sourceFile = File.fromPath(item.imagePath);
-                        await sourceFile.copy(tempPreviewFile.path);
-                        const restored = await restoreCleanPatch(tempPreviewFile.path, existingOverlay);
-                        if (restored) {
-                            cleanWorkingCopyPath = tempPreviewFile.path;
-                            previewImageSrc = cleanWorkingCopyPath;
-                            cleanReady = true;
-                        }
-                    } catch (e) {
-                        DEV_LOG && console.log('Restore clean patch for preview failed:', e);
                     }
                 }
 
