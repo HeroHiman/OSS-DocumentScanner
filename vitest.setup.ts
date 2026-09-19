@@ -69,6 +69,19 @@ vi.mock('@nativescript/core', () => ({
         exists: vi.fn(() => false),
         fromPath: vi.fn()
     },
+    ImageSource: class ImageSource {
+        width = 1000;
+        height = 1000;
+        constructor(public nativeSource?: any) {}
+        static fromFile = vi.fn(async () => new (ImageSource as any)());
+        static fromFileSync = vi.fn(() => new (ImageSource as any)());
+        static fromBase64 = vi.fn(async () => new (ImageSource as any)());
+        static fromBase64Sync = vi.fn(() => new (ImageSource as any)());
+        saveToFile = vi.fn(() => true);
+        saveToFileAsync = vi.fn(async () => true);
+        toBase64String = vi.fn(() => 'base64-mock');
+        toBase64StringAsync = vi.fn(async () => 'base64-mock');
+    },
     // Utilities exported directly from the core barrel
     isString: (v: unknown) => typeof v === 'string',
     isObject: (v: unknown) => v !== null && typeof v === 'object',
@@ -178,9 +191,21 @@ vi.mock('@nativescript-community/preferences', () => {
 vi.mock('@nativescript-community/ui-canvas', () => ({
     Align: { LEFT: 'left', CENTER: 'center', RIGHT: 'right' },
     LayoutAlignment: { ALIGN_NORMAL: 0, ALIGN_CENTER: 1, ALIGN_OPPOSITE: 2 },
+    Style: { FILL: 0, STROKE: 1, FILL_AND_STROKE: 2 },
     Canvas: class Canvas {
         drawText() {}
         drawRect() {}
+        drawRoundRect() {}
+        drawBitmap() {}
+        save() {}
+        restore() {}
+        translate() {}
+        rotate() {}
+        release() {}
+        setDensity() {}
+        getImage() {
+            return {};
+        }
         getWidth() {
             return 0;
         }
@@ -192,6 +217,8 @@ vi.mock('@nativescript-community/ui-canvas', () => ({
         setColor() {}
         setTextSize() {}
         setTextAlign() {}
+        setFontWeight() {}
+        setAntiAlias() {}
         measureText() {
             return 0;
         }

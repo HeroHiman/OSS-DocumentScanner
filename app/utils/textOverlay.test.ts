@@ -354,3 +354,107 @@ describe('mapScreenToImageCoordinates', () => {
         expect(blankTextResult.success).toBe(false);
     });
 });
+
+describe('calculateTextBoundingBoxInImage', () => {
+    it('calculates unrotated text box bounding box with margin', async () => {
+        const { calculateTextBoundingBoxInImage } = await import('./textOverlay');
+        const bbox = calculateTextBoundingBoxInImage({
+            imageX: 100,
+            imageY: 200,
+            boxWidth: 300,
+            boxHeight: 100,
+            canvasRotation: 0,
+            textRotation: 0,
+            imageWidth: 1000,
+            imageHeight: 1000,
+            fontScale: 1
+        });
+
+        // margin = max(8, ceil(8*1)) = 8
+        // minX = 100, maxX = 400 -> patchX = 92, patchWidth = 316
+        // minY = 200, maxY = 300 -> patchY = 192, patchHeight = 116
+        expect(bbox.patchX).toBe(92);
+        expect(bbox.patchY).toBe(192);
+        expect(bbox.patchWidth).toBe(316);
+        expect(bbox.patchHeight).toBe(116);
+    });
+
+    it('clamps patch coordinates to image boundaries', async () => {
+        const { calculateTextBoundingBoxInImage } = await import('./textOverlay');
+        const bbox = calculateTextBoundingBoxInImage({
+            imageX: 2,
+            imageY: 3,
+            boxWidth: 200,
+            boxHeight: 50,
+            canvasRotation: 0,
+            textRotation: 0,
+            imageWidth: 205,
+            imageHeight: 60,
+            fontScale: 1
+        });
+
+        expect(bbox.patchX).toBe(0);
+        expect(bbox.patchY).toBe(0);
+        expect(bbox.patchX + bbox.patchWidth).toBeLessThanOrEqual(205);
+        expect(bbox.patchY + bbox.patchHeight).toBeLessThanOrEqual(60);
+    });
+
+    it('handles rotated text boxes with expanded bounding box', async () => {
+        const { calculateTextBoundingBoxInImage } = await import('./textOverlay');
+        const unrotated = calculateTextBoundingBoxInImage({
+            imageX: 500,
+            imageY: 500,
+            boxWidth: 200,
+            boxHeight: 100,
+            canvasRotation: 0,
+            textRotation: 0,
+            imageWidth: 2000,
+            imageHeight: 2000,
+            fontScale: 1
+        });
+
+        const rotated = calculateTextBoundingBoxInImage({
+            imageX: 500,
+            imageY: 500,
+            boxWidth: 200,
+            boxHeight: 100,
+            canvasRotation: 0,
+            textRotation: 90,
+            imageWidth: 2000,
+            imageHeight: 2000,
+            fontScale: 1
+        });
+
+        // When rotated 90 degrees around center, width and height of the box swap
+        expect(rotated.patchWidth).toBeGreaterThan(0);
+        expect(rotated.patchHeight).toBeGreaterThan(0);
+        expect(rotated.patchHeight).toBe(unrotated.patchWidth);
+        expect(rotated.patchWidth).toBe(unrotated.patchHeight);
+    });
+});
+
+describe('restoreCleanPatch', () => {
+    it('returns false when cleanPatch or coordinates are missing', async () => {
+        const { restoreCleanPatch } = await import('./textOverlay');
+        const res1 = await restoreCleanPatch('/path/image.jpg', {
+            text: 'Hello',
+            screenX: 10,
+            screenY: 10,
+            containerWidth: 400,
+            containerHeight: 800
+        });
+        expect(res1).toBe(false);
+
+        const res2 = await restoreCleanPatch('', {
+            text: 'Hello',
+            screenX: 10,
+            screenY: 10,
+            containerWidth: 400,
+            containerHeight: 800,
+            cleanPatch: 'mock-base64',
+            patchX: 10,
+            patchY: 10
+        });
+        expect(res2).toBe(false);
+    });
+});

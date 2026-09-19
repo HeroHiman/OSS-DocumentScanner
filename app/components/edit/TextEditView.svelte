@@ -1,7 +1,7 @@
 <script lang="ts">
     import { NativeViewElementNode } from '@nativescript-community/svelte-native/dom';
     import { getImagePipeline } from '@nativescript-community/ui-image';
-    import { Application, EventData, File, Page, PanGestureEventData, Utils, View } from '@nativescript/core';
+    import { Application, EventData, File, Page, PanGestureEventData, Utils, View, knownFolders } from '@nativescript/core';
     import { AndroidActivityBackPressedEventData } from '@nativescript/core/application';
     import { confirm, inputType, prompt } from '@nativescript/core/ui/dialogs';
     import { closeModal } from '@shared/utils/svelte/ui';
@@ -14,7 +14,7 @@
     import { OCRDocument, OCRPage } from '~/models/OCRDocument';
     import { IMAGE_DECODE_HEIGHT, getImageExportSettings } from '~/utils/constants';
     import { getPageColorMatrix } from '~/utils/matrix';
-    import { TextOverlayItem, burnTextToImageFile, calculateImageDisplayBounds } from '~/utils/textOverlay';
+    import { TextOverlayItem, burnTextToImageFile, calculateImageDisplayBounds, restoreCleanPatch } from '~/utils/textOverlay';
     import { hideLoading, onBackButton, showLoading, showSnack } from '~/utils/ui';
     import { colors, fonts, screenHeightDips, screenWidthDips, windowInset } from '~/variables';
 
@@ -47,6 +47,11 @@
     let hasBorder = existingOverlay?.hasBorder ?? false;
     let textRotation = existingOverlay?.textRotation ?? 0;
     let isLayoutInitialized = false;
+
+    // Clean preview state to prevent ghost copies during re-editing
+    let previewImageSrc = item.imagePath;
+    let cleanWorkingCopyPath: string | null = null;
+    let isPreparingPreview = hasExistingOverlay;
 
     // Viewport dimensions
     let containerWidth = screenWidthDips;
@@ -182,10 +187,14 @@
 
             const file = File.fromPath(item.imagePath);
             const imageExportSettings = getImageExportSettings();
-            const compressFormat = item.sourceImagePath.toLowerCase().endsWith('.png') ? 'png' : imageExportSettings.imageFormat;
+            const compressFormat = item.sourceImagePath?.toLowerCase().endsWith('.png') ? 'png' : imageExportSettings.imageFormat;
 
-            // Re-crop pristine base from sourceImagePath if we had an existing text overlay to prevent ghosting
-            if (hasExistingOverlay && item.sourceImagePath) {
+            // 1. Ensure item.imagePath is restored to clean pristine base before burning new/edited text
+            if (cleanWorkingCopyPath && File.exists(cleanWorkingCopyPath)) {
+                const cleanFile = File.fromPath(cleanWorkingCopyPath);
+                await cleanFile.copy(item.imagePath);
+                await getImagePipeline().evictFromCache(item.imagePath);
+            } else if (hasExistingOverlay && item.sourceImagePath && item.crop && item.sourceImagePath !== item.imagePath && File.exists(item.sourceImagePath)) {
                 await cropDocumentFromFile(item.sourceImagePath, [item.crop], {
                     transforms: item.transforms,
                     saveInFolder: file.parent.path,
@@ -193,20 +202,11 @@
                     compressFormat,
                     compressQuality: imageExportSettings.imageQuality
                 });
+                await getImagePipeline().evictFromCache(item.imagePath);
+            } else if (hasExistingOverlay && existingOverlay?.cleanPatch) {
+                await restoreCleanPatch(item.imagePath, existingOverlay);
+                await getImagePipeline().evictFromCache(item.imagePath);
             }
-
-            const overlayData: TextOverlayItem = {
-                text: overlayText,
-                screenX: textX,
-                screenY: textY,
-                containerWidth,
-                containerHeight,
-                fontSize,
-                color: selectedColor,
-                hasBorder,
-                rotation: item.rotation ?? 0,
-                textRotation
-            };
 
             const result = await burnTextToImageFile({
                 imagePath: item.imagePath,
@@ -223,6 +223,24 @@
             });
 
             if (result.success) {
+                const overlayData: TextOverlayItem = {
+                    text: overlayText,
+                    screenX: textX,
+                    screenY: textY,
+                    containerWidth,
+                    containerHeight,
+                    fontSize,
+                    color: selectedColor,
+                    hasBorder,
+                    rotation: item.rotation ?? 0,
+                    textRotation,
+                    cleanPatch: result.cleanPatch,
+                    patchX: result.patchX,
+                    patchY: result.patchY,
+                    patchWidth: result.patchWidth,
+                    patchHeight: result.patchHeight
+                };
+
                 const currentExtra = item.extra || {};
                 await document.updatePage(
                     pageIndex,
@@ -264,16 +282,24 @@
             await showLoading(lc('computing'));
             const file = File.fromPath(item.imagePath);
             const imageExportSettings = getImageExportSettings();
-            const compressFormat = item.sourceImagePath.toLowerCase().endsWith('.png') ? 'png' : imageExportSettings.imageFormat;
+            const compressFormat = item.sourceImagePath?.toLowerCase().endsWith('.png') ? 'png' : imageExportSettings.imageFormat;
 
-            const images = await cropDocumentFromFile(item.sourceImagePath, [item.crop], {
-                transforms: item.transforms,
-                saveInFolder: file.parent.path,
-                fileName: file.name,
-                compressFormat,
-                compressQuality: imageExportSettings.imageQuality
-            });
-            const image = images[0];
+            // Restore clean base onto item.imagePath
+            if (cleanWorkingCopyPath && File.exists(cleanWorkingCopyPath)) {
+                const cleanFile = File.fromPath(cleanWorkingCopyPath);
+                await cleanFile.copy(item.imagePath);
+            } else if (item.sourceImagePath && item.crop && item.sourceImagePath !== item.imagePath && File.exists(item.sourceImagePath)) {
+                await cropDocumentFromFile(item.sourceImagePath, [item.crop], {
+                    transforms: item.transforms,
+                    saveInFolder: file.parent.path,
+                    fileName: file.name,
+                    compressFormat,
+                    compressQuality: imageExportSettings.imageQuality
+                });
+            } else if (existingOverlay?.cleanPatch) {
+                await restoreCleanPatch(item.imagePath, existingOverlay);
+            }
+
             await getImagePipeline().evictFromCache(item.imagePath);
 
             const newExtra = { ...(item.extra || {}) };
@@ -284,8 +310,6 @@
                 pageIndex,
                 {
                     size: updatedFile.size,
-                    width: image ? image.width : item.width,
-                    height: image ? image.height : item.height,
                     extra: newExtra
                 },
                 true
@@ -305,15 +329,78 @@
             onGoBack();
         });
 
-    onMount(() => {
+    onMount(async () => {
         if (__ANDROID__) {
             Application.android.on(Application.android.activityBackPressedEvent, onAndroidBackButton);
+        }
+        if (hasExistingOverlay) {
+            try {
+                const tempFolder = knownFolders.temp();
+                const tempFileName = `clean_preview_${Date.now()}_${item.id}.jpg`;
+                const tempPreviewFile = tempFolder.getFile(tempFileName);
+
+                let cleanReady = false;
+
+                // Strategy 1: Re-crop pristine base from sourceImagePath if available and valid
+                const hasCleanSource = item.sourceImagePath && item.crop && item.sourceImagePath !== item.imagePath && File.exists(item.sourceImagePath);
+                if (hasCleanSource) {
+                    try {
+                        const imageExportSettings = getImageExportSettings();
+                        const compressFormat = item.sourceImagePath.toLowerCase().endsWith('.png') ? 'png' : imageExportSettings.imageFormat;
+                        const images = await cropDocumentFromFile(item.sourceImagePath, [item.crop], {
+                            transforms: item.transforms,
+                            saveInFolder: tempFolder.path,
+                            fileName: tempFileName,
+                            compressFormat,
+                            compressQuality: imageExportSettings.imageQuality
+                        });
+                        if (images && images.length > 0 && File.exists(tempPreviewFile.path)) {
+                            cleanWorkingCopyPath = tempPreviewFile.path;
+                            previewImageSrc = cleanWorkingCopyPath;
+                            cleanReady = true;
+                        }
+                    } catch (e) {
+                        DEV_LOG && console.log('Re-crop for clean preview failed:', e);
+                    }
+                }
+
+                // Strategy 2: If no separate sourceImagePath or re-crop failed, restore cleanPatch
+                if (!cleanReady && existingOverlay?.cleanPatch) {
+                    try {
+                        const sourceFile = File.fromPath(item.imagePath);
+                        await sourceFile.copy(tempPreviewFile.path);
+                        const restored = await restoreCleanPatch(tempPreviewFile.path, existingOverlay);
+                        if (restored) {
+                            cleanWorkingCopyPath = tempPreviewFile.path;
+                            previewImageSrc = cleanWorkingCopyPath;
+                            cleanReady = true;
+                        }
+                    } catch (e) {
+                        DEV_LOG && console.log('Restore clean patch for preview failed:', e);
+                    }
+                }
+
+                if (cleanReady && cleanWorkingCopyPath) {
+                    try {
+                        await getImagePipeline().evictFromCache(cleanWorkingCopyPath);
+                    } catch (e) {}
+                }
+            } catch (error) {
+                showError(error);
+            } finally {
+                isPreparingPreview = false;
+            }
         }
     });
 
     onDestroy(() => {
         if (__ANDROID__) {
             Application.android.off(Application.android.activityBackPressedEvent, onAndroidBackButton);
+        }
+        if (cleanWorkingCopyPath && File.exists(cleanWorkingCopyPath)) {
+            try {
+                File.fromPath(cleanWorkingCopyPath).remove();
+            } catch (e) {}
         }
     });
 </script>
@@ -332,7 +419,7 @@
         <!-- Canvas / Document Page Preview Layer -->
         <gridlayout row={1} on:layoutChanged={onContainerLayout} clipToBounds={true}>
             <image
-                src={item.imagePath}
+                src={previewImageSrc}
                 imageRotation={item?.rotation ?? 0}
                 colorMatrix={getPageColorMatrix(item)}
                 decodeWidth={IMAGE_DECODE_HEIGHT}
@@ -341,26 +428,30 @@
                 height="100%"
             />
 
-            <!-- Interactive Absolute Text Placement Layer -->
-            <absolutelayout width="100%" height="100%" on:pan={onPan}>
-                <label
-                    text={overlayText}
-                    left={textX}
-                    top={textY}
-                    rotate={textRotation}
-                    on:pan={onPan}
-                    on:tap={editTextDialog}
-                    color={selectedColor}
-                    fontSize={fontSize}
-                    fontWeight="bold"
-                    padding="4"
-                    borderWidth={hasBorder ? 2 : 0}
-                    borderColor={hasBorder ? selectedColor : 'transparent'}
-                    backgroundColor="#00000022"
-                    borderRadius={4}
-                    textWrap={true}
-                />
-            </absolutelayout>
+            {#if isPreparingPreview}
+                <activityindicator busy={true} horizontalAlignment="center" verticalAlignment="center" />
+            {:else}
+                <!-- Interactive Absolute Text Placement Layer -->
+                <absolutelayout width="100%" height="100%" on:pan={onPan}>
+                    <label
+                        text={overlayText}
+                        left={textX}
+                        top={textY}
+                        rotate={textRotation}
+                        on:pan={onPan}
+                        on:tap={editTextDialog}
+                        color={selectedColor}
+                        fontSize={fontSize}
+                        fontWeight="bold"
+                        padding="4"
+                        borderWidth={hasBorder ? 2 : 0}
+                        borderColor={hasBorder ? selectedColor : 'transparent'}
+                        backgroundColor="#00000022"
+                        borderRadius={4}
+                        textWrap={true}
+                    />
+                </absolutelayout>
+            {/if}
         </gridlayout>
 
         <!-- Bottom Controls Layer -->

@@ -1,4 +1,4 @@
-import { Canvas, Paint, Style } from '@nativescript-community/ui-canvas';
+import { Canvas, Paint, Rect, Style } from '@nativescript-community/ui-canvas';
 import { getImagePipeline } from '@nativescript-community/ui-image';
 import { Color, File, ImageSource } from '@nativescript/core';
 import { getImageExportSettings } from '~/utils/constants';
@@ -30,6 +30,11 @@ export interface TextOverlayItem {
     hasBorder?: boolean;
     rotation?: number;
     textRotation?: number;
+    cleanPatch?: string;
+    patchX?: number;
+    patchY?: number;
+    patchWidth?: number;
+    patchHeight?: number;
 }
 
 export interface BurnTextOptions {
@@ -47,6 +52,18 @@ export interface BurnTextOptions {
     rotation?: number;
     textRotation?: number;
     hasBorder?: boolean;
+}
+
+export interface BurnTextResult {
+    success: boolean;
+    width: number;
+    height: number;
+    size: number;
+    cleanPatch?: string;
+    patchX?: number;
+    patchY?: number;
+    patchWidth?: number;
+    patchHeight?: number;
 }
 
 /**
@@ -189,7 +206,90 @@ export function mapScreenToImageCoordinates({
 }
 
 /**
+ * Computes the axis-aligned pixel bounding box of a text box on the native image bitmap,
+ * taking into account page rotation (canvasRotation: 0, 90, 180, 270) and text rotation.
+ */
+export function calculateTextBoundingBoxInImage({
+    imageX,
+    imageY,
+    boxWidth,
+    boxHeight,
+    canvasRotation = 0,
+    textRotation = 0,
+    imageWidth,
+    imageHeight,
+    fontScale = 1
+}: {
+    imageX: number;
+    imageY: number;
+    boxWidth: number;
+    boxHeight: number;
+    canvasRotation?: number;
+    textRotation?: number;
+    imageWidth: number;
+    imageHeight: number;
+    fontScale?: number;
+}): { patchX: number; patchY: number; patchWidth: number; patchHeight: number } {
+    const normTextRotation = ((textRotation % 360) + 360) % 360;
+    const radT = (normTextRotation * Math.PI) / 180;
+    const cosT = Math.cos(radT);
+    const sinT = Math.sin(radT);
+
+    const normCanvasRotation = ((canvasRotation % 360) + 360) % 360;
+    const radC = (normCanvasRotation * Math.PI) / 180;
+    const cosC = Math.cos(radC);
+    const sinC = Math.sin(radC);
+
+    const cx = boxWidth / 2;
+    const cy = boxHeight / 2;
+
+    const corners = [
+        { x: 0, y: 0 },
+        { x: boxWidth, y: 0 },
+        { x: boxWidth, y: boxHeight },
+        { x: 0, y: boxHeight }
+    ];
+
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+
+    for (const p of corners) {
+        // 1. Rotate around box center by normTextRotation
+        let rx = p.x;
+        let ry = p.y;
+        if (normTextRotation !== 0) {
+            const dx = p.x - cx;
+            const dy = p.y - cy;
+            rx = dx * cosT - dy * sinT + cx;
+            ry = dx * sinT + dy * cosT + cy;
+        }
+
+        // 2. Rotate around (0, 0) by canvasRotation and translate to (imageX, imageY)
+        const gx = rx * cosC - ry * sinC + imageX;
+        const gy = rx * sinC + ry * cosC + imageY;
+
+        if (gx < minX) minX = gx;
+        if (gx > maxX) maxX = gx;
+        if (gy < minY) minY = gy;
+        if (gy > maxY) maxY = gy;
+    }
+
+    const margin = Math.max(8, Math.ceil(8 * fontScale));
+    const patchX = Math.max(0, Math.floor(minX - margin));
+    const patchY = Math.max(0, Math.floor(minY - margin));
+    const patchRight = Math.min(imageWidth, Math.ceil(maxX + margin));
+    const patchBottom = Math.min(imageHeight, Math.ceil(maxY + margin));
+    const patchWidth = Math.max(1, patchRight - patchX);
+    const patchHeight = Math.max(1, patchBottom - patchY);
+
+    return { patchX, patchY, patchWidth, patchHeight };
+}
+
+/**
  * Renders text (and optional border) directly onto an image bitmap file and overwrites it.
+ * Also extracts a clean background patch under the text box before writing, enabling clean re-editing.
  */
 export async function burnTextToImageFile({
     imagePath,
@@ -204,7 +304,7 @@ export async function burnTextToImageFile({
     rotation = 0,
     textRotation = 0,
     hasBorder = false
-}: BurnTextOptions): Promise<{ success: boolean; width: number; height: number; size: number }> {
+}: BurnTextOptions): Promise<BurnTextResult> {
     if (!imagePath || !text?.trim()) {
         return { success: false, width: 0, height: 0, size: 0 };
     }
@@ -229,13 +329,6 @@ export async function burnTextToImageFile({
         rotation
     });
 
-    // Create a new mutable Canvas with the exact image dimensions
-    const canvas = new Canvas(imageWidth, imageHeight);
-    if (__ANDROID__ && imageSource.android) {
-        canvas.setDensity(imageSource.android.getDensity());
-    }
-    canvas.drawBitmap(imageSource, 0, 0, null);
-
     const paint = new Paint();
     paint.color = new Color(color);
     paint.style = Style.FILL;
@@ -258,6 +351,50 @@ export async function burnTextToImageFile({
     const boxHeight = lines.length * lineHeight + padding * 2;
 
     const normTextRotation = ((textRotation % 360) + 360) % 360;
+
+    // Calculate bounding box and extract clean background patch before drawing text
+    const bbox = calculateTextBoundingBoxInImage({
+        imageX,
+        imageY,
+        boxWidth,
+        boxHeight,
+        canvasRotation,
+        textRotation: normTextRotation,
+        imageWidth,
+        imageHeight,
+        fontScale
+    });
+
+    let cleanPatch: string | undefined;
+    const patchX = bbox.patchX;
+    const patchY = bbox.patchY;
+    const patchWidth = bbox.patchWidth;
+    const patchHeight = bbox.patchHeight;
+
+    try {
+        const patchCanvas = new Canvas(patchWidth, patchHeight);
+        if (__ANDROID__ && imageSource.android) {
+            patchCanvas.setDensity(imageSource.android.getDensity());
+        }
+        const srcRect = new Rect(patchX, patchY, patchX + patchWidth, patchY + patchHeight);
+        const dstRect = new Rect(0, 0, patchWidth, patchHeight);
+        patchCanvas.drawBitmap(imageSource, srcRect, dstRect, null);
+        const patchImage = new ImageSource(patchCanvas.getImage());
+        cleanPatch = typeof patchImage.toBase64StringAsync === 'function'
+            ? await patchImage.toBase64StringAsync('png')
+            : patchImage.toBase64String('png');
+        recycleImages(patchImage);
+        patchCanvas.release();
+    } catch (e) {
+        DEV_LOG && console.log('Error capturing clean patch in burnTextToImageFile:', e);
+    }
+
+    // Create a new mutable Canvas with the exact image dimensions
+    const canvas = new Canvas(imageWidth, imageHeight);
+    if (__ANDROID__ && imageSource.android) {
+        canvas.setDensity(imageSource.android.getDensity());
+    }
+    canvas.drawBitmap(imageSource, 0, 0, null);
 
     canvas.save();
     // 1. Position and orient to match the page's visual screen coordinate system
@@ -311,11 +448,76 @@ export async function burnTextToImageFile({
             success: true,
             width: imageWidth,
             height: imageHeight,
-            size: file.size
+            size: file.size,
+            cleanPatch,
+            patchX,
+            patchY,
+            patchWidth,
+            patchHeight
         };
     }
 
     return { success: false, width: imageWidth, height: imageHeight, size: 0 };
+}
+
+/**
+ * Overwrites the text area on an image with a stored clean background patch,
+ * erasing any previously burned text overlay.
+ */
+export async function restoreCleanPatch(
+    imagePath: string,
+    overlay: TextOverlayItem
+): Promise<boolean> {
+    if (!imagePath || !overlay?.cleanPatch || overlay.patchX === undefined || overlay.patchY === undefined) {
+        return false;
+    }
+    const cleanPath = imagePath.split('?')[0];
+    if (!File.exists(cleanPath)) {
+        return false;
+    }
+    try {
+        const imageSource = await ImageSource.fromFile(cleanPath);
+        if (!imageSource) {
+            return false;
+        }
+
+        const patchImageSource = typeof ImageSource.fromBase64 === 'function'
+            ? await ImageSource.fromBase64(overlay.cleanPatch)
+            : ImageSource.fromBase64Sync(overlay.cleanPatch);
+
+        if (!patchImageSource) {
+            recycleImages(imageSource);
+            return false;
+        }
+
+        const canvas = new Canvas(imageSource.width, imageSource.height);
+        if (__ANDROID__ && imageSource.android) {
+            canvas.setDensity(imageSource.android.getDensity());
+        }
+        canvas.drawBitmap(imageSource, 0, 0, null);
+        canvas.drawBitmap(patchImageSource, overlay.patchX, overlay.patchY, null);
+
+        const imageExportSettings = getImageExportSettings();
+        const format = cleanPath.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
+        const outputImage = new ImageSource(canvas.getImage());
+        const saved = await outputImage.saveToFileAsync(cleanPath, format as any, imageExportSettings.imageQuality);
+
+        recycleImages(imageSource, patchImageSource, outputImage);
+        canvas.release();
+
+        if (saved) {
+            try {
+                await getImagePipeline().evictFromCache(cleanPath);
+                if (imagePath !== cleanPath) {
+                    await getImagePipeline().evictFromCache(imagePath);
+                }
+            } catch (e) {}
+            return true;
+        }
+    } catch (err) {
+        DEV_LOG && console.log('restoreCleanPatch error:', err);
+    }
+    return false;
 }
 
 /**
@@ -333,7 +535,7 @@ export async function reapplyTextOverlays(
         if (!overlay.text || !overlay.text.trim()) {
             continue;
         }
-        await burnTextToImageFile({
+        const result = await burnTextToImageFile({
             imagePath,
             text: overlay.text,
             screenX: overlay.screenX,
@@ -346,5 +548,12 @@ export async function reapplyTextOverlays(
             textRotation: overlay.textRotation ?? 0,
             hasBorder: overlay.hasBorder
         });
+        if (result.success && result.cleanPatch) {
+            overlay.cleanPatch = result.cleanPatch;
+            overlay.patchX = result.patchX;
+            overlay.patchY = result.patchY;
+            overlay.patchWidth = result.patchWidth;
+            overlay.patchHeight = result.patchHeight;
+        }
     }
 }
