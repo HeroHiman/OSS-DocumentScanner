@@ -105,3 +105,17 @@ tesseract/**/*
 !tesseract/**/README.md
 /webpdfviewer/**/*.css
 /app/assets/**/*.html
+
+# AI Rules & Unnecessary BMAD files
+.clinerules
+*BMAD*
+*bmad*
+.agent/
+.agents/
+.claude/
+
+# Feature Branch Artifacts
+_blank_output/
+release.keystore
+app.css
+
